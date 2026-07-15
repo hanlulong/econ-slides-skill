@@ -1,57 +1,95 @@
-# Structure plan — 15-minute conference talk
+# Structure plan — "Broadband Expansion and Small-Firm Productivity"
 
-**Paper:** Lindqvist & Berg, "Broadband Expansion and Small-Firm Productivity:
-Evidence from a Staggered Municipal Rollout" (July 2026).
+15-minute conference talk, house theme. Review this before the deck; it is the
+cheapest moment to change course.
 
-**Intake (Phase 0)**
-- Genre: short **conference talk**
-- Clock: **15 minutes** -> budget 8-10 content slides + linked appendix (talk-structures.md)
-- Audience: assumed **smart generalists** (default for a conference; not field-expert-only). Pitch to "JEP not Econometrica."
-- Theme: **econ-slides-house** (user asked for "house")
-- Materials: paper PDF only; **no figure source** -> paper figures cropped from the PDF per exhibit-surgery no-source rule; regression exhibits rebuilt as slide tables.
+## Phase 0 intake (what I assumed, since running non-interactively)
 
-**Short-talk emphasis choice (talk-structures.md):** chose **results over model**.
-The model gets exactly one main-line slide (its testable prediction + the
-heterogeneity result); the full derivation and Proposition 1 go to the appendix.
+- **Genre:** conference talk (short). **Clock:** 15 min. **Theme:** `econ-slides-house` (as requested).
+- **Audience:** assumed field-adjacent generalists (default for a conference). Pitched to
+  "JEP not Econometrica": model stays intuitive, one equation, results carry.
+- **Materials:** the paper PDF only. No source data, so figures are *cropped* from the
+  paper (exhibit-surgery §Figures "no source to rebuild from"), not rebuilt. Tables are
+  rebuilt for slides from the printed numbers.
 
-## Main line (9 content slides; assertion titles)
+## Slide budget
 
-1. **Digital infrastructure could close the small-firm productivity gap** — motivation, text. Small firms = most employment, adopt tech last (Syverson '11; Bloom et al. '12). Exhibit: none (policy-question motivation).
-2. **Existing work has bypassed the small-firm segment** — question as economics + 2-4 gray antecedents (Czernich '13; Akerman '15; Hjort-Poulsen '19). Exhibit: none.
-3. **This paper** — punchline slide. Numbered: (1) first causal small-firm estimate, broadband raises labor productivity by KeyIdea 3.4%; (2) gains concentrate in communication-intensive firms, as a task-outsourcing model predicts; (3) program repaid its cost in six years. Implication line. Exhibit: none.
-4. **Setting and data** — RunIn bullets: NBP, 284 municipalities, 9,400 firms 2008-2019 (112,800 firm-years). Nav -> summary stats. Exhibit: none.
-5. **Fiber reached towns one at a time, on a fixed schedule** — **Figure 1** (rollout, cropped). Key assumption in subtitle; one bullet on threat + answer. Nav -> placebo, cohorts.
-6. **Productivity is flat before arrival, then climbs steadily** — **Figure 2** (event study, cropped). Takeaway: no pre-trends; average gain 3.4% (Table 2). Nav -> baseline table, robustness.
-7. **Gains concentrate in communication-intensive firms** — surgical **slide table from Table 4** (interaction 0.032, teal). Model prediction (Prop 1) stated. Nav -> model appendix.
-8. **The program paid for itself within six years** — **ResultBox** with euro magnitudes (410M/yr vs 2.3B cost). Exhibit: ResultBox.
-9. **Conclusion** — mirrors slide 3 (same numbering, same Implication).
+15 min ⇒ 7 content frames + rich appendix (talk-structures.md short-talk arc:
+motivation+question, this-paper, data, design, main result, mechanism, conclusion).
+Model vs results: results carry; the model gets **one** fused mechanism slide because
+Proposition 1's heterogeneity prediction *is* the second contribution.
 
-## Appendix (linked, `\AppendixStart`)
-- A1 Summary statistics (Table 1; mean/SD/N only — Min/Max dropped, see notes) <- from Data
-- A2 Model and estimating equation (eq 5, Proposition 1 in ResultBox) <- from Mechanism
-- A3 Baseline difference-in-differences table (Table 2, 4 cols) <- from Main result
-- A4 Robustness (Table 5, 3 cols) <- from Main result
-- A5 Placebo with permuted rollout years (Table 3) <- from Design
-- A6 Effects by rollout cohort (Figure 3) <- from Design
-- A7 Related literature (deploy only if asked; no inbound link)
+## Concept → color map (held for the whole talk)
 
-## Semantic color code (held for the whole talk)
-- `cAccentA` blue = **broadband / treatment effect** (beta term, Table 2 col 1)
-- `cAccentC` teal = **communication intensity / mechanism** (gamma term, Table 4 interaction)
-- `cHighlight` magenta = the one punchline phrase (3.4%) via `\KeyIdea`
-- Included paper figures keep their original teal ink (cannot recolor without source) — flagged.
+- `cTreat = cAccentC` (teal) — broadband / treatment. Chosen to match the paper figures'
+  teal, so the cropped figures agree with the text color.
+- `cMech = cAccentA` (blue) — communication intensity / the complementarity channel.
+- `cHighlight` — the one punchline phrase per slide.
 
-## Number-provenance ledger (every slide number tagged in-source)
-- 3.4% main effect = 0.034 (0.002)  [Table 2 col 1, p.7]
-- Table 4 interaction 0.032 (0.005); level 0.020 (0.003) / 0.034 (0.002)  [Table 4, p.9]
-- Placebo -0.004 (0.002)  [Table 3, p.8]
-- Robustness 0.030 / 0.034 / 0.037  [Table 5, p.9]
-- 410M euro/yr, 2.3B cost, six-year payback  [Section 7, p.8-9]
-- 284 munis, 9,400 firms, 112,800 firm-years, 2008-2019  [Section 4, p.4-5]
+## Content frames (assertion titles + exhibit)
 
-## Deliberate-error handling (paper has intentional errors)
-- Abstract "34 percent" contradicts body "3.4 percent" and Table 2 coeff 0.034 -> use **3.4%** everywhere; never show 34%.
-- Table 1 Employees Max 19.00 < Mean 23.40 (impossible) -> summary-stats slide shows Mean/SD/N only; no number altered.
-- Section 7 conflates a 3.4% level gain with "3.4 pp per year growth" -> state the level effect + euro magnitude only.
+1. **"Small firms adopt technology late — can broadband close the gap?"**
+   (motivation+question, text). Striking fact: small firms are most of employment but
+   adopt tech later/less completely (`\graycite` Syverson '11; Bloom et al. '12). Question
+   as economics: causal effect of universal broadband on small-firm productivity, and
+   whether the gain concentrates where a task-outsourcing model predicts. Antecedents
+   (`\graycite` Czernich '13; Akerman '15; Hjort–Poulsen '19) are aggregate / worker-level.
+2. **"This paper"** (punchline, enumerate). Framing line + 3 numbered contributions,
+   mirroring the paper's stated threefold contribution:
+   1. First causal small-firm estimates: broadband raises labor productivity by
+      `\KeyIdea{3.4%}` (0.034, s.e. 0.002).  *[Table 2 col (1), p.7]*
+   2. Gains concentrate in communication-intensive firms, as a task-outsourcing model
+      predicts (interaction 0.032, s.e. 0.005).  *[Table 4 col (1), p.9]*
+   3. Large policy return: repays its €2.3bn cost within six years via small firms alone.
+      *[§7, p.8–9]*
+   Implication: universal broadband is among the most cost-effective productivity policies
+   for small open economies.
+3. **"Data"** (structural, text, RunIn). Sample 9,400 firms, 3–49 employees, 2008–2019
+   (112,800 firm-years) *[§4.2, p.5]*; treatment = year the municipality's backbone entered
+   service *[§4.1, App B]*; outcome = log real value added per worker *[App B]*; het measure
+   = 2008 wage-bill share of communication-intensive occupations, mean 0.42 *[Table 1, p.5]*.
+   Nav → summary stats (A1).
+4. **"Staggered rollout timing identifies the effect"** (figure = Fig 1 rollout, cropped).
+   Subtitle carries the identifying assumption; `\Takeaway` = timing set by the 2010 Act
+   and terrain, not firm prospects. Nav → placebo (A4).
+5. **"Effects appear only after arrival and build for five years"** (MAIN exhibit = Fig 2
+   event study, cropped). Subtitle: coefficients vs. year before arrival; 95% CIs,
+   firm-clustered. `\Takeaway` gives the average DiD gain 3.4% (0.034, s.e. 0.002).
+   Nav → full table (A2) + robustness (A3).
+6. **"Gains concentrate where the model predicts"** (mechanism; annotated estimating
+   equation, γ term highlighted). Proposition 1: gain strictly increasing in communication
+   intensity. Confirmed γ̂ = 0.032 (s.e. 0.005) *[Table 4]*; one SD above mean ⇒ gain
+   ~one-fifth larger than the average firm *[§6.3, p.8]*. Nav → model (A7) + het table (A6).
+7. **"Conclusion"** — mirrors "This paper": same 3 numbered contributions, same Implication.
 
-*Recorded and proceeding as approved (dogfood: no live user to sign off).*
+## Appendix (linked, each with a Back button)
+
+- A1 Summary statistics (Table 1 → mean/SD/N; min/max dropped, see note) ← Data
+- A2 Baseline estimates, full (Table 2 cols 1–4, col 1 highlighted) ← Main result
+- A3 Robustness perturbations (Table 5) ← Main result
+- A4 Placebo test (Table 3: −0.004) ← Design
+- A5 Cohort estimates (Fig 3, cropped: positive & similar ⇒ no negative weighting) ← Main result
+- A6 Heterogeneity table (Table 4 cols 1–2) ← Mechanism
+- A7 The model (production fn, sourcing rule, Prop 1) ← Mechanism
+- A8 Policy arithmetic (€410M/yr, €2.3bn, six-year payback) ← Conclusion
+- A9 Related literature (deploy only if asked)
+
+## Number-provenance notes (paper is a demo with intentional inconsistencies)
+
+- Headline **3.4%** = Table 2 col (1) 0.034 and the intro/conclusion. The **abstract's
+  "34 percent" is a typo**; not used.
+- Text §6.1 calls the region-trends coefficient **0.024**, but **Table 2 col (3) shows
+  0.030**; Table 5 col (1) also 0.030. I use the table value 0.030 and present robustness
+  as a range 0.030–0.037.
+- Table 1 lists Employees **max 19.0 < mean 23.4** (impossible). On the summary-stats slide
+  I keep mean/SD/N and drop min/max (legitimate slide-table surgery), which avoids
+  displaying the bad cell.
+- §7 phrases the level gain "3.4%" as "3.4 percentage points per year" of growth (a
+  level-vs-growth slip). I present only the euro figures and the six-year payback, not the
+  growth-rate phrasing.
+
+## What I deliberately leave out
+
+Literature-review slide (antecedents are `\graycite` inline + one appendix slide only);
+the full model derivation (App A of the paper → one appendix slide, statement not proof);
+ICT-investment control detail; sectoral figure (Fig 4) — not load-bearing for 15 min.

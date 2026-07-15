@@ -5,11 +5,15 @@ with its [LaTeX source](conference-15min.tex) and the
 [structure plan](structure-plan.md) the skill produced before drafting.
 
 **Provenance.** This deck was built *cold* by an agent following `SKILL.md`
-literally, from a single input: the fictional demonstration manuscript
-"Broadband Expansion and Small-Firm Productivity" used as the public sample
-of [econ-paper-review-skill](https://github.com/hanlulong/econ-paper-review-skill)
-(see its `docs/sample-review/demo-paper.pdf`). The run took four
-compile/check iterations and finished at a verification score of 100.
+(v0.1.1) literally, from a single input: the fictional demonstration
+manuscript "Broadband Expansion and Small-Firm Productivity" used as the
+public sample of
+[econ-paper-review-skill](https://github.com/hanlulong/econ-paper-review-skill)
+(see its `docs/sample-review/demo-paper.pdf`). The run took five
+compile/check iterations (score path 84 → 96 → 100, then two visual-polish
+rounds) and finished at a verification score of 100. Where the manuscript
+contradicts itself on a number, the agent's resolution is documented in
+[structure-plan.md](structure-plan.md) — never silently.
 
 Two honesty notes:
 

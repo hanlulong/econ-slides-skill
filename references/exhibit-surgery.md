@@ -78,6 +78,10 @@ from the user's paper and keep the provenance comments:
 
 ## Figures
 
+- **Rebuild only when you have the source data or figure code.** Rebuilding
+  from a PDF alone means eyeballing coefficients off a plot — that violates
+  number provenance. No source → cropping the paper figure IS the
+  provenance-safe path, not a lesser one.
 - **Rebuild figures for the slide** whenever sources are available: figure
   fonts at slide scale (legible from the back row), legends inside the plot
   area or dropped in favor of direct line labels, and **line colors =

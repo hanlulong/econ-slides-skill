@@ -74,8 +74,9 @@ block intact. The deck never changes.
 ## Build and check
 
 ```bash
-python3 scripts/compile_deck.py talk/sed-2026.tex
-python3 scripts/check_deck.py talk/build/sed-2026.pdf \
+# <skill-dir> = this skill's own folder; run from anywhere
+python3 <skill-dir>/scripts/compile_deck.py talk/sed-2026.tex
+python3 <skill-dir>/scripts/check_deck.py talk/build/sed-2026.pdf \
     --tex talk/sed-2026.tex --log talk/build/sed-2026.log \
     --render-dir talk/build/pages
 ```

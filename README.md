@@ -28,9 +28,9 @@
 
 Two slides from the [sample deck](docs/sample-talk/) — a 15-minute conference talk built cold by an agent following `SKILL.md`, from a manuscript PDF alone, finishing at a verification score of 100:
 
-| The punchline slide | A surgically rebuilt table |
+| The punchline slide | A surgically rebuilt table (linked appendix) |
 |---|---|
-| ![Punchline slide: numbered contributions with the key magnitude highlighted](docs/images/sample-punchline.png) | ![Main-result slide: rebuilt regression table with highlighted column, embedded interpretation row, and magnitude takeaway](docs/images/sample-mainresult.png) |
+| ![Punchline slide: framing sentence, numbered contributions with the key magnitude highlighted, implication line](docs/images/sample-punchline.png) | ![Appendix table: highlighted baseline column, controls collapsed to indicator rows, embedded interpretation row, magnitude takeaway](docs/images/sample-mainresult.png) |
 
 **[Browse the full sample deck →](docs/sample-talk/)** — PDF, LaTeX source, and the structure plan the skill wrote before drafting. (The underlying manuscript is the fictional demonstration paper from [econ-paper-review-skill](https://github.com/hanlulong/econ-paper-review-skill); see the sample's [provenance notes](docs/sample-talk/README.md).)
 
