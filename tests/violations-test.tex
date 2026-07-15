@@ -1,0 +1,43 @@
+% Deliberately broken deck: every frame violates an econ-slides rule.
+% check_deck.py must flag ALL of these. Used as the negative test.
+\documentclass[11pt, aspectratio=169]{beamer}
+\usepackage{econ-slides-house}
+
+\begin{document}
+
+% VIOLATION 1: frame title wraps to two lines
+\begin{frame}{This frame title is far too long to fit on a single line and therefore wraps onto a second line which the skill forbids}
+  \begin{itemize}
+    \item Short bullet
+  \end{itemize}
+\end{frame}
+
+% VIOLATION 2: wrapped bullet + too many bullets
+\begin{frame}{Too many bullets and one that wraps}
+  \begin{itemize}
+    \item This bullet goes on and on with clause after clause after clause so that it cannot possibly fit on one line at this font size and must wrap
+    \item Second bullet
+    \item Third bullet
+    \item Fourth bullet
+    \item Fifth bullet
+    \item Sixth bullet
+    \item Seventh bullet
+  \end{itemize}
+\end{frame}
+
+% VIOLATION 3: text pushed past the right page edge
+\begin{frame}{Edge overflow}
+  \noindent\hspace{0.8\textwidth}\mbox{this text is pushed far beyond the right edge of the slide}
+\end{frame}
+
+% VIOLATION 4: overlay as decoration — a \pause chain
+\begin{frame}{Pause chain}
+  \begin{itemize}
+    \item One \pause
+    \item Two \pause
+    \item Three \pause
+    \item Four
+  \end{itemize}
+\end{frame}
+
+\end{document}

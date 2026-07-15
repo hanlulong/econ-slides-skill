@@ -1,0 +1,95 @@
+% Interface test deck: exercises every element of the econ-slides semantic
+% interface. Must compile cleanly under all bundled themes:
+%   xelatex "\def\ecoslidestheme{econ-slides-house}\input{interface-test.tex}"
+% Defaults to the house theme when compiled directly.
+\ifdefined\ecoslidestheme\else\def\ecoslidestheme{econ-slides-house}\fi
+\documentclass[11pt, aspectratio=169]{beamer}
+\usepackage{\ecoslidestheme}
+
+\title{Broadband expansion raises small-firm productivity by 3.4 percent}
+\subtitle{Interface test deck for the econ-slides themes}
+\author{Author One \and Author Two}
+\date{July 2026}
+
+\begin{document}
+
+% ---- Title (plain, de-counted) ----
+\begin{frame}[plain]
+  \titlepage
+  \vfill\centering\scriptsize\textit{Disclaimer: synthetic test content only.}
+\end{frame}
+\addtocounter{framenumber}{-1}
+
+% ---- Assertion title + subtitle + bullets + KeyIdea + graycite ----
+\begin{frame}{Broadband rollout was staggered across 290 municipalities}
+  \framesubtitle{Rollout reached 80 percent of municipalities between 2011 and 2017}
+  \begin{itemize}
+    \item Staggered adoption creates treated and not-yet-treated comparisons
+    \item \KeyIdea{Timing is plausibly exogenous} conditional on region trends \graycite{(Autor '13; Hjort--Poulsen '19)}
+    \item[$\Rightarrow$] Event-study design with cohort-robust estimator
+  \end{itemize}
+\end{frame}
+
+% ---- Result box + RunIn + math with \Et ----
+\begin{frame}{Two headline results survive every specification}
+  \begin{ResultBox}[Main result]
+    A one-year exposure to broadband raises small-firm labor productivity by
+    $3.4\%$ (s.e.\ $0.6$); effects concentrate in communication-intensive sectors.
+  \end{ResultBox}
+  \medskip
+  \RunIn{Mechanism:} consistent with reduced coordination costs, since
+  $\Et\,[y_{it+1}] $ rises only where task outsourcing is feasible.
+\end{frame}
+
+% ---- Regression table: booktabs + threeparttable + highlighted column ----
+\begin{frame}{The estimate is stable across specifications}
+  \framesubtitle{Log labor productivity, firm and year fixed effects}
+  \centering
+  \resizebox{0.72\textwidth}{!}{%
+  \begin{threeparttable}
+    \begin{tabular}{lccc}
+      \toprule
+      & (1) OLS & (2) +Controls & \textcolor{cAccentA}{(3) +Region trends} \\
+      \midrule
+      Broadband $\times$ Post & 0.041*** & 0.036*** & \textcolor{cAccentA}{\textbf{0.034***}} \\
+       & (0.009) & (0.008) & \textcolor{cAccentA}{(0.008)} \\
+      \midrule
+      Controls & No & Yes & Yes \\
+      Region trends & No & No & Yes \\
+      Observations & 148,220 & 148,220 & 148,220 \\
+      \multicolumn{4}{l}{\textcolor{cAccentA}{\footnotesize Preferred estimate: $+3.4\%$, about half the naive OLS gap.}} \\
+      \bottomrule
+    \end{tabular}
+    \begin{tablenotes}\footnotesize
+      \item Standard errors clustered by municipality. *** $p<0.01$.
+    \end{tablenotes}
+  \end{threeparttable}}
+  \Takeaway{One standard deviation of exposure moves productivity by 0.7 percent — significant but modest.}
+  \PlaceNav{\hyperlink{app:robust}{\beamergotobutton{Robustness}}}
+\end{frame}
+
+% ---- Overlay reasoning test ----
+\begin{frame}{The effect builds over three years, then stabilizes}
+  \begin{overlayarea}{\textwidth}{0.55\textheight}
+    \only<1>{\centering\itshape (Figure placeholder: pre-trend coefficients near zero)}
+    \only<2>{\centering\itshape (Figure placeholder: post coefficients rising to 0.034)}
+  \end{overlayarea}
+  \begin{itemize}
+    \item<1-> Pre-treatment coefficients are small and not significant
+    \item<2-> \KeyIdea{Effects emerge with a two-year lag} — consistent with adoption delays
+  \end{itemize}
+\end{frame}
+
+% ---- Appendix: divider, A-numbering, Back button ----
+\AppendixStart
+
+\begin{frame}{Robustness: alternative clustering and estimators}
+  \hypertarget{app:robust}{}
+  \begin{itemize}
+    \item Municipality clustering roughly doubles standard errors; result holds
+    \item Cohort-robust estimators give $0.031$--$0.036$
+  \end{itemize}
+  \BackButton{app:robust}
+\end{frame}
+
+\end{document}

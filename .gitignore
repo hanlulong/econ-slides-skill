@@ -1,0 +1,26 @@
+# Internal design-phase material — NEVER publish.
+# research/ contains analysis of private, unpublished slide decks;
+# DESIGN.md references the same material.
+research/
+DESIGN.md
+
+# LaTeX build output
+build/
+tests/build-*/
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+
+# Rendered page images (regenerate with check_deck.py --render-dir)
+tests/**/*.png
+
+# OS noise
+.DS_Store
+__pycache__/
+*.pyc

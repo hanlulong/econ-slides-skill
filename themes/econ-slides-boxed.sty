@@ -1,0 +1,101 @@
+% econ-slides-boxed.sty — structured/boxed theme of the econ-slides skill
+%
+% A navy title bar, circle bullets, and bold run-in labels: the structured
+% look common at central banks and policy institutions. Well suited to
+% discussant decks and policy audiences.
+%
+% Usage:
+%   \documentclass[11pt, aspectratio=169]{beamer}
+%   \usepackage{econ-slides-boxed}
+%
+% Implements the shared econ-slides semantic interface (see themes/README.md):
+% swapping this \usepackage line for another theme changes nothing else.
+%
+% Part of econ-slides (https://github.com/hanlulong/econ-slides-skill). MIT.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{econ-slides-boxed}[2026/07/15 econ-slides boxed theme]
+
+% ---- Core packages ----
+\RequirePackage{amsmath,amssymb,bm}
+\RequirePackage{booktabs,array,multirow,multicol}
+\RequirePackage{threeparttable}
+\RequirePackage{graphicx}
+\RequirePackage{tcolorbox}
+\usefonttheme{professionalfonts}
+\RequirePackage{lmodern}
+\RequirePackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\RequirePackage{xcolor}
+\RequirePackage{appendixnumberbeamer}
+
+% ---- Palette: navy structure + Okabe-Ito semantics ----
+\definecolor{esNavy}{HTML}{1F3864}
+\definecolor{cAccentA}{HTML}{0072B2}
+\definecolor{cAccentB}{HTML}{D55E00}
+\definecolor{cAccentC}{HTML}{009E73}
+\definecolor{cAccentD}{HTML}{E69F00}
+\definecolor{cHighlight}{HTML}{1F3864} % highlight = navy in the boxed theme
+\colorlet{cGood}{cAccentC}
+\colorlet{cBad}{cAccentB}
+
+% ---- Theme: title bar + circles ----
+\usetheme{default}
+\useinnertheme{circles}
+\setbeamertemplate{navigation symbols}{}
+\setbeamersize{text margin left=2em, text margin right=2em}
+\setbeamercolor{frametitle}{bg=esNavy, fg=white}
+\setbeamerfont{frametitle}{series=\bfseries, size=\large}
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip
+  \begin{beamercolorbox}[wd=\paperwidth, sep=0.45em, leftskip=0.8em]{frametitle}
+    \usebeamerfont{frametitle}\insertframetitle
+    \ifx\insertframesubtitle\empty\else
+      \\[1pt]{\normalfont\small\itshape\color{white!85!esNavy}\insertframesubtitle}%
+    \fi
+  \end{beamercolorbox}}
+\setbeamercolor{itemize item}{fg=esNavy}
+\setbeamercolor{itemize subitem}{fg=esNavy}
+\setbeamercolor{block title}{bg=esNavy, fg=white}
+\setbeamercolor{block body}{bg=esNavy!6, fg=black}
+\setbeamerfont{button}{size=\scriptsize}
+
+% ---- Footer ----
+\newif\ifecoslides@appendix
+\ecoslides@appendixfalse
+\let\ecoslides@origappendix\appendix
+\renewcommand{\appendix}{\ecoslides@origappendix\ecoslides@appendixtrue}
+\setbeamertemplate{footline}{%
+  \hfill{\color{gray}\scriptsize
+    \ifecoslides@appendix A\insertframenumber
+    \else\insertframenumber\,/\,\inserttotalframenumber\fi
+  }\hspace{1.2em}\vspace{0.8em}}
+
+% ---- Semantic interface ----
+\newcommand{\KeyIdea}[1]{\textcolor{cHighlight}{\textbf{#1}}}
+\newcommand{\Takeaway}[1]{\par\smallskip\centering\footnotesize\textit{#1}\par}
+\newcommand{\graycite}[1]{{\color{gray}\scriptsize #1}}
+\newcommand{\Et}{\mathbb{E}_t}
+% Bold navy run-in label for structured summaries: \RunIn{Question:} ...
+\newcommand{\RunIn}[1]{\textbf{\textcolor{esNavy}{#1}}}
+
+\newcommand{\PlaceNavShift}[2]{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=south east, inner sep=0pt, outer sep=0pt]
+      at ([xshift=#1,yshift=0.42cm]current page.south east) {#2};
+  \end{tikzpicture}}
+\newcommand{\PlaceNav}[1]{\PlaceNavShift{-2em}{#1}}
+\newcommand{\BackButton}[1]{\PlaceNav{\hyperlink{#1}{\beamerreturnbutton{Back}}}}
+
+\newtcolorbox{ResultBox}[1][Main result]{%
+  colback=esNavy!6, colframe=esNavy, coltitle=white,
+  title={\textbf{#1}}, fonttitle=\small,
+  boxsep=2pt, top=4pt, bottom=4pt, left=6pt, right=6pt,
+  boxrule=0.8pt, arc=1.5pt}
+
+\newcommand{\AppendixStart}{%
+  \appendix
+  \begin{frame}[plain]\centering\vfill{\Huge\bfseries Appendix}\vfill\end{frame}%
+  \addtocounter{framenumber}{-1}}
+
+\endinput

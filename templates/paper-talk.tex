@@ -1,0 +1,122 @@
+% econ-slides paper-talk template — the spine of a conference/seminar talk.
+% Replace bracketed placeholders; delete frames you don't need; keep the arc.
+% Compile: python3 scripts/compile_deck.py this-file.tex
+\documentclass[11pt, aspectratio=169]{beamer}
+\usepackage{econ-slides-house}
+
+\newcommand{\TODO}[1]{\textcolor{cAccentB}{\textbf{TODO: #1}}}
+
+\title{[Assertion title: the paper's finding as one sentence]}
+\subtitle{[Optional: method + setting in a phrase]}
+\author{[Authors]}
+\institute{[Affiliations]}
+\date{[Venue], [Month Year]}
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+  % \vfill\centering\scriptsize\textit{Disclaimer: views are the authors' own.}
+\end{frame}
+\addtocounter{framenumber}{-1}
+
+% ---- 1. Motivation: one striking fact + one figure. Two slides MAX. ----
+\begin{frame}{[Assertion: why this matters, as a fact not a topic]}
+  \framesubtitle{[Precise reading of the exhibit below]}
+  \centering
+  % \includegraphics[width=0.85\textwidth, keepaspectratio]{figures-slides/motivation}
+  \TODO{motivation exhibit}
+  \Takeaway{[One line: the fact the audience should register]}
+\end{frame}
+
+% ---- 2. Question ----
+\begin{frame}{[The research question, stated as economics]}
+  \begin{itemize}
+    \item {[The question in one line — a counterfactual, parameter, or test]}
+    \item {[Why it is hard / what blocks a naive answer]}
+          \graycite{([Closest antecedent 1]; [2]; [3])}
+    \item[$\Rightarrow$] [What this paper does differently, in one line]
+  \end{itemize}
+\end{frame}
+
+% ---- 3. This paper: THE PUNCHLINE SLIDE. Numbered, magnitudes stated. ----
+\begin{frame}{This paper}
+  \begin{enumerate}
+    \item {[Contribution 1 with its number: "\KeyIdea{raises X by Y\%} (s.e. Z)"]}  % Table _, p._
+    \item {[Contribution 2, one line]}
+    \item {[Contribution 3, one line]}
+  \end{enumerate}
+  \medskip
+  \textbf{Implication:} [the one-sentence so-what]
+\end{frame}
+
+% ---- 4. Data / setting: sources, unit, N, period. Hide the cleaning. ----
+\begin{frame}{Data}
+  \begin{itemize}
+    \item \RunIn{Sample:} [unit of observation, N, period]  % Section _, p._
+    \item \RunIn{Treatment:} [measure + source, one line]
+    \item \RunIn{Outcome:} [measure + source, one line]
+  \end{itemize}
+  \PlaceNav{\hyperlink{app:sumstats}{\beamergotobutton{Summary stats}}}
+\end{frame}
+
+% ---- 5. Identification / model: the design as a picture + one assumption ----
+\begin{frame}{[Assertion: what identifies the effect]}
+  \framesubtitle{[The key assumption, in words]}
+  \centering
+  \TODO{design figure: timeline / event-study / DAG}
+  \begin{itemize}
+    \item {[Main threat to validity]} — [the paper's answer, one line]
+  \end{itemize}
+\end{frame}
+
+% ---- 6. Main result: ONE exhibit, surgically rebuilt ----
+\begin{frame}{[Assertion: the main finding with its magnitude]}
+  \framesubtitle{[Outcome, specification, CI level]}
+  \centering
+  \TODO{main exhibit: rebuilt figure or slide table (see exhibit-surgery.md)}
+  \Takeaway{[Magnitude translated: one SD / policy dose $\Rightarrow$ effect]}
+  \PlaceNav{\hyperlink{app:robust}{\beamergotobutton{Robustness}}}
+\end{frame}
+
+% ---- 7. Mechanism / supporting result (one idea per frame) ----
+\begin{frame}{[Assertion: what drives it]}
+  \TODO{mechanism exhibit or 2--3 bullets}
+\end{frame}
+
+% ---- 8. Conclusion: mirrors "This paper", same numbering ----
+\begin{frame}{Conclusion}
+  \begin{enumerate}
+    \item {[Contribution 1, same phrasing as slide 3]}
+    \item {[Contribution 2]}
+    \item {[Contribution 3]}
+  \end{enumerate}
+  \medskip
+  \textbf{Implication:} [same line as slide 3]
+\end{frame}
+% No "Thank you / Questions?" slide — end on the takeaway.
+
+% ================= Appendix =================
+\AppendixStart
+
+\begin{frame}{Summary statistics}
+  \hypertarget{app:sumstats}{}
+  \TODO{summary table}
+  \BackButton{app:sumstats}
+\end{frame}
+
+\begin{frame}{Robustness}
+  \hypertarget{app:robust}{}
+  \TODO{full table with all specifications}
+  \BackButton{app:robust}
+\end{frame}
+
+\begin{frame}{Related literature}
+  % Deploy only if asked; never in the main line.
+  \begin{itemize}
+    \item {[Antecedent 1]} — [what it did; what it did not]
+    \item {[Antecedent 2]} — [...]
+  \end{itemize}
+\end{frame}
+
+\end{document}

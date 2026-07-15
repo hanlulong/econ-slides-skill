@@ -1,0 +1,98 @@
+% econ-slides-clean.sty — neutral minimal theme of the econ-slides skill
+%
+% A restrained, near-monochrome look: Latin Modern, left-aligned frame titles
+% over a thin rule, one accent color. For users who want no visual signature.
+%
+% Usage:
+%   \documentclass[11pt, aspectratio=169]{beamer}
+%   \usepackage{econ-slides-clean}
+%
+% Implements the shared econ-slides semantic interface (see themes/README.md):
+% swapping this \usepackage line for another theme changes nothing else.
+%
+% Part of econ-slides (https://github.com/hanlulong/econ-slides-skill). MIT.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{econ-slides-clean}[2026/07/15 econ-slides clean theme]
+
+% ---- Core packages ----
+\RequirePackage{amsmath,amssymb,bm}
+\RequirePackage{booktabs,array,multirow,multicol}
+\RequirePackage{threeparttable}
+\RequirePackage{graphicx}
+\RequirePackage{tcolorbox}
+\usefonttheme{professionalfonts}
+\RequirePackage{lmodern}
+\RequirePackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\RequirePackage{xcolor}
+\RequirePackage{appendixnumberbeamer}
+
+% ---- Theme: minimal, left-aligned, thin title rule ----
+\usetheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamersize{text margin left=2em, text margin right=2em}
+\setbeamertemplate{itemize item}{\textbullet}
+\setbeamertemplate{itemize subitem}{--}
+\setbeamertemplate{itemize subsubitem}{$\cdot$}
+\setbeamerfont{button}{size=\scriptsize}
+\setbeamerfont{frametitle}{series=\bfseries, size=\large}
+\setbeamercolor{frametitle}{fg=black}
+\setbeamerfont{framesubtitle}{size=\small, shape=\itshape}
+\setbeamercolor{framesubtitle}{fg=black!65}
+\setbeamertemplate{frametitle}{%
+  \vspace{0.6em}%
+  {\usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\insertframetitle\par}%
+  \ifx\insertframesubtitle\empty\else
+    {\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle\par}%
+  \fi
+  \vspace{0.15em}{\color{black!30}\hrule height 0.4pt}\vspace{0.2em}}
+
+% ---- Palette: monochrome + one accent (Okabe-Ito blue), semantic names kept ----
+\definecolor{cAccentA}{HTML}{0072B2}   % blue — the single accent
+\definecolor{cAccentB}{HTML}{D55E00}   % vermillion (sparingly)
+\definecolor{cAccentC}{HTML}{009E73}   % teal/green
+\definecolor{cAccentD}{HTML}{E69F00}   % amber
+\definecolor{cHighlight}{HTML}{0072B2} % highlight = accent in the clean theme
+\colorlet{cGood}{cAccentC}
+\colorlet{cBad}{cAccentB}
+
+% ---- Footer ----
+\newif\ifecoslides@appendix
+\ecoslides@appendixfalse
+\let\ecoslides@origappendix\appendix
+\renewcommand{\appendix}{\ecoslides@origappendix\ecoslides@appendixtrue}
+\setbeamertemplate{footline}{%
+  \hfill{\color{gray}\scriptsize
+    \ifecoslides@appendix A\insertframenumber
+    \else\insertframenumber\,/\,\inserttotalframenumber\fi
+  }\hspace{1.2em}\vspace{0.8em}}
+
+% ---- Semantic interface ----
+\newcommand{\KeyIdea}[1]{\textcolor{cHighlight}{\textbf{#1}}}
+\newcommand{\Takeaway}[1]{\par\smallskip\centering\footnotesize\textit{#1}\par}
+\newcommand{\graycite}[1]{{\color{gray}\scriptsize #1}}
+\newcommand{\Et}{\mathbb{E}_t}
+% Bold run-in label for structured summaries: \RunIn{Question:} ...
+\newcommand{\RunIn}[1]{\textbf{#1}}
+
+\newcommand{\PlaceNavShift}[2]{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=south east, inner sep=0pt, outer sep=0pt]
+      at ([xshift=#1,yshift=0.42cm]current page.south east) {#2};
+  \end{tikzpicture}}
+\newcommand{\PlaceNav}[1]{\PlaceNavShift{-2em}{#1}}
+\newcommand{\BackButton}[1]{\PlaceNav{\hyperlink{#1}{\beamerreturnbutton{Back}}}}
+
+\newtcolorbox{ResultBox}[1][Main result]{%
+  colback=black!4, colframe=black!70, coltitle=white,
+  title={\textbf{#1}}, fonttitle=\small,
+  boxsep=2pt, top=4pt, bottom=4pt, left=6pt, right=6pt,
+  boxrule=0.6pt, arc=0pt}
+
+\newcommand{\AppendixStart}{%
+  \appendix
+  \begin{frame}[plain]\centering\vfill{\Huge\bfseries Appendix}\vfill\end{frame}%
+  \addtocounter{framenumber}{-1}}
+
+\endinput
