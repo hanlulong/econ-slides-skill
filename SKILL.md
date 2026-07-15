@@ -1,12 +1,6 @@
 ---
 name: econ-slides
-description: >
-  Build professional academic economics slide decks in LaTeX/Beamer: turn a
-  paper into a conference, seminar, or job-market talk; build discussant
-  slides; polish or shorten an existing deck. Use when the user mentions
-  slides, presentation, talk, deck, beamer, seminar, conference, job talk,
-  job market presentation, discussion, or discussant in an economics or
-  social-science research context.
+description: "Build professional academic economics slide decks in LaTeX/Beamer: turn a paper into a conference, seminar, or job-market talk; build discussant slides; polish or shorten an existing deck. Use when the user mentions slides, presentation, talk, deck, beamer, seminar, conference, job talk, job market presentation, discussion, or discussant in an economics or social-science research context."
 ---
 
 # econ-slides
@@ -52,9 +46,10 @@ master-and-cuts, appendix links.
    ("Data", "Conclusion") only for structural slides.
 4. **One idea, one exhibit per frame.** A figure or a table, never both;
    under it, one `\Takeaway{}` line.
-5. **The punchline lands by slide 4** (a numbered "This paper" slide) and is
-   mirrored in the conclusion. State the bottom line as one quantitative
-   sentence, not a promise of results to come.
+5. **The punchline lands within the first three content slides** (counting
+   after the title page — a numbered "This paper" slide) and is mirrored in
+   the conclusion. State the bottom line as one quantitative sentence, not
+   a promise of results to come.
 6. **Slide tables are not paper tables.** Apply the surgery procedure in
    `references/exhibit-surgery.md`; never paste or `\input` a paper table.
 7. **Overlays build reasoning, never decorate.** Progressive reveals are for
@@ -76,11 +71,15 @@ master-and-cuts, appendix links.
 
 Establish before writing anything: **genre** (conference talk / seminar /
 job talk / discussion), **clock** (minutes), **audience** (field experts /
-generalists / policy), **theme** (`econ-slides-house` default;
-`econ-slides-clean`, `econ-slides-boxed`, or the user's own — ask only if
-the user signals a preference exists), and **materials** (paper PDF and/or
-source, existing deck, figures). Ask about anything ambiguous that changes
-the deck; assume sensible defaults otherwise and say what you assumed.
+generalists / policy), **theme**, and **materials** (paper PDF and/or
+source, existing deck, figures). Theme options: `econ-slides-house`
+(default), `econ-slides-clean`, `econ-slides-boxed`, or — if the user
+prefers a stock Beamer theme (Madrid, metropolis, CambridgeUS, an
+institutional theme) — their `\usetheme{...}` followed by
+`\usepackage{econ-slides-compat}`, which adds this skill's interface
+without changing their theme's look. Ask only if the user signals a
+preference exists. Ask about anything ambiguous that changes the deck;
+assume sensible defaults otherwise and say what you assumed.
 
 ### Phase 1 — Read the paper
 
@@ -113,8 +112,9 @@ carrying a `\BackButton`.
 ### Phase 4 — Verify (do not skip; do not trust the compiler alone)
 
 ```bash
-python3 scripts/compile_deck.py talk.tex            # compile + error triage
-python3 scripts/check_deck.py build/talk.pdf \
+# scripts live in THIS skill's folder — call them by the skill's path
+python3 <skill-dir>/scripts/compile_deck.py talk.tex   # compile + error triage
+python3 <skill-dir>/scripts/check_deck.py build/talk.pdf \
     --tex talk.tex --log build/talk.log --render-dir build/pages
 ```
 

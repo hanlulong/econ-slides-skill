@@ -70,8 +70,11 @@ from the user's paper and keep the provenance comments:
 - **"Data | Model" tables** (structural/theory-empirics): two value columns
   compared moment by moment; reveal the model column on a second overlay
   step after the data column is absorbed.
-- Never place `\toprule` directly under a colored frame title bar (boxed
-  theme) — insert `\vspace{4pt}` first; the compiler will not warn you.
+- Never place `\toprule` directly under a colored frame title bar — this
+  bites under the boxed theme and any compat theme with a title bar
+  (Madrid, CambridgeUS): insert `\vspace{4pt}` between title and table.
+  The compiler will not warn you and the checker cannot see it — it is a
+  visual-pass item.
 
 ## Figures
 
@@ -93,6 +96,10 @@ from the user's paper and keep the provenance comments:
   word one hue and the line another.
 - One figure per frame, centered; panels labeled `A.`/`B.` only if both
   panels are discussed. Wide figures: `\makebox[\textwidth][c]{...}`.
+- Spacing recipe around a figure: `\bigskip` (or `\vspace{1em}`) after the
+  title/subtitle, then `\centering` + the figure; **after** the figure,
+  exactly one line — the `\Takeaway{}` or a single bullet, never a
+  paragraph. After a `ResultBox`, `\medskip` before any follow-up text.
 - Every figure slide: assertion title, `\framesubtitle` with the precise
   reading (sample, units, CI level), `\Takeaway` beneath.
 - Prefer figures to tables for the main result (event-study plot,

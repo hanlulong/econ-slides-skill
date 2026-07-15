@@ -73,7 +73,7 @@ def main() -> int:
         print(f"error: {tex} not found", file=sys.stderr)
         return 1
     if shutil.which(args.engine) is None:
-        print(f"error: {args.engine} not on PATH — install TeX Live/MacTeX", file=sys.stderr)
+        print(f"error: {args.engine} not on PATH — install TeX Live / MacTeX / MiKTeX", file=sys.stderr)
         return 1
 
     build = (args.build_dir or tex.parent / "build").resolve()
@@ -81,7 +81,9 @@ def main() -> int:
 
     env = os.environ.copy()
     themes = args.themes_dir or Path(__file__).resolve().parent.parent / "themes"
-    env["TEXINPUTS"] = f".:{themes}:" + env.get("TEXINPUTS", "")
+    # os.pathsep: ':' on Unix, ';' on Windows (TeX Live/MiKTeX expect it)
+    sep = os.pathsep
+    env["TEXINPUTS"] = f".{sep}{themes}{sep}" + env.get("TEXINPUTS", "")
 
     cmd = [args.engine, "-interaction=nonstopmode", "-halt-on-error",
            f"-output-directory={build}", tex.name]
@@ -94,7 +96,8 @@ def main() -> int:
             break
 
     log_path = build / (tex.stem + ".log")
-    log_text = log_path.read_text(errors="replace") if log_path.exists() else proc.stdout
+    log_text = (log_path.read_text(encoding="utf-8", errors="replace")
+                if log_path.exists() else proc.stdout)
     pdf_path = build / (tex.stem + ".pdf")
 
     result: dict = {"ok": ok and pdf_path.exists(), "pdf": str(pdf_path),

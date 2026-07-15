@@ -1,0 +1,74 @@
+% econ-slides-compat.sty — the econ-slides semantic interface on top of ANY
+% stock Beamer theme. For users who prefer Madrid, metropolis, CambridgeUS,
+% Boadilla, Frankfurt, or an institutional theme over the bundled looks.
+%
+% Usage (theme first, then this adapter):
+%   \documentclass[11pt, aspectratio=169]{beamer}
+%   \usetheme{Madrid}
+%   \usepackage{econ-slides-compat}
+%
+% Unlike the bundled themes, this package imposes NO look: no fonts, no
+% margins, no footer, no bullet shapes. It only provides the interface the
+% skill writes decks against, so any deck compiles unchanged under a stock
+% theme. (One exception: navigation symbols are removed — every craft guide
+% agrees on that.)
+%
+% Part of econ-slides (https://github.com/hanlulong/econ-slides-skill). MIT.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{econ-slides-compat}[2026/07/15 econ-slides interface adapter]
+
+% ---- Packages the interface (and the skill's table/figure patterns) need ----
+\RequirePackage{amsmath,amssymb,bm}
+\RequirePackage{booktabs,array,multirow,multicol}
+\RequirePackage{threeparttable}
+\RequirePackage{graphicx}
+\RequirePackage{tcolorbox}
+\RequirePackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\RequirePackage{xcolor}
+\RequirePackage{appendixnumberbeamer}
+
+\setbeamertemplate{navigation symbols}{}
+
+% ---- Okabe-Ito semantic palette (same names as the bundled themes) ----
+\providecolor{cAccentA}{HTML}{0072B2}
+\providecolor{cAccentB}{HTML}{D55E00}
+\providecolor{cAccentC}{HTML}{009E73}
+\providecolor{cAccentD}{HTML}{E69F00}
+\providecolor{cHighlight}{rgb}{0.78,0.08,0.52}
+\colorlet{cGood}{cAccentC}
+\colorlet{cBad}{cAccentB}
+
+% ---- Semantic interface ----
+\newcommand{\KeyIdea}[1]{\textcolor{cHighlight}{\textbf{#1}}}
+\newcommand{\Takeaway}[1]{\par\smallskip\centering\footnotesize\textit{#1}\par}
+\newcommand{\graycite}[1]{{\color{gray}\scriptsize #1}}
+\newcommand{\Et}{\mathbb{E}_t}
+\newcommand{\RunIn}[1]{\textbf{\usebeamercolor[fg]{structure}#1}}
+
+\newcommand{\PlaceNavShift}[2]{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=south east, inner sep=0pt, outer sep=0pt]
+      at ([xshift=#1,yshift=0.75cm]current page.south east) {#2};
+  \end{tikzpicture}}
+\newcommand{\PlaceNav}[1]{\PlaceNavShift{-2em}{#1}}
+\newcommand{\BackButton}[1]{\PlaceNav{\hyperlink{#1}{\beamerreturnbutton{Back}}}}
+
+% ResultBox tinted with the host theme's own structure color, so it blends
+% with whatever theme the user chose. The color is captured at \begin{document}
+% (after the theme has set it) and resolved when the box is drawn.
+\colorlet{es@structure}{blue!60!black}   % fallback until the theme is known
+\AtBeginDocument{\usebeamercolor{structure}\colorlet{es@structure}{structure.fg}}
+\newtcolorbox{ResultBox}[1][Main result]{%
+  colback=es@structure!8!white, colframe=es@structure!80!black,
+  coltitle=white, title={\textbf{#1}}, fonttitle=\small,
+  boxsep=2pt, top=3pt, bottom=3pt, left=6pt, right=6pt,
+  boxrule=0.8pt, arc=1.5pt}
+
+\newcommand{\AppendixStart}{%
+  \appendix
+  \begin{frame}[plain]\centering\vfill{\Huge\bfseries Appendix}\vfill\end{frame}%
+  \addtocounter{framenumber}{-1}}
+
+\endinput

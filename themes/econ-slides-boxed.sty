@@ -59,6 +59,8 @@
 \setbeamercolor{block title}{bg=esNavy, fg=white}
 \setbeamercolor{block body}{bg=esNavy!6, fg=black}
 \setbeamerfont{button}{size=\scriptsize}
+% Breathing room between top-level bullets (nested lists stay tight)
+\setbeamertemplate{itemize/enumerate body begin}{\setlength{\itemsep}{0.45em}}
 
 % ---- Footer ----
 \newif\ifecoslides@appendix
@@ -82,7 +84,7 @@
 \newcommand{\PlaceNavShift}[2]{%
   \begin{tikzpicture}[remember picture,overlay]
     \node[anchor=south east, inner sep=0pt, outer sep=0pt]
-      at ([xshift=#1,yshift=0.42cm]current page.south east) {#2};
+      at ([xshift=#1,yshift=0.75cm]current page.south east) {#2};
   \end{tikzpicture}}
 \newcommand{\PlaceNav}[1]{\PlaceNavShift{-2em}{#1}}
 \newcommand{\BackButton}[1]{\PlaceNav{\hyperlink{#1}{\beamerreturnbutton{Back}}}}
@@ -90,7 +92,7 @@
 \newtcolorbox{ResultBox}[1][Main result]{%
   colback=esNavy!6, colframe=esNavy, coltitle=white,
   title={\textbf{#1}}, fonttitle=\small,
-  boxsep=2pt, top=4pt, bottom=4pt, left=6pt, right=6pt,
+  boxsep=2pt, top=3pt, bottom=3pt, left=6pt, right=6pt,
   boxrule=0.8pt, arc=1.5pt}
 
 \newcommand{\AppendixStart}{%

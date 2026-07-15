@@ -11,15 +11,31 @@ switches looks by swapping one line:
 
 | Theme | Look | Reach for it when |
 |---|---|---|
-| `econ-slides-house` *(default)* | No chrome, centered titles, Palatino math, Okabe–Ito accents | Research talks: seminars, conferences, job talks |
+| `econ-slides-house` *(default)* | No chrome, centered structure-blue titles, Palatino math, Okabe–Ito accents | Research talks: seminars, conferences, job talks |
 | `econ-slides-clean` | Near-monochrome, left titles over a thin rule, one blue accent | You want zero visual signature — referee workshops, teaching |
 | `econ-slides-boxed` | Navy title bar, circle bullets, structured blocks | Discussant decks, policy and central-bank audiences |
+| `econ-slides-compat` | **Your choice of stock Beamer theme** | You prefer Madrid, metropolis, CambridgeUS, Boadilla, an institutional theme, … |
 
 All themes assume:
 
 ```latex
 \documentclass[11pt, aspectratio=169]{beamer}
 ```
+
+## Prefer a stock Beamer theme?
+
+Load your theme first, then the adapter — it adds the semantic interface
+without touching the theme's look (it only removes navigation symbols):
+
+```latex
+\documentclass[11pt, aspectratio=169]{beamer}
+\usetheme{Madrid}                 % any stock or institutional theme
+\usepackage{econ-slides-compat}
+```
+
+The `ResultBox` tints itself with the host theme's structure color, and
+`\RunIn` uses it too, so the interface blends in. Verified in the test suite
+with Madrid and CambridgeUS.
 
 ## The semantic interface
 

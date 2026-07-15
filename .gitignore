@@ -19,6 +19,7 @@ tests/build-*/
 
 # Rendered page images (regenerate with check_deck.py --render-dir)
 tests/**/*.png
+tests/_*.tex
 
 # OS noise
 .DS_Store

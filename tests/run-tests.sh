@@ -28,6 +28,33 @@ for engine in pdflatex lualatex; do
   fi
 done
 
+echo "== handout mode (overlays must collapse, not overprint) =="
+sed 's/\\documentclass\[11pt, aspectratio=169\]{beamer}/\\documentclass[11pt, aspectratio=169, handout]{beamer}/' \
+    tests/interface-test.tex > tests/_handout.tex
+if python3 scripts/compile_deck.py tests/_handout.tex \
+     --build-dir tests/build-suite >/dev/null 2>&1; then
+  # the overlay frame must collapse to ONE page in handout mode: 8 -> 7
+  HPAGES=$(python3 -c "import fitz; print(fitz.open('tests/build-suite/_handout.pdf').page_count)")
+  [ "$HPAGES" = "7" ] && ok "handout compiles and collapses overlays (7 pages)" \
+                      || bad "handout page count $HPAGES (want 7)"
+else
+  bad "handout compile"
+fi
+rm -f tests/_handout.tex
+
+echo "== compat adapter on stock themes =="
+for stock in Madrid CambridgeUS; do
+  printf '\\def\\ecoslidesstocktheme{%s}\\def\\ecoslidestheme{econ-slides-compat}\\input{interface-test.tex}\n' "$stock" \
+    > "tests/_compat-$stock.tex"
+  if python3 scripts/compile_deck.py "tests/_compat-$stock.tex" \
+       --build-dir tests/build-suite >/dev/null 2>&1; then
+    ok "compile compat [$stock]"
+  else
+    bad "compile compat [$stock]"
+  fi
+  rm -f "tests/_compat-$stock.tex"
+done
+
 echo "== templates compile under every theme =="
 for tpl in paper-talk discussion; do
   for theme in econ-slides-house econ-slides-clean econ-slides-boxed; do

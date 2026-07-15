@@ -36,6 +36,8 @@
 \setbeamertemplate{itemize subitem}{--}
 \setbeamertemplate{itemize subsubitem}{$\cdot$}
 \setbeamerfont{button}{size=\scriptsize}
+% Breathing room between top-level bullets (nested lists stay tight)
+\setbeamertemplate{itemize/enumerate body begin}{\setlength{\itemsep}{0.45em}}
 \setbeamerfont{frametitle}{series=\bfseries, size=\large}
 \setbeamercolor{frametitle}{fg=black}
 \setbeamerfont{framesubtitle}{size=\small, shape=\itshape}
@@ -84,7 +86,7 @@
 \newcommand{\PlaceNavShift}[2]{%
   \begin{tikzpicture}[remember picture,overlay]
     \node[anchor=south east, inner sep=0pt, outer sep=0pt]
-      at ([xshift=#1,yshift=0.42cm]current page.south east) {#2};
+      at ([xshift=#1,yshift=0.75cm]current page.south east) {#2};
   \end{tikzpicture}}
 \newcommand{\PlaceNav}[1]{\PlaceNavShift{-2em}{#1}}
 \newcommand{\BackButton}[1]{\PlaceNav{\hyperlink{#1}{\beamerreturnbutton{Back}}}}
@@ -92,7 +94,7 @@
 \newtcolorbox{ResultBox}[1][Main result]{%
   colback=black!4, colframe=black!70, coltitle=white,
   title={\textbf{#1}}, fonttitle=\small,
-  boxsep=2pt, top=4pt, bottom=4pt, left=6pt, right=6pt,
+  boxsep=2pt, top=3pt, bottom=3pt, left=6pt, right=6pt,
   boxrule=0.6pt, arc=0pt}
 
 \newcommand{\AppendixStart}{%

@@ -36,19 +36,21 @@
 \setbeamertemplate{navigation symbols}{}
 \setbeamertemplate{frametitle}[default][center]
 \setbeamersize{text margin left=2em, text margin right=2em}
-\setbeamertemplate{itemize item}{\Large\textbullet}
+% Math-mode bullet, NOT \textbullet: mathpazo has no \textbullet glyph under
+% xelatex/lualatex, so \textbullet silently renders as a tofu square there.
+\setbeamertemplate{itemize item}{\raise0.9pt\hbox{\small$\bullet$}}
 \setbeamertemplate{itemize subitem}{\tiny$\blacksquare$}
 \setbeamertemplate{itemize subsubitem}{$\star$}
 \setbeamerfont{button}{size=\scriptsize}
-\setbeamerfont{frametitle}{series=\bfseries, size=\large}
-\setbeamercolor{frametitle}{fg=black}
+% Frame titles and the title page keep beamer's defaults on purpose:
+% \Large, structure color (the classic dark blue), medium weight — the
+% original house look. Pin the blue so a beamer default change can't move it.
+\definecolor{esStructure}{rgb}{0.2,0.2,0.7}
+\setbeamercolor{structure}{fg=esStructure}
 \setbeamerfont{framesubtitle}{size=\small, shape=\itshape}
 \setbeamercolor{framesubtitle}{fg=black!70}
-\setbeamercolor{title}{fg=black}
-\setbeamercolor{subtitle}{fg=black!70}
-\setbeamercolor{author}{fg=black}
-\setbeamercolor{institute}{fg=black!70}
-\setbeamercolor{date}{fg=black!70}
+% Breathing room between top-level bullets (nested lists stay tight)
+\setbeamertemplate{itemize/enumerate body begin}{\setlength{\itemsep}{0.45em}}
 
 % ---- Okabe-Ito colorblind-safe palette (assign ONE color per recurring concept) ----
 \definecolor{cAccentA}{HTML}{0072B2}   % blue
@@ -82,13 +84,15 @@
 % Notation shortcut
 \newcommand{\Et}{\mathbb{E}_t}
 % Bold run-in label for structured summaries: \RunIn{Question:} ...
-\newcommand{\RunIn}[1]{\textbf{\textcolor{cAccentA}{#1}}}
+% Neutral bold on purpose: accents are reserved for taught concepts, and a
+% structural label must not collide with the concept color map.
+\newcommand{\RunIn}[1]{\textbf{#1}}
 
 % Absolute-positioned nav buttons pinned bottom-right: never reflow the body
 \newcommand{\PlaceNavShift}[2]{%
   \begin{tikzpicture}[remember picture,overlay]
     \node[anchor=south east, inner sep=0pt, outer sep=0pt]
-      at ([xshift=#1,yshift=0.42cm]current page.south east) {#2};
+      at ([xshift=#1,yshift=0.75cm]current page.south east) {#2};
   \end{tikzpicture}}
 \newcommand{\PlaceNav}[1]{\PlaceNavShift{-2em}{#1}}
 % Back button for appendix slides: \BackButton{main-slide-label}
@@ -98,7 +102,7 @@
 \newtcolorbox{ResultBox}[1][Main result]{%
   colback=cAccentC!8, colframe=cAccentC, coltitle=white,
   title={\textbf{#1}}, fonttitle=\small,
-  boxsep=2pt, top=4pt, bottom=4pt, left=6pt, right=6pt,
+  boxsep=2pt, top=3pt, bottom=3pt, left=6pt, right=6pt,
   boxrule=0.8pt, arc=1.5pt}
 
 % Appendix divider frame + numbering switch

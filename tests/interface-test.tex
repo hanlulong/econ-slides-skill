@@ -4,6 +4,8 @@
 % Defaults to the house theme when compiled directly.
 \ifdefined\ecoslidestheme\else\def\ecoslidestheme{econ-slides-house}\fi
 \documentclass[11pt, aspectratio=169]{beamer}
+% stock-theme mode: \def\ecoslidesstocktheme{Madrid} + econ-slides-compat
+\ifdefined\ecoslidesstocktheme\usetheme{\ecoslidesstocktheme}\fi
 \usepackage{\ecoslidestheme}
 
 \title{Broadband expansion raises small-firm productivity by 3.4 percent}
@@ -69,11 +71,11 @@
   \PlaceNav{\hyperlink{app:robust}{\beamergotobutton{Robustness}}}
 \end{frame}
 
-% ---- Overlay reasoning test ----
+% ---- Overlay reasoning test (handout-safe: exactly one variant survives) ----
 \begin{frame}{The effect builds over three years, then stabilizes}
   \begin{overlayarea}{\textwidth}{0.55\textheight}
-    \only<1>{\centering\itshape (Figure placeholder: pre-trend coefficients near zero)}
-    \only<2>{\centering\itshape (Figure placeholder: post coefficients rising to 0.034)}
+    \only<1|handout:0>{\centering\itshape (Figure placeholder: pre-trend coefficients near zero)}
+    \only<2|handout:1>{\centering\itshape (Figure placeholder: post coefficients rising to 0.034)}
   \end{overlayarea}
   \begin{itemize}
     \item<1-> Pre-treatment coefficients are small and not significant

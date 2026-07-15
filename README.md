@@ -12,7 +12,7 @@
 
 ## What it does
 
-- **Paper → talk.** Give it your manuscript and a clock ("15-minute conference talk", "90-minute job talk") and get a complete deck: motivation with a hook, the punchline by slide 4, surgically rebuilt exhibits, a linked appendix for every "what about…".
+- **Paper → talk.** Give it your manuscript and a clock ("15-minute conference talk", "90-minute job talk") and get a complete deck: motivation with a hook, the punchline within the first three content slides, surgically rebuilt exhibits, a linked appendix for every "what about…".
 - **Discussant decks.** A first-class genre, not an afterthought: one-slide summary, two to three titled comments (the title *is* the comment), each ending in a concrete suggestion — built to the Dallas Fed / ASHEcon discussant norms.
 - **Polish an existing deck.** Enforces the rules on your own slides: one-line titles and bullets, density limits, table surgery, semantic color.
 - **Retarget a venue.** The same paper at 15 and 90 minutes is two different talks, not one deck played fast. The skill cuts by craft rules, not proportionally.
@@ -42,24 +42,42 @@ Paste this into Claude Code or Codex:
 
 ```text
 Help me install the econ-slides skill from
-https://github.com/hanlulong/econ-slides-skill: clone it and register it as
-an Agent Skill for my client (for Claude Code, place or link the folder under
-~/.claude/skills/econ-slides). Verify python3 and xelatex are available and
-pymupdf is installed, then confirm the skill loads.
+https://github.com/hanlulong/econ-slides-skill: clone it, then link the
+folder as an Agent Skill — into ~/.claude/skills/econ-slides for Claude Code
+and ~/.codex/skills/econ-slides for Codex (whichever of the two I use).
+Verify python3 and xelatex are available and pymupdf is installed, then
+confirm the skill loads.
 ```
 
 <details>
 <summary>Manual installation</summary>
 
+macOS / Linux:
+
 ```bash
 git clone https://github.com/hanlulong/econ-slides-skill.git
-# Claude Code (global): link it into your skills directory
-ln -s "$(pwd)/econ-slides-skill" ~/.claude/skills/econ-slides
 pip install pymupdf
+
+# Claude Code (global skills directory)
+ln -s "$(pwd)/econ-slides-skill" ~/.claude/skills/econ-slides
+
+# Codex CLI (same skill format, its own directory)
+ln -s "$(pwd)/econ-slides-skill" ~/.codex/skills/econ-slides
 ```
 
-Any agent that reads `SKILL.md` can use the skill; the scripts and themes are
-plain Python and LaTeX with no other dependencies.
+Windows (PowerShell — use `python` rather than `python3`):
+
+```powershell
+git clone https://github.com/hanlulong/econ-slides-skill.git
+pip install pymupdf
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\econ-slides" -Target "$PWD\econ-slides-skill"
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.codex\skills\econ-slides" -Target "$PWD\econ-slides-skill"
+```
+
+Both clients read the same `SKILL.md`; any agent that can read it can use
+the skill. The scripts are plain Python (pathlib throughout, `os.pathsep`
+for TeX paths) and run on macOS, Windows, and Linux; `tests/run-tests.sh`
+needs bash (Git Bash or WSL on Windows).
 
 </details>
 
@@ -85,8 +103,9 @@ Three bundled looks, one semantic interface — a finished deck switches themes 
 | `econ-slides-house` *(default)* | No chrome, centered assertion titles, Palatino math, Okabe–Ito palette | Research talks |
 | `econ-slides-clean` | Near-monochrome, left titles over a thin rule | Zero visual signature |
 | `econ-slides-boxed` | Navy title bar, structured blocks | Discussions, policy audiences |
+| `econ-slides-compat` | **Any stock Beamer theme you prefer** | Madrid, metropolis, CambridgeUS, institutional themes |
 
-Institutional template? Copy a bundled `.sty`, swap its look, keep the interface block — the deck's content never changes. See [themes/README.md](themes/README.md).
+Prefer your own look? `\usetheme{Madrid}` followed by `\usepackage{econ-slides-compat}` keeps your theme and adds the skill's interface on top. Institutional template? Copy a bundled `.sty`, swap its look, keep the interface block — the deck's content never changes. See [themes/README.md](themes/README.md).
 
 ## What's inside
 

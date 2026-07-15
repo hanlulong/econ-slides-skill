@@ -93,5 +93,10 @@ python3 scripts/check_deck.py talk/build/sed-2026.pdf \
   appendix contents, anything marked `\TODO`.
 - State where each headline number came from (table/page), so the user can
   spot-check in one minute.
-- Offer the standard follow-ups: theme swap, venue retarget, handout mode
-  (`\documentclass[handout]` collapses overlays for sharing).
+- Offer the standard follow-ups: theme swap, venue retarget, handout mode.
+  **Handout caveat**: `\documentclass[handout]` collapses each frame to one
+  slide, and a bare `\only<1>{A}\only<2>{B}` then shows A and B
+  *overprinted*. Decks that use `\only`/`\includegraphics<>` swaps must
+  carry handout specs — `\only<1|handout:0>{draft}\only<2|handout:1>{final}`
+  — so exactly one variant survives (see slide-rules.md §Overlays). Always
+  recompile and view the handout before sharing it.

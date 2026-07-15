@@ -32,10 +32,69 @@ measurable subset; the rest is your judgment on the rendered pages.
 - One sentence per line ≈ 45–75 characters (Goldsmith-Pinkham). Vertical
   whitespace (`\medskip`) between idea groups; hand-tune rhythm rather than
   cramming.
+- **Top-anchor sparse text frames.** Beamer vertically centers, which
+  leaves a dead band under the title on short slides. For text-only frames
+  with ≤4 bullets use `\begin{frame}[t]{...}` with a `\medskip` after the
+  title, so the body sits near the title the way a hand-tuned deck does.
+  Exhibit frames stay centered.
+- **Bullet spacing by role** (theme default is 0.45em; override in-list
+  with `\setlength{\itemsep}{...}` after `\begin{itemize}`): contribution
+  and conclusion lists breathe at ~0.9em; ordinary content lists 0.45–0.6em;
+  genuinely dense lists may tighten to ~0.3em before splitting the frame.
+- **Generous between ideas, tight within an idea.** An arrow-led
+  sub-conclusion belongs to the bullet above it — pull it up so it hugs
+  its parent instead of floating a full itemsep away:
+  `\item[$\Rightarrow$]` preceded by `\vspace*{-0.5em}`. The eye then
+  reads bullet+arrow as one unit and the wide gaps as idea boundaries.
+- Single-bullet frames: tighten the indent locally with
+  `{\setlength{\leftmargini}{1em} \begin{itemize} ... \end{itemize}}`.
 - Nothing on the slide you will not say out loud; screen space = emphasis
   (Shapiro). If attention lapsed for 30 seconds, the slide alone should let
   a listener catch back up (Meager).
 - No prose walls: >15 text lines on a non-exhibit slide fails the checker.
+
+## Filling space with depth, not breadth
+
+Minimal is the floor, not the goal: a frame with two short bullets over a
+sea of white is a missed opportunity. When a frame has room AND the paper
+has something genuinely interesting to add, deepen the *same* point — never
+add a new one. The enrichment moves, in order of preference:
+
+1. **A one-line framing sentence** above a numbered list — the "This
+   paper" and Conclusion slides open with one plain-text line setting up
+   the contributions, never with a bare enumerate.
+2. **Sharper `\framesubtitle`** — the precise reading of the exhibit
+   (sample, units, specification) instead of a vague one.
+3. **An arrow-led intuition line** — `\item[$\Rightarrow$]` carrying the
+   economic logic or the "so what" of the bullet above it.
+4. **A gray parenthetical** — `\graycite{}` with the closest antecedent, a
+   benchmark magnitude ("about half the college wage premium"), or the
+   institutional detail that pre-empts a question.
+5. **A small annotated equation** — one term `\underbrace`d with its
+   meaning, if the mechanism is the point.
+6. **A larger exhibit** — let the figure fill the frame rather than pad
+   the text.
+
+Never enrich with filler, a second idea, or detail the speaker will not
+say out loud. If nothing interesting exists to add, the white space stays —
+space is emphasis.
+
+## Color consistency across the deck
+
+Declare the concept→color map once, before drafting, at the top of the
+`.tex`, and alias the concepts so slides never reference raw accents:
+
+```latex
+% COLOR MAP (one color per concept, held for the whole talk):
+%   treatment/broadband = cAccentA   mechanism/model = cAccentC
+\colorlet{cTreat}{cAccentA}
+\colorlet{cModel}{cAccentC}
+```
+
+Slides and rebuilt figures use `cTreat`/`cModel`, so a concept cannot
+change color between slide 6 and slide 12. Audit the map during the visual
+pass: same concept, same color, every appearance — and no accent used
+without a meaning.
 
 ## Overlays
 
@@ -45,6 +104,10 @@ measurable subset; the rest is your judgment on the rendered pages.
 - Always inside `\begin{overlayarea}{\textwidth}{<height>}` (or as full
   figure swaps `\includegraphics<1>…<2>`) so content never jumps between
   builds.
+- **Make every `\only`/figure swap handout-safe**: tag which variant the
+  handout keeps — `\only<1|handout:0>{build}\only<2|handout:1>{final}` —
+  otherwise `[handout]` mode overprints all variants on one slide.
+  `\item<2->` needs no spec (it simply shows).
 - Never `\pause` down a bullet list (the checker flags 3+ `\pause` per
   frame). If a reveal isn't rehearsed, show everything at once.
 - Discussant decks: fully static.
@@ -54,13 +117,41 @@ measurable subset; the rest is your judgment on the rendered pages.
 - 1–3 display equations per slide, each introduced in words and each symbol
   explained *on that slide* — no one remembers notation across slides
   (Piazzesi). Prefer words to symbols where words are exact.
-- Annotate terms in place: `\underbrace{...}_{\text{selection}}` with the
-  economic meaning and sign; spotlight the term under discussion with
-  `\KeyIdea` or an overlay color switch, one term at a time.
 - Build the estimating equation in stages (baseline → add the interaction
   → add fixed effects), not as a wall. The full system, derivations, and
   proofs live in the appendix behind a button.
 - Headline theoretical results go in a `ResultBox`.
+
+### Defining new notation (the discipline)
+
+Every **key, new, or nonstandard** symbol is defined at its first
+appearance, on the same slide, and the definition is *economic*, not
+lexical:
+
+1. **The `where` line**, directly under the display, in plain economic
+   language: "where $\kappa$ governs how fast prices adjust and
+   $\rho$ is the persistence of the shock" — never "where $\kappa$ is a
+   parameter". If the `where` line needs more than one sentence, the
+   equation carries too many new symbols — split the build.
+2. **In-place naming for composite terms**:
+   `\underbrace{...}_{\text{adjustment cost $>0$}}` — the economic name
+   *plus the sign* whenever the sign drives the argument; compact sign
+   tags via `\overbrace{...}^{\scriptscriptstyle(+)}`.
+3. **Color as identity for the talk's key objects**: introduce a central
+   object once with its concept color and name
+   (`\textcolor{cModel}{u^{NK}}`, per the color map); afterwards the color
+   alone carries the identity across every equation, bullet, and figure.
+4. **Spotlight one term at a time** when walking a decomposition:
+   `{\color<2>{cHighlight}\underbrace{...}_{...}}` — discuss term by term
+   over overlays, never all at once.
+5. **Re-ground returning notation**: when a symbol reappears after several
+   slides, remind rather than assume — a parenthetical "(recall $\kappa$ =
+   price-adjustment cost)" or the `\framesubtitle`.
+
+What NOT to define: standard objects (logs, expectations, $i$/$t$
+subscripts, OLS notation). Defining the obvious clutters exactly where
+clean definition should stand out — knowing what needs no definition is
+half the discipline.
 
 ## Color
 

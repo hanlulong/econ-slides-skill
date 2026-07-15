@@ -12,7 +12,7 @@ Piazzesi) — you must leave slides up long enough to digest.
 
 | Clock | Content slides | Appendix |
 |---|---|---|
-| 12–15 min (conference) | 8–10 | 5–15 |
+| 12–15 min (conference) | 7–10 | 5–15 |
 | 20 min (conference/workshop) | 10–13 | 10–20 |
 | 45–60 min (seminar) | 18–25 | 15–30 |
 | 75–90 min (seminar/job talk) | 25–32 | 20–40 |

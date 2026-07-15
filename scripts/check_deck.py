@@ -45,7 +45,8 @@ MAX_BULLETS = 5           # house norm is 1-4 top-level bullets
 MAX_TEXT_LINES = 15       # more = a wall of text
 
 DEDUCT = {"edge-overflow": 15, "wrapped-title": 10, "wrapped-bullet": 4,
-          "density": 3, "overfull": 5, "pause-chain": 2}
+          "density": 3, "overfull": 5, "pause-chain": 2,
+          "nav-footer-overlap": 5}
 
 
 MATH_FONT_RE = re.compile(r"CMMI|CMSY|CMEX|MSBM|MSAM|Math|rsfs", re.I)
@@ -124,9 +125,13 @@ def check_page(page: fitz.Page, pno: int, footer_zone: float = 0.93) -> list[dic
                                        f"{l['text'][:60]!r}"})
 
     # --- wrapped title: >1 line in title-size font inside the title zone ---
-    # \large bold at an 11pt base renders ~12pt; body text ~10.9pt
+    # threshold is RELATIVE to this page's body size so 10pt decks and
+    # stock themes are covered too (title fonts run >=1.04x the body)
+    below = [l["size"] for l in body if l["bbox"].y0 >= H * TITLE_ZONE]
+    body_size = sorted(below)[len(below) // 2] if below else 11.0
+    title_thresh = max(body_size * 1.04, 11.0)
     title_lines = [l for l in body if l["bbox"].y0 < H * TITLE_ZONE
-                   and l["size"] >= 11.5 and not is_marker_line(l)]
+                   and l["size"] >= title_thresh and not is_marker_line(l)]
     if len(title_lines) > 1:
         # tolerate title+subtitle: subtitle is smaller; equal-size pairs = a wrap
         sizes = sorted({round(l["size"], 1) for l in title_lines}, reverse=True)
@@ -170,9 +175,35 @@ def check_page(page: fitz.Page, pno: int, footer_zone: float = 0.93) -> list[dic
     return findings
 
 
+def check_nav_overlap(page: fitz.Page, pno: int) -> list[dict]:
+    """Nav buttons (link annotations) must not overlap footer text."""
+    findings = []
+    H = page.rect.height
+    footer_lines = [l for l in page_lines(page) if l["bbox"].y0 > H * 0.90]
+    if not footer_lines:
+        return findings
+    for link in page.get_links():
+        # the drawn button pill extends ~3pt beyond the clickable rect
+        r = fitz.Rect(link["from"]) + (-3, -3, 3, 3)
+        for fl in footer_lines:
+            inter = r & fl["bbox"]
+            if inter.is_empty:
+                continue
+            # a button's own label sits fully inside the link rect — skip it
+            if inter.get_area() > 0.8 * fl["bbox"].get_area():
+                continue
+            if inter.width > 1 and inter.height > 0.5:
+                findings.append({"check": "nav-footer-overlap", "page": pno,
+                                 "detail": f"button overlaps footer text "
+                                           f"{fl['text'][:20]!r} by "
+                                           f"{inter.width:.1f}x{inter.height:.1f}pt"})
+                break
+    return findings
+
+
 def check_log(log_path: Path) -> list[dict]:
     findings = []
-    text = log_path.read_text(errors="replace")
+    text = log_path.read_text(encoding="utf-8", errors="replace")
     for m in re.finditer(r"^Overfull \\([hv])box \(([\d.]+)pt too \w+\)", text, re.M):
         if float(m.group(2)) > 2.0:
             findings.append({"check": "overfull", "page": None,
@@ -182,7 +213,7 @@ def check_log(log_path: Path) -> list[dict]:
 
 def check_tex(tex_path: Path) -> list[dict]:
     findings = []
-    src = tex_path.read_text(errors="replace")
+    src = tex_path.read_text(encoding="utf-8", errors="replace")
     for fm in re.finditer(r"\\begin\{frame\}(.*?)\\end\{frame\}", src, re.S):
         n_pause = fm.group(1).count(r"\pause")
         if n_pause >= 3:
@@ -204,10 +235,25 @@ def main() -> int:
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
-    doc = fitz.open(args.pdf)
+    if not args.pdf.exists():
+        print(f"error: {args.pdf} not found — compile the deck first",
+              file=sys.stderr)
+        return 2
+    try:
+        doc = fitz.open(args.pdf)
+    except Exception as exc:
+        print(f"error: cannot open {args.pdf}: {exc}", file=sys.stderr)
+        return 2
+    if doc.needs_pass:
+        print(f"error: {args.pdf} is password-protected", file=sys.stderr)
+        return 2
+    if doc.page_count == 0:
+        print(f"error: {args.pdf} has no pages", file=sys.stderr)
+        return 2
     findings: list[dict] = []
     for pno in range(doc.page_count):
         findings += check_page(doc.load_page(pno), pno + 1)
+        findings += check_nav_overlap(doc.load_page(pno), pno + 1)
     if args.log and args.log.exists():
         findings += check_log(args.log)
     if args.tex and args.tex.exists():
@@ -241,7 +287,8 @@ def main() -> int:
             print("  no findings from static checks")
         print("  reminder: static checks cannot see box-interior overflow or a"
               " \\toprule merged into a title bar — always view the renders.")
-    return 0 if score >= 80 else 1
+    # exit gate == the ship gate (>= 90), so `check_deck && deliver` is safe
+    return 0 if score >= 90 else 1
 
 
 if __name__ == "__main__":

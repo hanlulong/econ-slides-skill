@@ -61,7 +61,17 @@ def main() -> int:
                     help="padding in points around the bbox")
     args = ap.parse_args()
 
-    doc = fitz.open(args.pdf)
+    if not args.pdf.exists():
+        print(f"error: {args.pdf} not found", file=sys.stderr)
+        return 2
+    try:
+        doc = fitz.open(args.pdf)
+    except Exception as exc:
+        print(f"error: cannot open {args.pdf}: {exc}", file=sys.stderr)
+        return 2
+    if doc.needs_pass:
+        print(f"error: {args.pdf} is password-protected", file=sys.stderr)
+        return 2
     if not 1 <= args.page <= doc.page_count:
         print(f"error: page {args.page} out of range 1..{doc.page_count}",
               file=sys.stderr)
