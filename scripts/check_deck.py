@@ -35,7 +35,9 @@ except ImportError:  # pragma: no cover
     print("error: PyMuPDF missing — pip install pymupdf", file=sys.stderr)
     sys.exit(1)
 
-BULLET_GLYPHS = "•▪■◦‣–—⋆★✓✔"
+# NOTE: en/em dashes are deliberately NOT markers — they appear as empty
+# table cells ("---") and would false-positive the bullet checks.
+BULLET_GLYPHS = "•▪■◦‣⋆★✓✔"
 ARROW_GLYPHS = "⇒→↳"
 EDGE_MARGIN_PT = 6        # text closer than this to the paper edge = overflow
 TITLE_ZONE = 0.18         # top fraction of the page that can hold the title
@@ -44,6 +46,16 @@ MAX_TEXT_LINES = 15       # more = a wall of text
 
 DEDUCT = {"edge-overflow": 15, "wrapped-title": 10, "wrapped-bullet": 4,
           "density": 3, "overfull": 5, "pause-chain": 2}
+
+
+MATH_FONT_RE = re.compile(r"CMMI|CMSY|CMEX|MSBM|MSAM|Math|rsfs", re.I)
+ENUM_MARKER_RE = re.compile(r"^\d{1,2}\.$")
+
+
+def _is_marker_token(token: str) -> bool:
+    """A span/line head that is a list marker: bullet glyph, arrow, or '1.'."""
+    return (bool(token) and token[0] in BULLET_GLYPHS + ARROW_GLYPHS) \
+        or bool(ENUM_MARKER_RE.match(token))
 
 
 def page_lines(page: fitz.Page) -> list[dict]:
@@ -62,9 +74,10 @@ def page_lines(page: fitz.Page) -> list[dict]:
             lines.append({
                 "text": text, "bbox": fitz.Rect(line["bbox"]),
                 "size": max(s["size"] for s in spans),
+                "math": any(MATH_FONT_RE.search(s["font"]) for s in spans),
                 "x_text": next((fitz.Rect(s["bbox"]).x0 for s in spans
                                 if s["text"].strip()
-                                and s["text"].strip()[0] not in BULLET_GLYPHS + ARROW_GLYPHS),
+                                and not _is_marker_token(s["text"].strip())),
                                fitz.Rect(spans[0]["bbox"]).x0),
             })
     lines.sort(key=lambda l: (l["bbox"].y0, l["bbox"].x0))
@@ -72,8 +85,18 @@ def page_lines(page: fitz.Page) -> list[dict]:
 
 
 def is_marker_line(line: dict) -> bool:
+    """A line that starts a list item: bullet/arrow glyph or a '1.' label.
+
+    The glyph may extract with or without a following space, so no separator
+    is required. Dashes are not in the glyph set (see note above), which is
+    what keeps '---' table cells out of the bullet checks.
+    """
     head = line["text"].lstrip()
-    return bool(head) and head[0] in BULLET_GLYPHS + ARROW_GLYPHS
+    if not head:
+        return False
+    if head[0] in BULLET_GLYPHS + ARROW_GLYPHS:
+        return True
+    return bool(re.match(r"^\d{1,2}\.(\s|$)", head))
 
 
 def has_table_rules(page: fitz.Page) -> bool:
@@ -136,8 +159,12 @@ def check_page(page: fitz.Page, pno: int, footer_zone: float = 0.93) -> list[dic
                                  "detail": f"bullet wraps: {l['text'][:60]!r}"})
                 break
 
-    # exhibit slides (a booktabs table on the page) get a larger line budget
-    if len(body) > MAX_TEXT_LINES and not has_table_rules(page):
+    # exhibit slides get a larger line budget: booktabs tables (drawn rules)
+    # and math-heavy slides (display equations fragment into many "lines" —
+    # every \underbrace label and shifted baseline counts separately)
+    math_share = sum(1 for l in body if l["math"]) / max(1, len(body))
+    if len(body) > MAX_TEXT_LINES and not has_table_rules(page) \
+            and math_share < 0.25:
         findings.append({"check": "density", "page": pno,
                          "detail": f"{len(body)} text lines (max {MAX_TEXT_LINES})"})
     return findings

@@ -64,6 +64,12 @@ pre-run the results tables (Cochrane's objection is to the long preview).
 
 ### Short conference talk (12–20 min)
 
+- The ten-step spine at one frame each already overfills a 15-minute
+  budget. Merge to fit: motivation and question into one frame; policy
+  implications into the conclusion; data to one frame or a single bullet
+  on the design slide. A typical 15-minute deck: motivation+question,
+  this-paper, data, design, main result, mechanism, conclusion — seven
+  content frames plus appendix.
 - Choose **model OR results**; the loser gets one slide (Evans).
 - Cut in this order when over budget: literature → data minutiae →
   summary stats → theory (assumptions + predictions only) → robustness →

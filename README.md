@@ -24,6 +24,16 @@
 3. **Slide tables are not paper tables.** Regression tables are rebuilt: key rows only, controls collapsed to indicator lines, the load-bearing column highlighted, the economic magnitude translated ("one SD ⇒ 0.7%") under the exhibit.
 4. **A real verification loop.** `compile_deck.py` compiles and triages errors; `check_deck.py` measures the rendered pages (edge overflow, wrapped titles and bullets, bullet density, overlay abuse) and scores the deck — it ships at ≥ 90 plus a page-by-page visual pass.
 
+## See it
+
+Two slides from the [sample deck](docs/sample-talk/) — a 15-minute conference talk built cold by an agent following `SKILL.md`, from a manuscript PDF alone, finishing at a verification score of 100:
+
+| The punchline slide | A surgically rebuilt table |
+|---|---|
+| ![Punchline slide: numbered contributions with the key magnitude highlighted](docs/images/sample-punchline.png) | ![Main-result slide: rebuilt regression table with highlighted column, embedded interpretation row, and magnitude takeaway](docs/images/sample-mainresult.png) |
+
+**[Browse the full sample deck →](docs/sample-talk/)** — PDF, LaTeX source, and the structure plan the skill wrote before drafting. (The underlying manuscript is the fictional demonstration paper from [econ-paper-review-skill](https://github.com/hanlulong/econ-paper-review-skill); see the sample's [provenance notes](docs/sample-talk/README.md).)
+
 ## Install
 
 Requires Python 3.10+, a TeX distribution with XeLaTeX (TeX Live / MacTeX / MiKTeX), and PyMuPDF (`pip install pymupdf`).
@@ -93,6 +103,7 @@ templates/               paper-talk.tex and discussion.tex starting points
 scripts/
   compile_deck.py        XeLaTeX compile loop with error triage
   check_deck.py          geometry-measured layout audit with a numeric score
+  crop_figure.py         crop a paper figure for slide use (when no source exists)
 tests/                   interface test (all themes) + a deliberately broken deck
 ```
 

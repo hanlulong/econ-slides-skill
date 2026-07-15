@@ -12,7 +12,7 @@
 %   colors   cAccentA cAccentB cAccentC cAccentD cHighlight cGood cBad
 %   macros   \KeyIdea{...} \Takeaway{...} \graycite{...} \Et
 %   nav      \PlaceNav{...} \PlaceNavShift{<xshift>}{...} \BackButton{<label>}
-%   frames   \ResultBox[title]{...} (environment) \AppendixStart
+%   frames   \begin{ResultBox}[title] ... \end{ResultBox} and \AppendixStart
 %
 % Part of econ-slides (https://github.com/hanlulong/econ-slides-skill). MIT.
 
@@ -44,6 +44,11 @@
 \setbeamercolor{frametitle}{fg=black}
 \setbeamerfont{framesubtitle}{size=\small, shape=\itshape}
 \setbeamercolor{framesubtitle}{fg=black!70}
+\setbeamercolor{title}{fg=black}
+\setbeamercolor{subtitle}{fg=black!70}
+\setbeamercolor{author}{fg=black}
+\setbeamercolor{institute}{fg=black!70}
+\setbeamercolor{date}{fg=black!70}
 
 % ---- Okabe-Ito colorblind-safe palette (assign ONE color per recurring concept) ----
 \definecolor{cAccentA}{HTML}{0072B2}   % blue

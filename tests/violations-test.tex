@@ -40,4 +40,26 @@
   \end{itemize}
 \end{frame}
 
+% VIOLATION 5: wrapped enumerate item (the punchline-slide failure mode)
+\begin{frame}{Wrapped numbered contribution}
+  \begin{enumerate}
+    \item This numbered contribution rambles through clause after clause after clause until it cannot fit on one line and wraps
+    \item Short item
+  \end{enumerate}
+\end{frame}
+
+% NON-VIOLATION: an em-dash filling an empty table cell must NOT be flagged
+% as a bullet (false-positive regression test)
+\begin{frame}{Em-dash table cell is not a bullet}
+  \centering
+  \begin{tabular}{lcc}
+    \toprule
+    & (1) & (2) \\
+    \midrule
+    Effect & 0.12 & --- \\
+    Control mean & --- & 0.48 \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
 \end{document}

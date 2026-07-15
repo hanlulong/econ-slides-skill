@@ -51,11 +51,25 @@ block intact. The deck never changes.
   so numbering starts at the first content slide. Disclaimer footnote on
   the title frame when the employer requires one.
 - Appendix: `\AppendixStart` (divider, numbering switches to A1, A2, …,
-  main total freezes). Main-deck buttons jump forward:
-  `\PlaceNav{\hyperlink{app:robust}{\beamergotobutton{Robustness}}}`;
-  each appendix frame sets `\hypertarget{app:robust}{}` and a
-  `\BackButton{app:robust}`. Every button's target must exist — cutting
-  frames orphans links; the compile log lists undefined references.
+  main total freezes). Navigation is a **pair of targets** — the Back
+  button must point at the *main* slide, not at the appendix frame it sits
+  on (a `\BackButton{app:X}` next to `\hypertarget{app:X}` is a dead
+  self-link):
+
+  ```latex
+  % main slide
+  \hypertarget{main:robust}{}%
+  \PlaceNav{\hyperlink{app:robust}{\beamergotobutton{Robustness}}}
+  % appendix slide
+  \hypertarget{app:robust}{}%
+  ...
+  \BackButton{main:robust}
+  ```
+
+  Two buttons on one frame share a single `\PlaceNav` node:
+  `\PlaceNav{\hyperlink{app:a}{\beamergotobutton{Placebo}}\;\hyperlink{app:b}{\beamergotobutton{By cohort}}}`
+  (stacked `\PlaceNav` calls overprint). Every button's target must exist —
+  cutting frames orphans links; the compile log lists undefined references.
 
 ## Build and check
 

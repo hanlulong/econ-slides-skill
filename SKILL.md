@@ -97,7 +97,9 @@ Build the slide plan from `references/talk-structures.md`: slide budget from
 the clock (≈1.5–2 min per content slide), the genre arc, what goes to the
 appendix. Present the plan as a numbered list of frame titles (the
 assertions, not placeholders) with the exhibit each frame carries. Get the
-user's sign-off — this is the cheapest moment to change course.
+user's sign-off — this is the cheapest moment to change course. Running
+non-interactively? Write the plan to `structure-plan.md` beside the deck
+and proceed; the user reviews it with the delivery.
 
 ### Phase 3 — Draft
 

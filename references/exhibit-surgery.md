@@ -43,7 +43,9 @@ Procedure, in order:
    `\resizebox{0.7–0.8\textwidth}{!}{...}`. Font floor: if the resize drops
    below `\scriptsize` legibility, the table is too wide — cut columns.
 
-Pattern (matches `tests/interface-test.tex`):
+Pattern — **every value below is illustrative fiction. Copying any number
+from this snippet into a real deck is fabrication**; replace all of them
+from the user's paper and keep the provenance comments:
 
 ```latex
 \resizebox{0.72\textwidth}{!}{%
@@ -79,9 +81,16 @@ Pattern (matches `tests/interface-test.tex`):
   slide concept colors** (same Okabe–Ito hex values — this is the single
   strongest professional signal the skill produces). Keep a
   `figures-slides/` directory separate from the paper's figures.
-- No source to rebuild from → crop tightly and include the paper figure at
-  `width=0.9\textwidth, keepaspectratio`; if its internal text is illegible
-  at that size, it does not go on the slide.
+- No source to rebuild from → crop tightly with
+  `scripts/crop_figure.py` (`--list` finds candidate regions, `--bbox`
+  crops at 300 DPI) and include at `width=0.9\textwidth, keepaspectratio`;
+  if its internal text is illegible at that size, it does not go on the
+  slide.
+- An included paper figure keeps its own colors, so the slide↔figure color
+  contract cannot hold for it. Do not fight it: if the figure's palette is
+  close to a theme accent, adopt that accent for the concept in the text;
+  otherwise drop concept-coloring for that concept rather than color the
+  word one hue and the line another.
 - One figure per frame, centered; panels labeled `A.`/`B.` only if both
   panels are discussed. Wide figures: `\makebox[\textwidth][c]{...}`.
 - Every figure slide: assertion title, `\framesubtitle` with the precise

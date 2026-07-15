@@ -1,0 +1,295 @@
+% Broadband Expansion and Small-Firm Productivity — 15-min conference talk.
+% Built with the econ-slides skill, house theme. Results-focused short cut.
+% Compile: python3 <skill>/scripts/compile_deck.py conference-15min.tex --build-dir build
+%
+% Number provenance: every figure on a slide is tagged to the source paper
+% (Lindqvist & Berg, July 2026) at its point of use. The headline effect is
+% 3.4% = coefficient 0.034 (Table 2, col 1); the abstract's "34 percent" is a
+% typo in the source and is not used.
+\documentclass[11pt, aspectratio=169]{beamer}
+\usepackage{econ-slides-house}   % the only line a theme swap changes
+
+\newcommand{\TODO}[1]{\textcolor{cAccentB}{\textbf{TODO: #1}}}
+
+% Concept colors, held for the whole talk:
+%   cAccentA (blue) = broadband / treatment effect (beta)
+%   cAccentC (teal) = communication intensity / mechanism (gamma)
+
+\title{Broadband expansion raises small-firm productivity by 3.4 percent}
+\subtitle{Evidence from a staggered municipal fiber rollout}
+\author{Astrid Lindqvist \and Tomas Berg}
+\date{Conference talk, July 2026}
+
+\begin{document}
+
+% ---- Title (plain, de-counted) ----
+\begin{frame}[plain]
+  \titlepage
+  \vfill\centering\scriptsize\textit{Demonstration deck; setting and data are simulated.}
+\end{frame}
+\addtocounter{framenumber}{-1}
+
+% ==== 1. Motivation: the policy question, no exhibit ====
+\begin{frame}{Digital infrastructure could close the small-firm productivity gap}
+  \begin{itemize}
+    \item Small firms employ most workers but modernize last
+          \graycite{(Syverson '11)}   % Intro, p.1
+    \item Fast internet could raise their productivity at low fiscal cost
+    \item[$\Rightarrow$] Yet no causal estimate exists for the firms that need it most
+  \end{itemize}
+\end{frame}
+
+% ==== 2. Question: stated as economics, antecedents as gray citations ====
+\begin{frame}{Existing work has bypassed the small-firm segment}
+  \begin{itemize}
+    \item Broadband's effect is measured in aggregate, not for small firms
+    \item Adoption is endogenous to a firm's own prospects
+    \item[$\Rightarrow$] We exploit access timing that firms did not choose
+  \end{itemize}
+  \medskip
+  \graycite{Prior work: Czernich et al.\ '13; Akerman et al.\ '15; Hjort--Poulsen '19}  % Intro/Lit, p.2, p.4
+\end{frame}
+
+% ==== 3. This paper: THE PUNCHLINE SLIDE (lands by slide 4) ====
+\begin{frame}{This paper}
+  \begin{enumerate}
+    \item First causal small-firm estimate: productivity rises \KeyIdea{3.4\%} (0.034)   % Table 2 col 1, p.7
+    \item Gains rise with communication intensity, as a simple model predicts   % Table 4, p.9; Prop 1, p.3
+    \item Back-of-the-envelope: the program repaid its cost within six years   % Sec 7, p.8-9
+  \end{enumerate}
+  \medskip
+  \textbf{Implication:} universal broadband is among the cheapest productivity
+  policies for a small open economy.
+\end{frame}
+
+% ==== 4. Setting and data ====
+\begin{frame}{Setting and data}
+  \hypertarget{main:data}{}
+  \begin{itemize}
+    \item \RunIn{Program:} all 284 municipalities wired to fiber, 2011--2018   % Sec 4.1, p.4; Fig 1
+    \item \RunIn{Panel:} 9,400 firms with 3--49 employees, 2008--2019
+          (112,800 firm-years)   % Sec 4.2, p.5
+    \item \RunIn{Outcome:} log real value added per worker   % Sec 4.2, p.5
+    \item \RunIn{Intensity:} 2008 wage-bill share of communication tasks, fixed pre-program   % Sec 4.2, p.5
+  \end{itemize}
+  \PlaceNav{\hyperlink{app:sumstats}{\beamergotobutton{Summary stats}}}
+\end{frame}
+
+% ==== 5. Design: staggered rollout as the identifying variation ====
+\begin{frame}{Fiber reached towns one at a time, on a fixed schedule}
+  \hypertarget{main:design}{}
+  \framesubtitle{Rollout order was fixed by the 2010 Act, before firms' outcomes were realized}
+  \centering
+  % No figure source available -> paper's Figure 1 cropped from the PDF (p.5).
+  \includegraphics[width=0.76\textwidth, keepaspectratio]{figures-slides/fig1_rollout.png}
+  \Takeaway{Scoring favored high-potential towns, yet a permuted-year placebo is a precise zero (Table 3).}  % Sec 4.1 p.4; Table 3 p.8
+  \PlaceNav{\hyperlink{app:placebo}{\beamergotobutton{Placebo}}\;%
+            \hyperlink{app:cohorts}{\beamergotobutton{By cohort}}}
+\end{frame}
+
+% ==== 6. Main result: the event-study figure (the workhorse) ====
+\begin{frame}{Productivity is flat before arrival, then climbs steadily}
+  \hypertarget{main:results}{}
+  \framesubtitle{Coefficients relative to the year before arrival; 95\% CIs, firm-clustered}
+  \centering
+  % No figure source available -> paper's Figure 2 cropped from the PDF (p.7).
+  \includegraphics[width=0.72\textwidth, keepaspectratio]{figures-slides/fig2_eventstudy.png}
+  \Takeaway{No pre-trends; the average post-arrival gain is 3.4\% (Table 2, col 1).}  % Fig 2 p.7; Table 2 p.7
+  \PlaceNav{\hyperlink{app:baseline}{\beamergotobutton{DiD table}}\;%
+            \hyperlink{app:robust}{\beamergotobutton{Robustness}}}
+\end{frame}
+
+% ==== 7. Mechanism: the communication channel (model's one main-line slide) ====
+\begin{frame}{Gains concentrate in communication-intensive firms}
+  \hypertarget{main:mech}{}
+  \framesubtitle{A task-outsourcing model predicts the effect rises with communication intensity (Prop.\ 1)}
+  \centering
+  \resizebox{0.66\textwidth}{!}{%
+  \begin{threeparttable}
+    \begin{tabular}{lcc}
+      \toprule
+      Dep.\ var.: log labor productivity & (1) Average & \textcolor{cAccentC}{(2) + Interaction} \\
+      \midrule
+      Broadband                          & 0.034*** & \textcolor{cAccentC}{0.020***} \\   % Table 4: col(2), col(1), p.9
+                                         & (0.002)  & \textcolor{cAccentC}{(0.003)} \\
+      Broadband $\times$ comm.\ intensity &  & \textcolor{cAccentC}{\textbf{0.032***}} \\  % Table 4 col(1), p.9; empty cell (not in col 1)
+                                         &     & \textcolor{cAccentC}{(0.005)} \\
+      \midrule
+      Firm and year fixed effects        & Yes & Yes \\
+      Observations                       & 112{,}800 & 112{,}800 \\   % Table 4, p.9
+      \multicolumn{3}{l}{\textcolor{cAccentC}{\footnotesize Interaction is positive and precise $\Rightarrow$ the model's complementarity holds.}} \\
+      \bottomrule
+    \end{tabular}
+    \begin{tablenotes}\footnotesize
+      \item SEs clustered by firm. *** $p<0.01$. Communication intensity is the 2008 wage-bill share.
+    \end{tablenotes}
+  \end{threeparttable}}
+  \Takeaway{A firm one SD above mean intensity gains about one-fifth more than the average firm.}  % Sec 6.3, p.8
+  \PlaceNav{\hyperlink{app:model}{\beamergotobutton{Model}}}
+\end{frame}
+
+% ==== 8. Policy magnitude: the third contribution ====
+\begin{frame}{The program paid for itself within six years}
+  \begin{ResultBox}[Policy return]
+    A 3.4\% productivity gain for the average connected small firm is worth about
+    \KeyIdea{410 million euros a year}. Against the fund's 2.3 billion euro
+    construction cost, the small-firm channel alone repays the public investment
+    within six years.
+  \end{ResultBox}   % Sec 7, p.8-9
+  \medskip
+  \RunIn{Scope:} the mechanism is communication cost, not a Nordavian
+  particularity, so the logic travels to other broadband programs.   % Conclusion, p.9
+\end{frame}
+
+% ==== 9. Conclusion: mirrors "This paper" ====
+\begin{frame}{Conclusion}
+  \begin{enumerate}
+    \item Broadband arrival raises small-firm labor productivity by \KeyIdea{3.4\%}   % Table 2 col 1, p.7
+    \item Gains concentrate where firms rely on communication-intensive tasks
+    \item The program repaid its cost within six years
+  \end{enumerate}
+  \medskip
+  \textbf{Implication:} universal broadband is among the cheapest productivity
+  policies for a small open economy.
+\end{frame}
+% No "Thank you / Questions?" slide — end on the takeaway.
+
+% =================== Appendix ===================
+\AppendixStart
+
+% A1 — Summary statistics (Table 1). Mean/SD/N only: the source Table 1 lists an
+% Employees Max of 19 below its Mean of 23.4 (a typo); Min/Max are dropped rather
+% than reproduce or "fix" a number. Standard slide practice shows mean/SD anyway.
+\begin{frame}{Summary statistics}
+  \hypertarget{app:sumstats}{}
+  \centering
+  \resizebox{0.62\textwidth}{!}{%
+  \begin{threeparttable}
+    \begin{tabular}{lccc}
+      \toprule
+                                    & Mean & SD & N \\
+      \midrule
+      Log labor productivity        & 0.10  & 0.46 & 112{,}800 \\   % Table 1, p.5
+      Employees                     & 23.40 & 7.31 & 112{,}800 \\
+      Firm age                      & 21.45 & 9.56 & 112{,}800 \\
+      Communication intensity       & 0.42  & 0.20 & 112{,}800 \\
+      ICT investment (log)          & 0.37  & 0.36 & 112{,}800 \\
+      \bottomrule
+    \end{tabular}
+    \begin{tablenotes}\footnotesize
+      \item Firm-year observations, 2008--2019. Balanced panel of 9,400 firms.
+    \end{tablenotes}
+  \end{threeparttable}}
+  \BackButton{main:data}
+\end{frame}
+
+% A2 — Model and estimating equation
+\begin{frame}{Model and estimating equation}
+  \hypertarget{app:model}{}
+  A task-outsourcing model delivers the estimating equation   % Sec 2.2, eq (5), p.3
+  \[
+    y_{it}-\ell_{it} = \alpha_i + \lambda_t
+      + \underbrace{\beta\, B_{mt}}_{\textcolor{cAccentA}{\text{average effect}}}
+      + \underbrace{\gamma\,(B_{mt}\times\theta_i)}_{\textcolor{cAccentC}{\text{complementarity}}}
+      + \varepsilon_{it},
+  \]
+  with $B_{mt}$ a connected-municipality flag and $\theta_i$ communication intensity.
+  \medskip
+  \begin{ResultBox}[Proposition 1]
+    The gain is strictly increasing in communication intensity: $G'(\theta_i) > 0$ on $[0,1]$.   % Prop 1, p.3
+  \end{ResultBox}
+  \BackButton{main:mech}
+\end{frame}
+
+% A3 — Baseline difference-in-differences table (Table 2, all four columns)
+\begin{frame}{Baseline difference-in-differences estimates}
+  \hypertarget{app:baseline}{}
+  \centering
+  \resizebox{0.82\textwidth}{!}{%
+  \begin{threeparttable}
+    \begin{tabular}{lcccc}
+      \toprule
+      Dep.\ var.: log labor productivity
+        & \textcolor{cAccentA}{(1) Baseline} & (2) Firm controls & (3) Region trends & (4) Muni.\ cluster \\
+      \midrule
+      Broadband            & \textcolor{cAccentA}{\textbf{0.034***}} & 0.033*** & 0.030*** & 0.034*** \\  % Table 2, p.7
+                           & \textcolor{cAccentA}{(0.002)} & (0.002) & (0.002) & (0.003) \\
+      ICT investment (log) &  & 0.000 & & \\   % Table 2 col 2, p.7
+                           &  & (0.002) & & \\
+      \midrule
+      Firm and year fixed effects & Yes & Yes & Yes & Yes \\
+      Observations         & 112{,}800 & 112{,}800 & 112{,}800 & 112{,}800 \\
+      \bottomrule
+    \end{tabular}
+    \begin{tablenotes}\footnotesize
+      \item SEs clustered by firm, except col.\ (4) by municipality. *** $p<0.01$.
+    \end{tablenotes}
+  \end{threeparttable}}
+  \Takeaway{The 3.4\% effect is stable across controls, trends, and clustering.}
+  \BackButton{main:results}
+\end{frame}
+
+% A4 — Robustness (Table 5)
+\begin{frame}{Robustness}
+  \hypertarget{app:robust}{}
+  \centering
+  \resizebox{0.72\textwidth}{!}{%
+  \begin{threeparttable}
+    \begin{tabular}{lccc}
+      \toprule
+      Dep.\ var.: log labor productivity & (1) Region trends & (2) No controls & (3) Drop 2011--12 cohorts \\
+      \midrule
+      Broadband & 0.030*** & 0.034*** & 0.037*** \\   % Table 5, p.9
+                & (0.002)  & (0.002)  & (0.002) \\
+      \bottomrule
+    \end{tabular}
+    \begin{tablenotes}\footnotesize
+      \item All columns include firm and year fixed effects. SEs clustered by firm. *** $p<0.01$.
+    \end{tablenotes}
+  \end{threeparttable}}
+  \Takeaway{Dropping the potentially non-random early cohorts nudges the estimate up, not down.}  % Sec 6.4, p.8
+  \BackButton{main:results}
+\end{frame}
+
+% A5 — Placebo with permuted rollout years (Table 3)
+\begin{frame}{Placebo: permuted rollout years}
+  \hypertarget{app:placebo}{}
+  \centering
+  \resizebox{0.6\textwidth}{!}{%
+  \begin{threeparttable}
+    \begin{tabular}{lc}
+      \toprule
+      Dep.\ var.: log labor productivity & Pre-period placebo \\
+      \midrule
+      Placebo broadband (permuted years) & $-0.004$ (0.002) \\   % Table 3, p.8
+      \bottomrule
+    \end{tabular}
+    \begin{tablenotes}\footnotesize
+      \item Pre-treatment sample. SEs clustered by firm.
+    \end{tablenotes}
+  \end{threeparttable}}
+  \Takeaway{A precisely estimated zero: the design recovers a program effect, not a trend.}  % Sec 6.2, p.7
+  \BackButton{main:design}
+\end{frame}
+
+% A6 — Effects by rollout cohort (Figure 3)
+\begin{frame}{Effects are similar across rollout cohorts}
+  \hypertarget{app:cohorts}{}
+  \framesubtitle{Each bar is a separate estimate vs.\ towns connected at least three years later; 95\% CIs}
+  \centering
+  % No figure source -> paper's Figure 3 cropped from the PDF (p.8).
+  \includegraphics[width=0.66\textwidth, keepaspectratio]{figures-slides/fig3_cohorts.png}
+  \Takeaway{Positive for every cohort, so negative weighting is not driving the result.}  % Sec 6.2, p.7
+  \BackButton{main:design}
+\end{frame}
+
+% A7 — Related literature (deploy only if asked; no inbound button)
+\begin{frame}{Related literature}
+  \begin{itemize}
+    \item \RunIn{Broadband:} Czernich et al.\ '13; Akerman et al.\ '15; Hjort--Poulsen '19   % Lit, p.4
+    \item \RunIn{Staggered DiD:} Goodman-Bacon '21; Callaway--Sant'Anna '21; Sun--Abraham '21   % Lit, p.4
+    \item \RunIn{Inference:} Bertrand et al.\ '04; Cameron--Miller '15; Abadie et al.\ '23   % Lit, p.4
+  \end{itemize}
+\end{frame}
+
+\end{document}
