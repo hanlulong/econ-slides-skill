@@ -503,7 +503,8 @@ def check_tex(tex_path: Path) -> list[dict]:
         static_match = re.search(
             r"\\includegraphics\b|\\begin\s*\{(?:tabular|tabularx|longtable|axis|tikzpicture)\}",
             frame_src)
-        reading_match = re.search(r"\\Takeaway(?:WithNav)?\s*\{", frame_src)
+        reading_match = re.search(
+            r"\\Takeaway(?:WithNav)?(?:\s*\[[^\]]+\])?\s*\{", frame_src)
         semantic_build = bool(re.search(
             r"\\(?:only|uncover|visible|onslide)\s*<|\\begin\s*\{overlayarea\}",
             frame_src))

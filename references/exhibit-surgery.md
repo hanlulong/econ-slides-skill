@@ -80,7 +80,11 @@ Procedure, in order:
    visually tight to the table. Then leave a distinct bounded gap before the
    normal-body interpretation. The note documents the exhibit; the reading
    tells the audience why it matters. In the bundled themes,
-   `\Takeaway{}` owns this configurable `\ExhibitReadingGap`.
+   `\Takeaway{}` owns this configurable `\ExhibitReadingGap`. After the final
+   render shows surplus room, use the local roomy form
+   `\Takeaway[\ExhibitReadingGapRoomy]{...}` or
+   `\TakeawayWithNav[\ExhibitReadingGapRoomy]{...}`. Keep the ordinary default
+   on tighter frames; never enlarge the global gap to fix one sparse slide.
 
 Pattern — **every value below is illustrative fiction. Copying any number
 from this snippet into a real deck is fabrication**; replace all of them
@@ -180,7 +184,8 @@ For every new figure, record beside the slide plan:
 - **`\Takeaway` and `\PlaceNav` share the bottom of the frame** — a long
   centered takeaway runs under the bottom-right pills. When a frame has nav,
   use `\TakeawayWithNav{...}`, which reserves that lane. The checker flags
-  button-text collisions, but eyeball it.
+  button-text collisions, but eyeball it. Its optional first argument changes
+  only the exhibit-to-reading gap; it does not change the reserved nav lane.
 - Prefer the paper's existing main-result figure when it communicates the
   finding well. Do not manufacture a coefficient plot from a table solely to
   satisfy a figures-over-tables preference; a small native slide table may be

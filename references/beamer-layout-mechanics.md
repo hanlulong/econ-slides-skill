@@ -62,12 +62,18 @@ not predict the visual result.
 4. Use bounded spacing (`\smallskip`, `\medskip`, a scoped `\vspace{...}`, or
    list `\itemsep`) between ordinary idea groups. Use `\vfill` only when the
    resulting anchor is intentional under both one-line and two-line variants.
+   When a text frame has surplus room, enlarge gaps by hierarchy: distinct
+   claim groups first, then parent-to-support and sibling-support gaps by a
+   smaller amount. Keep nested support attached to its claim and make the
+   change locally, not through global list defaults.
 5. Put a table/figure reading directly after the exhibit at normal body size.
    Keep a technical source or table note tight to the exhibit, then use a
    separate bounded gap before the reading so the audience does not mistake
    interpretation for fine print. The reading should state the insight,
    intuition, economic scale, interpretation, or decisive limitation. Put
-   navigation buttons in a separate lane below it.
+   navigation buttons in a separate lane below it. Bundled-theme decks may
+   use `\Takeaway[\ExhibitReadingGapRoomy]{...}` locally when the final render
+   has room; inherited decks use their closest bounded local idiom.
 6. Compile after each structural change or coherent local batch. Render the
    affected pages to images and inspect them at presentation size. A shared
    macro change requires inspecting every use; the final pass covers the full

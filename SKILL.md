@@ -104,7 +104,9 @@ graph or an existing deck gives a better answer.
    repeats a coefficient already visible in the exhibit. Crop internal figure
    whitespace first, give a load-bearing exhibit enough scale and a bounded
    title-to-exhibit gap, keep source notes tight to the exhibit, and leave a
-   visibly distinct gap before the interpretation. Design and model schematics
+   visibly distinct gap before the interpretation. When the final render has
+   surplus room, enlarge that boundary locally rather than changing every
+   exhibit slide. Design and model schematics
    may pair with at most two reading bullets, but never a second exhibit.
 7. **Give the audience the answer as soon as it is intelligible.** In many
    short author talks, the punchline lands within the first few content slides
@@ -330,9 +332,16 @@ ordinary content slide, inspect the title-to-body gap, spacing between idea
 groups, and the lower edge of the final meaningful line or exhibit: avoid an
 accidental empty bottom band by enlarging the existing exhibit, redistributing
 spacing, deepening the same source-supported point, or merging a redundant
-slide. Deliberate whitespace on title, roadmap, and divider slides is fine.
-If the theme or TeX distribution is
-missing something, fix the environment first — never ship an uncompiled deck.
+slide. Before adding content to a roomy frame, run a bounded spacing pass:
+keep a claim and its nested support as one visual unit, add air first between
+distinct claim groups, then modestly within a group, and preserve a visibly
+larger between-group gap. Use local `\itemsep`, `\topsep`, bounded skips, or a
+local takeaway-gap option; never change global line spacing or add `\vfill`
+merely to consume the surplus. Re-render after each adjustment and stop before
+support looks detached or the final line competes with navigation. Deliberate
+whitespace on title, roadmap, and divider slides is fine. If the theme or TeX
+distribution is missing something, fix the environment first — never ship an
+uncompiled deck.
 
 ### Phase 4b — Speaker script (offered by default for new decks)
 

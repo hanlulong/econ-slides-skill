@@ -85,17 +85,21 @@
 % for a transient equation/build spotlight, not as an automatic punchline hue.
 \newcommand{\KeyIdea}[1]{\textcolor{esStructure}{\textbf{#1}}}
 % One plain-language reading under an exhibit.  The bullet makes the economic
-% interpretation visually distinct from a caption or table note.
+% interpretation visually distinct from a caption or table note.  An optional
+% first argument changes the gap locally on a roomy frame, without changing
+% every exhibit slide: \Takeaway[\ExhibitReadingGapRoomy]{...}.
 \newlength{\ExhibitReadingGap}
 \setlength{\ExhibitReadingGap}{0.72em}
-\newcommand{\Takeaway}[1]{\par\vspace{\ExhibitReadingGap}\noindent
+\newlength{\ExhibitReadingGapRoomy}
+\setlength{\ExhibitReadingGapRoomy}{1.18em}
+\newcommand{\Takeaway}[2][\ExhibitReadingGap]{\par\vspace{#1}\noindent
   \begin{minipage}{\textwidth}\raggedright\normalsize
-    \leavevmode\textcolor{esStructure}{\raise0.7pt\hbox{\scriptsize$\bullet$}}\hspace{0.55em}#1
+    \leavevmode\textcolor{esStructure}{\raise0.7pt\hbox{\scriptsize$\bullet$}}\hspace{0.55em}#2
   \end{minipage}\par}
 % Variant reserving the bottom-right lane for navigation pills.
-\newcommand{\TakeawayWithNav}[1]{\par\vspace{\ExhibitReadingGap}\noindent
+\newcommand{\TakeawayWithNav}[2][\ExhibitReadingGap]{\par\vspace{#1}\noindent
   \begin{minipage}{\textwidth}\raggedright\normalsize
-    \leavevmode\textcolor{esStructure}{\raise0.7pt\hbox{\scriptsize$\bullet$}}\hspace{0.55em}#1
+    \leavevmode\textcolor{esStructure}{\raise0.7pt\hbox{\scriptsize$\bullet$}}\hspace{0.55em}#2
   \end{minipage}\par\vspace{0.34cm}}
 % Gray inline citations: {\graycite{(Autor '13; Hjort-Poulsen '19)}}
 \newcommand{\graycite}[1]{{\color{gray}\scriptsize #1}}

@@ -224,6 +224,7 @@ themes = [Path(path).read_text() for path in (
     "themes/econ-slides-boxed.sty",
     "themes/econ-slides-compat.sty",
 )]
+interface = Path("tests/interface-test.tex").read_text()
 
 assert r"\title[\PaperShortTitle]{\PaperTitle}" in paper
 assert r"\newcommand{\PaperTitle}{[Exact paper title]}" in results
@@ -248,6 +249,12 @@ assert "economic question" not in paper.lower()
 assert "economic question" not in script.lower()
 assert all(r"\newcommand{\KeyIdea}[1]{\textcolor{cHighlight}" not in src
            for src in themes)
+assert all(r"\newlength{\ExhibitReadingGapRoomy}" in src for src in themes)
+assert all(r"\newcommand{\Takeaway}[2][\ExhibitReadingGap]" in src
+           for src in themes)
+assert all(r"\newcommand{\TakeawayWithNav}[2][\ExhibitReadingGap]" in src
+           for src in themes)
+assert r"\TakeawayWithNav[\ExhibitReadingGapRoomy]" in interface
 punch = paper.split(r"\begin{frame}{This paper}", 1)[1].split(
     r"\end{frame}", 1)[0]
 close = paper.split(r"\begin{frame}{Conclusion}", 1)[1].split(

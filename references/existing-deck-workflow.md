@@ -238,6 +238,10 @@ stretchable glue, move an exhibit, and collide with a footer or button.
 
 - Use bounded spacing such as `\smallskip`, `\medskip`, a scoped
   `\vspace{...}`, or local `\itemsep` between ordinary idea groups.
+- If the final render has surplus room, increase spacing by hierarchy: first
+  between distinct claim groups, then by a smaller amount between each claim
+  and its support. Preserve the deck's local idiom and keep nested support
+  visibly attached; do not change global list defaults for one roomy frame.
 - Use `\vfill` only for a deliberately anchored object whose position remains
   appropriate when nearby text gains or loses a line. Do not use it as a
   generic separator or to strand an exhibit reading at the bottom.

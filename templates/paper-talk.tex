@@ -63,19 +63,22 @@
 \begin{frame}{This paper}
   \medskip
   [One framing line: setting, sample, units, and period.]
-  \begin{enumerate}\setlength{\itemsep}{0.78em}
+  \bigskip
+  \begin{enumerate}\setlength{\itemsep}{1.0em}
     \item \KeyIdea{[Main result.]} \ResultHeadlineSlide
-      \begin{itemize}
+      \vspace{0.14em}
+      \begin{itemize}\setlength{\itemsep}{0.38em}
         \item {[Economic meaning in one plain-language line]}
       \end{itemize}
     \item \textbf{[Supporting pattern.]} \ResultSupportSlide
-      \begin{itemize}
+      \vspace{0.14em}
+      \begin{itemize}\setlength{\itemsep}{0.38em}
         \item {[Why this pattern sharpens the interpretation]}
       \end{itemize}
     % Add a third item only when the emphasis ledger contains a genuinely
     % distinct second support. Do not create an equal-weight contribution slot.
   \end{enumerate}
-  \medskip
+  \bigskip
   \textbf{Implication:} \ResultImplicationSlide
 \end{frame}
 
@@ -144,7 +147,9 @@
   \framesubtitle{[Outcome, specification, sample, and uncertainty]}
   \centering
   \SourceExhibitPlaceholder{Main source figure or surgically rebuilt table}
-  \TakeawayWithNav{[Translate the load-bearing estimate into economic language.]}
+  % If the final render has extra room, use the optional local gap below;
+  % do not enlarge \ExhibitReadingGap globally for one sparse frame.
+  \TakeawayWithNav[\ExhibitReadingGapRoomy]{[Translate the load-bearing estimate into economic language.]}
   \hypertarget{main:robust}{}%
   \PlaceNav{\hyperlink{app:robust}{\beamergotobutton{Robustness}}\;\hyperlink{app:literature}{\beamergotobutton{Literature}}}
 \end{frame}

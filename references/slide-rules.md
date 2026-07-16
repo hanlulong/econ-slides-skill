@@ -99,6 +99,14 @@ a later slide. A qualification stays subordinate to the claim it qualifies.
   belongs to the bullet above it. Keep nested `itemize` compact, or use a
   direct `\RunIn{Interpretation:}` sentence after the parent, so the eye reads
   claim and explanation as one unit while wide gaps separate distinct ideas.
+- **Run a surplus-room spacing pass after the words are final.** When a frame
+  has extra vertical room, increase bounded spacing in this order: between
+  distinct claim groups; modestly between a parent claim and its nested
+  support; between sibling support lines; and before the final implication.
+  The within-claim gaps must remain visibly smaller than the between-claim
+  gaps. Adjust local `\itemsep`, `\topsep`, and bounded skips one small step at
+  a time, then re-render. Do not change global list defaults or line spacing,
+  and do not add `\vfill` to consume the surplus.
 - **Roadmaps use regular weight.** Their job is orientation, not emphasis. In
   a repeated seminar roadmap, gray inactive modules and leave the current
   module in ordinary black; do not bold every stop or enlarge the list merely

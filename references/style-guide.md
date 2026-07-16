@@ -20,12 +20,14 @@ For a new deck using a bundled theme, begin:
 ```
 
 Write new bundled-theme frames against the interface (`\AuthorAffil`,
-`\KeyIdea`, `\Takeaway`,
-`\TakeawayWithNav`, `\graycite`, `\RunIn`, `\PlaceNav`, `\BackButton`,
+`\KeyIdea`, `\Takeaway[gap]`,
+`\TakeawayWithNav[gap]`, `\graycite`, `\RunIn`, `\PlaceNav`, `\BackButton`,
 `ResultBox`, `\AppendixStart`,
 `cAccentA…D`) — never against theme internals or raw colors. Test a theme
 swap before delivery if the user is undecided: the deck must compile
-cleanly under all three.
+cleanly under all three. Omit the optional gap on ordinary exhibit frames;
+use `\ExhibitReadingGapRoomy` locally only when the final render has surplus
+space between a tight technical note and the normal-body interpretation.
 
 **Existing or institutional deck:** do not copy in a bundled theme or semantic
 interface merely to normalize the project. Follow

@@ -49,9 +49,9 @@ internals — that is what makes themes swappable.
 | `cHighlight` | Transient spotlight for one term during a build; not a generic punchline color |
 | `cGood` / `cBad` | Diagnostic aliases (teal / vermillion), mainly for discussions; avoid good/bad cards in author talks |
 | `\KeyIdea{...}` | Bold structure-colored hierarchy for at most one key phrase on a slide |
-| `\Takeaway{...}` | One normal-body-size bullet directly under a load-bearing exhibit: insight, intuition, economic scale, interpretation, or the decisive limit |
-| `\TakeawayWithNav{...}` | The same full-width reading plus bounded clearance for a separate bottom-right navigation lane |
-| `\ExhibitReadingGap` | Configurable bounded gap before `\Takeaway`; keep technical notes tight to the exhibit, then separate the economic reading |
+| `\Takeaway[gap]{...}` | One normal-body-size bullet directly under a load-bearing exhibit: insight, intuition, economic scale, interpretation, or the decisive limit; omit the optional local gap on ordinary frames |
+| `\TakeawayWithNav[gap]{...}` | The same full-width reading plus bounded clearance for a separate bottom-right navigation lane |
+| `\ExhibitReadingGap` / `\ExhibitReadingGapRoomy` | Default and roomy bounded gaps before a takeaway. Keep technical notes tight to the exhibit; use the roomy gap locally only after the final render shows surplus space |
 | `\graycite{...}` | Gray inline citations: `\graycite{(Autor '13; Hjort--Poulsen '19)}` |
 | `\RunIn{Label:}` | Bold run-in label for structured summaries (discussant decks) |
 | `\Et` | `\mathbb{E}_t` |

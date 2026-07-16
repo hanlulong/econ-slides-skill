@@ -81,13 +81,15 @@
 \newcommand{\KeyIdea}[1]{\textbf{#1}}
 \newlength{\ExhibitReadingGap}
 \setlength{\ExhibitReadingGap}{0.72em}
-\newcommand{\Takeaway}[1]{\par\vspace{\ExhibitReadingGap}\noindent
+\newlength{\ExhibitReadingGapRoomy}
+\setlength{\ExhibitReadingGapRoomy}{1.18em}
+\newcommand{\Takeaway}[2][\ExhibitReadingGap]{\par\vspace{#1}\noindent
   \begin{minipage}{\textwidth}\raggedright\normalsize
-    \leavevmode\textcolor{cAccentA}{\raise0.7pt\hbox{\scriptsize$\bullet$}}\hspace{0.55em}#1
+    \leavevmode\textcolor{cAccentA}{\raise0.7pt\hbox{\scriptsize$\bullet$}}\hspace{0.55em}#2
   \end{minipage}\par}
-\newcommand{\TakeawayWithNav}[1]{\par\vspace{\ExhibitReadingGap}\noindent
+\newcommand{\TakeawayWithNav}[2][\ExhibitReadingGap]{\par\vspace{#1}\noindent
   \begin{minipage}{\textwidth}\raggedright\normalsize
-    \leavevmode\textcolor{cAccentA}{\raise0.7pt\hbox{\scriptsize$\bullet$}}\hspace{0.55em}#1
+    \leavevmode\textcolor{cAccentA}{\raise0.7pt\hbox{\scriptsize$\bullet$}}\hspace{0.55em}#2
   \end{minipage}\par\vspace{0.34cm}}
 \newcommand{\graycite}[1]{{\color{gray}\scriptsize #1}}
 \newcommand{\Et}{\mathbb{E}_t}
