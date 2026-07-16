@@ -74,8 +74,19 @@
   }\hspace{1.2em}\vspace{0.8em}}
 
 % ---- Semantic interface ----
-\newcommand{\KeyIdea}[1]{\textcolor{cHighlight}{\textbf{#1}}}
-\newcommand{\Takeaway}[1]{\par\smallskip\centering\footnotesize\textit{#1}\par}
+\providecommand{\AuthorAffil}[2]{%
+  \begin{tabular}[t]{@{}c@{}}#1\\[-0.12em]{\scriptsize #2}\end{tabular}}
+\newcommand{\KeyIdea}[1]{\textcolor{esNavy}{\textbf{#1}}}
+\newlength{\ExhibitReadingGap}
+\setlength{\ExhibitReadingGap}{0.72em}
+\newcommand{\Takeaway}[1]{\par\vspace{\ExhibitReadingGap}\noindent
+  \begin{minipage}{\textwidth}\raggedright\normalsize
+    \leavevmode\textcolor{esNavy}{\raise0.7pt\hbox{\scriptsize$\bullet$}}\hspace{0.55em}#1
+  \end{minipage}\par}
+\newcommand{\TakeawayWithNav}[1]{\par\vspace{\ExhibitReadingGap}\noindent
+  \begin{minipage}{\textwidth}\raggedright\normalsize
+    \leavevmode\textcolor{esNavy}{\raise0.7pt\hbox{\scriptsize$\bullet$}}\hspace{0.55em}#1
+  \end{minipage}\par\vspace{0.34cm}}
 \newcommand{\graycite}[1]{{\color{gray}\scriptsize #1}}
 \newcommand{\Et}{\mathbb{E}_t}
 % Bold navy run-in label for structured summaries: \RunIn{Question:} ...

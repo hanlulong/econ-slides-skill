@@ -1,0 +1,25 @@
+% Four-author / four-institution title-page regression test.
+% Defaults to the house theme; run-tests swaps every bundled theme.
+\ifdefined\ecoslidestheme\else\def\ecoslidestheme{econ-slides-house}\fi
+\documentclass[11pt,aspectratio=169]{beamer}
+\usepackage{\ecoslidestheme}
+
+\title[Market power]{Trade Shocks and the Reallocation of Market Power}
+\author[Cheng et al.]{%
+  \begin{tabular}{@{}c@{\hspace{4.0em}}c@{}}
+    \AuthorAffil{Chuan-Han Cheng}{Cambridge University} &
+    \AuthorAffil{Giancarlo Corsetti}{EUI and CEPR} \\[1.15em]
+    \AuthorAffil{Meredith Crowley}{Cambridge University and CEPR} &
+    \AuthorAffil{Lu Han}{Bank of Canada and CEPR}
+  \end{tabular}}
+\institute{}
+\date{Research Workshop, July 2026}
+
+\begin{document}
+\begin{frame}[plain]
+  \titlepage
+  \vfill
+  \centering\scriptsize\textit{The views expressed are those of the authors
+  and not necessarily those of the Bank of Canada.}
+\end{frame}
+\end{document}

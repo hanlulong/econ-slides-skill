@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Crop a figure out of a paper PDF for slide use (when it can't be rebuilt).
+"""Crop a source figure from a paper PDF for faithful slide reuse.
 
 Usage:
     # 1. Find candidate figure regions on a page:
@@ -7,7 +7,7 @@ Usage:
 
     # 2. Crop one (coordinates in PDF points, from --list or a PDF viewer):
     python3 scripts/crop_figure.py paper.pdf --page 6 \
-        --bbox 72,150,540,420 --out figures-slides/fig2_eventstudy.png
+        --bbox 72,150,540,420 --out figures-slides/fig2_event_study.png
 
 Renders at 300 DPI so the crop stays legible when scaled to slide width.
 Requires PyMuPDF: pip install pymupdf
@@ -16,6 +16,7 @@ Requires PyMuPDF: pip install pymupdf
 from __future__ import annotations
 
 import argparse
+import math
 import sys
 from pathlib import Path
 
@@ -93,9 +94,29 @@ def main() -> int:
         print("error: --bbox and --out required (or use --list first)",
               file=sys.stderr)
         return 1
-    x0, y0, x1, y1 = (float(v) for v in args.bbox.split(","))
+    try:
+        values = [float(v.strip()) for v in args.bbox.split(",")]
+    except ValueError:
+        print("error: --bbox must contain four numeric values: x0,y0,x1,y1",
+              file=sys.stderr)
+        return 2
+    if len(values) != 4 or not all(math.isfinite(value) for value in values):
+        print("error: --bbox must contain four finite values: x0,y0,x1,y1",
+              file=sys.stderr)
+        return 2
+    x0, y0, x1, y1 = values
+    if x1 <= x0 or y1 <= y0:
+        print("error: --bbox requires x1 > x0 and y1 > y0", file=sys.stderr)
+        return 2
+    if args.dpi <= 0 or args.pad < 0:
+        print("error: --dpi must be positive and --pad cannot be negative",
+              file=sys.stderr)
+        return 2
     clip = fitz.Rect(x0 - args.pad, y0 - args.pad,
                      x1 + args.pad, y1 + args.pad) & page.rect
+    if clip.is_empty or clip.width <= 0 or clip.height <= 0:
+        print("error: --bbox does not overlap the requested page", file=sys.stderr)
+        return 2
     args.out.parent.mkdir(parents=True, exist_ok=True)
     mat = fitz.Matrix(args.dpi / 72, args.dpi / 72)
     page.get_pixmap(matrix=mat, clip=clip).save(args.out)

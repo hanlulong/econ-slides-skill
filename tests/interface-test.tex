@@ -8,10 +8,10 @@
 \ifdefined\ecoslidesstocktheme\usetheme{\ecoslidesstocktheme}\fi
 \usepackage{\ecoslidestheme}
 
-\title{Broadband expansion raises small-firm productivity by 3.4 percent}
-\subtitle{Interface test deck for the econ-slides themes}
-\author{Author One \and Author Two}
-\date{July 2026}
+\title[Broadband and productivity]{Broadband Expansion and Small-Firm Productivity}
+\subtitle{Evidence from a Staggered Municipal Rollout}
+\author[One \& Two]{Author One \and Author Two}
+\date[July 2026]{July 2026}
 
 \begin{document}
 
@@ -27,8 +27,18 @@
   \framesubtitle{Rollout reached 80 percent of municipalities between 2011 and 2017}
   \begin{itemize}
     \item Staggered adoption creates treated and not-yet-treated comparisons
-    \item \KeyIdea{Timing is plausibly exogenous} conditional on region trends \graycite{(Autor '13; Hjort--Poulsen '19)}
-    \item[$\Rightarrow$] Event-study design with cohort-robust estimator
+      \begin{itemize}
+        \item 284 municipalities connected between 2011 and 2018
+        \item firms cannot choose their municipality's slot
+      \end{itemize}
+    \item \KeyIdea{Timing is plausibly exogenous} given region trends \graycite{(Autor '13; Hjort '19)}
+      \begin{itemize}
+        \item engineering constraints, not local demand, set the order
+      \end{itemize}
+    \item \RunIn{Design:} event study with a cohort-robust estimator
+      \begin{itemize}
+        \item placebo and clustering variants live in the appendix
+      \end{itemize}
   \end{itemize}
 \end{frame}
 
@@ -41,6 +51,10 @@
   \medskip
   \RunIn{Mechanism:} consistent with reduced coordination costs, since
   $\Et\,[y_{it+1}] $ rises only where task outsourcing is feasible.
+  \begin{itemize}
+    \item communication-intensive firms respond first and most
+    \item \RunIn{Prediction:} the interaction term should be positive
+  \end{itemize}
 \end{frame}
 
 % ---- Regression table: booktabs + threeparttable + highlighted column ----
@@ -59,14 +73,13 @@
       Controls & No & Yes & Yes \\
       Region trends & No & No & Yes \\
       Observations & 148,220 & 148,220 & 148,220 \\
-      \multicolumn{4}{l}{\textcolor{cAccentA}{\footnotesize Preferred estimate: $+3.4\%$, about half the naive OLS gap.}} \\
       \bottomrule
     \end{tabular}
     \begin{tablenotes}\footnotesize
       \item Standard errors clustered by municipality. *** $p<0.01$.
     \end{tablenotes}
   \end{threeparttable}}
-  \Takeaway{One standard deviation of exposure moves productivity by 0.7 percent — significant but modest.}
+  \TakeawayWithNav{One standard deviation of exposure moves productivity by 0.7 percent.}
   \hypertarget{main:robust}{}%
   \PlaceNav{\hyperlink{app:robust}{\beamergotobutton{Robustness}}}
 \end{frame}
@@ -89,9 +102,16 @@
 \begin{frame}{Robustness: alternative clustering and estimators}
   \hypertarget{app:robust}{}%
   \begin{itemize}
-    \item Municipality clustering roughly doubles standard errors; result holds
+    \item Municipality clustering roughly doubles standard errors
+      \begin{itemize}\item the displayed conclusion remains unchanged\end{itemize}
     \item Cohort-robust estimators give $0.031$--$0.036$
+      \begin{itemize}\item estimates remain close to the preferred column\end{itemize}
+    \item Assignment-level inference is the conservative default
+      \begin{itemize}\item dependence follows the municipality rollout\end{itemize}
   \end{itemize}
+  \begin{ResultBox}[What this backup establishes]
+    The synthetic estimate is numerically stable across the listed alternatives.
+  \end{ResultBox}
   \BackButton{main:robust}
 \end{frame}
 

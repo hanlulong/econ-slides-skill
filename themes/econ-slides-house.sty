@@ -1,6 +1,7 @@
 % econ-slides-house.sty — default theme of the econ-slides skill
 %
-% The "house" look: no chrome, 16:9, Palatino, Okabe-Ito semantic palette,
+% The "house" look: no chrome, 16:9, Beamer sans text with Pazo math,
+% Okabe-Ito semantic palette,
 % gray current/total footer with the appendix excluded and renumbered A1, A2, ...
 %
 % Usage:
@@ -10,7 +11,8 @@
 % Every econ-slides theme implements the same semantic interface, so decks
 % switch themes by swapping this one \usepackage line:
 %   colors   cAccentA cAccentB cAccentC cAccentD cHighlight cGood cBad
-%   macros   \KeyIdea{...} \Takeaway{...} \graycite{...} \Et
+%   macros   \AuthorAffil{...}{...} \KeyIdea{...} \Takeaway{...}
+%            \TakeawayWithNav{...} \graycite{...} \Et
 %   nav      \PlaceNav{...} \PlaceNavShift{<xshift>}{...} \BackButton{<label>}
 %   frames   \begin{ResultBox}[title] ... \end{ResultBox} and \AppendixStart
 %
@@ -25,7 +27,7 @@
 \RequirePackage{threeparttable}
 \RequirePackage{graphicx}
 \RequirePackage{tcolorbox}
-\RequirePackage{mathpazo}                 % Palatino text + math: the signature font
+\RequirePackage{mathpazo}                 % Pazo math; Beamer keeps sans body text
 \RequirePackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,calc}
 \RequirePackage{xcolor}
@@ -75,10 +77,26 @@
   }\hspace{1.2em}\vspace{0.8em}}
 
 % ---- Semantic interface ----
-% Key idea / punchline highlight
-\newcommand{\KeyIdea}[1]{\textcolor{cHighlight}{\textbf{#1}}}
-% One-line takeaway under an exhibit
-\newcommand{\Takeaway}[1]{\par\smallskip\centering\footnotesize\textit{#1}\par}
+% Pair an author with the institution directly below. Compose one to three
+% blocks in a row or four blocks in a 2x2 tabular on the title page.
+\providecommand{\AuthorAffil}[2]{%
+  \begin{tabular}[t]{@{}c@{}}#1\\[-0.12em]{\scriptsize #2}\end{tabular}}
+% Generic hierarchy follows the structure blue. cHighlight remains available
+% for a transient equation/build spotlight, not as an automatic punchline hue.
+\newcommand{\KeyIdea}[1]{\textcolor{esStructure}{\textbf{#1}}}
+% One plain-language reading under an exhibit.  The bullet makes the economic
+% interpretation visually distinct from a caption or table note.
+\newlength{\ExhibitReadingGap}
+\setlength{\ExhibitReadingGap}{0.72em}
+\newcommand{\Takeaway}[1]{\par\vspace{\ExhibitReadingGap}\noindent
+  \begin{minipage}{\textwidth}\raggedright\normalsize
+    \leavevmode\textcolor{esStructure}{\raise0.7pt\hbox{\scriptsize$\bullet$}}\hspace{0.55em}#1
+  \end{minipage}\par}
+% Variant reserving the bottom-right lane for navigation pills.
+\newcommand{\TakeawayWithNav}[1]{\par\vspace{\ExhibitReadingGap}\noindent
+  \begin{minipage}{\textwidth}\raggedright\normalsize
+    \leavevmode\textcolor{esStructure}{\raise0.7pt\hbox{\scriptsize$\bullet$}}\hspace{0.55em}#1
+  \end{minipage}\par\vspace{0.34cm}}
 % Gray inline citations: {\graycite{(Autor '13; Hjort-Poulsen '19)}}
 \newcommand{\graycite}[1]{{\color{gray}\scriptsize #1}}
 % Notation shortcut
@@ -100,7 +118,7 @@
 
 % Headline result box
 \newtcolorbox{ResultBox}[1][Main result]{%
-  colback=cAccentC!8, colframe=cAccentC, coltitle=white,
+  colback=esStructure!7, colframe=esStructure, coltitle=white,
   title={\textbf{#1}}, fonttitle=\small,
   boxsep=2pt, top=3pt, bottom=3pt, left=6pt, right=6pt,
   boxrule=0.8pt, arc=1.5pt}

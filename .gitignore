@@ -20,8 +20,15 @@ tests/build-*/
 # Rendered page images (regenerate with check_deck.py --render-dir)
 tests/**/*.png
 tests/_*.tex
+tmp/
 
 # OS noise
 .DS_Store
 __pycache__/
 *.pyc
+
+# Private diagnostic benchmarks, local demo runs, and handoff (never publish)
+internal-tests/
+demo-runs/
+HANDOFF.md
+USER-REQUIREMENTS.md

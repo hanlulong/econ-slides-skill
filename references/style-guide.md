@@ -12,45 +12,94 @@ Three bundled themes, one semantic interface — full reference in
 - `econ-slides-boxed`: navy title bar, structured blocks. Discussions and
   policy rooms.
 
-Every deck begins:
+For a new deck using a bundled theme, begin:
 
 ```latex
 \documentclass[11pt, aspectratio=169]{beamer}
 \usepackage{econ-slides-house}   % the only line a theme swap changes
 ```
 
-Write frames against the interface (`\KeyIdea`, `\Takeaway`, `\graycite`,
-`\RunIn`, `\PlaceNav`, `\BackButton`, `ResultBox`, `\AppendixStart`,
+Write new bundled-theme frames against the interface (`\AuthorAffil`,
+`\KeyIdea`, `\Takeaway`,
+`\TakeawayWithNav`, `\graycite`, `\RunIn`, `\PlaceNav`, `\BackButton`,
+`ResultBox`, `\AppendixStart`,
 `cAccentA…D`) — never against theme internals or raw colors. Test a theme
 swap before delivery if the user is undecided: the deck must compile
 cleanly under all three.
 
-**User's own template**: copy the closest bundled `.sty`, replace its
-"Theme" block with the institution's look, keep the "Semantic interface"
-block intact. The deck never changes.
+**Existing or institutional deck:** do not copy in a bundled theme or semantic
+interface merely to normalize the project. Follow
+`references/existing-deck-workflow.md`: preserve the preamble, macros, engine,
+and repeated visual idioms. Create a custom adapter only when the user asks to
+make that style reusable across new decks.
 
 ## File engineering
 
-- **One clean file per venue.** Never maintain a master with 40% of its
-  frames commented out — that graveyard pattern (common in real Overleaf
-  projects) makes every venue cut a manual diff. Shared content that
-  several venue decks reuse belongs in `frames/*.tex` modules pulled in
-  with `\input`.
+- **Prefer one clear entry file per venue when several cuts will remain in
+  use.** Avoid a newly created master with large commented-out graveyards.
+  Shared content that several venue decks reuse can live in `frames/*.tex`
+  modules pulled in with `\input`. Do not refactor a working one-off or an
+  inherited architecture merely to enforce this pattern.
 - Layout for a paper's talk directory:
 
   ```
   talk/
   ├── sed-2026.tex          % one file per venue
   ├── seminar-90min.tex
+  ├── script.tex            % printable rehearsal script, when requested
+  ├── results.tex           % shared number/phrase macros for deck + script
   ├── frames/               % shared frame modules (optional, when ≥2 venues)
-  ├── figures-slides/       % slide-rebuilt figures, never the paper's
+  ├── figures-slides/       % source crops or rebuilt assets, each provenance-tagged
   └── build/                % compile output (never committed)
   ```
 
-- Title slide pattern: `[plain]` frame + `\addtocounter{framenumber}{-1}`
-  so numbering starts at the first content slide. Disclaimer footnote on
-  the title frame when the employer requires one.
-- Appendix: `\AppendixStart` (divider, numbering switches to A1, A2, …,
+  When deck and script are generated together and share several exact results,
+  a `results.tex` file is the preferred way to prevent drift: both artifacts
+  `\input` it, and `check_script.py` expands its simple spoken phrase macros
+  when estimating rehearsal time. Start from `templates/results.tex`. In an
+  existing project, reuse its authoritative results pipeline rather than
+  adding a parallel macro file.
+
+- New bundled-theme title slide pattern: `[plain]` frame + `\addtocounter{framenumber}{-1}`
+  so numbering starts at the first content slide. Preserve the paper title;
+  add a subtitle only when the paper has one. Keep authors, author-specific
+  affiliations, venue/date, and at most one small bottom disclaimer. Do not add
+  editorial findings, caveats, talk length, workflow labels, or a second
+  disclaimer.
+
+  Build author metadata as relationships, not two unrelated lists. Use
+  `\AuthorAffil{Name}{Institution}` inside `\author{...}` and leave
+  `\institute{}` empty when affiliations differ. One shared `\institute` line
+  is correct only when it applies to every author. Useful starting layouts:
+
+  ```latex
+  % One to three authors: one row, when it fits at full size.
+  \author{%
+    \begin{tabular}{@{}c@{\hspace{2.5em}}c@{\hspace{2.5em}}c@{}}
+      \AuthorAffil{Author A}{Institution A} &
+      \AuthorAffil{Author B}{Institution B} &
+      \AuthorAffil{Author C}{Institution C}
+    \end{tabular}}
+  \institute{}
+
+  % Four authors: a balanced 2-by-2 grid.
+  \author{%
+    \begin{tabular}{@{}cc@{}}
+      \AuthorAffil{Author A}{Institution A} &
+      \AuthorAffil{Author B}{Institution B} \\[1.6em]
+      \AuthorAffil{Author C}{Institution C} &
+      \AuthorAffil{Author D}{Institution D}
+    \end{tabular}}
+  \institute{}
+  ```
+
+  Keep a separate plain author list for scripts and PDF metadata. When a
+  central-bank or public-institution affiliation requires a disclaimer,
+  recover the institution's established wording from the paper or the user's
+  prior decks and place one quiet `\scriptsize\itshape` line after `\vfill`.
+  A separate disclaimer frame is reserved for mandatory long legal or data
+  language.
+- New bundled-theme appendix: `\AppendixStart` (divider, numbering switches to A1, A2, …,
   main total freezes). Navigation is a **pair of targets** — the Back
   button must point at the *main* slide, not at the appendix frame it sits
   on (a `\BackButton{app:X}` next to `\hypertarget{app:X}` is a dead
@@ -70,6 +119,10 @@ block intact. The deck never changes.
   `\PlaceNav{\hyperlink{app:a}{\beamergotobutton{Placebo}}\;\hyperlink{app:b}{\beamergotobutton{By cohort}}}`
   (stacked `\PlaceNav` calls overprint). Every button's target must exist —
   cutting frames orphans links; the compile log lists undefined references.
+  Existing decks keep their own appendix and target conventions.
+- Main-deck navigation is optional and subordinate. The **Conclusion never has
+  navigation**: no `\PlaceNav`, `\hyperlink`, `\beamergotobutton`, or appendix
+  link. Leave the final answer and implication on screen during discussion.
 
 ## Build and check
 
@@ -83,15 +136,27 @@ python3 <skill-dir>/scripts/check_deck.py talk/build/sed-2026.pdf \
 
 - `compile_deck.py`: XeLaTeX, two passes, themes dir on `TEXINPUTS`,
   triaged first error on failure.
-- `check_deck.py`: geometry-measured layout audit + numeric score.
-  Ship at ≥ 90 **and** a page-by-page visual pass of `build/pages/`.
+- `check_deck.py`: geometry-measured layout audit + numeric triage score.
+  Objective failures—compilation errors, missing assets, edge overflow,
+  serious overfull boxes, collisions, broken links, and unreadable content—
+  block delivery. Wrapped text, density, columns, emphasis, and sparse-layout
+  findings require visual and editorial review against the target deck, not
+  automatic padding or a forced rewrite:
+  merge a redundant frame or keep intentional whitespace; never add filler.
+  For every normal content slide, inspect vertical rhythm explicitly: title-to-
+  body gap, spacing between idea groups, and the lower edge of the last
+  meaningful line or exhibit. A large empty bottom band is a design problem;
+  redistribute existing spacing, enlarge the source exhibit, deepen the same
+  supported point, or merge the frame. Roadmaps and dividers may be sparse,
+  but their whitespace should be balanced rather than bottom-heavy.
 - Engines: XeLaTeX default; pdfLaTeX and LuaLaTeX also work with the
   bundled themes (`--engine`).
 
 ## Delivery conventions
 
-- Deliver `.tex` + compiled PDF + a three-line map: main deck contents,
-  appendix contents, anything marked `\TODO`.
+- Deliver deck `.tex` + PDF, script `.tex` + PDF when requested, and a
+  three-line map: main deck contents, appendix contents, anything marked
+  `\TODO`.
 - State where each headline number came from (table/page), so the user can
   spot-check in one minute.
 - Offer the standard follow-ups: theme swap, venue retarget, handout mode.

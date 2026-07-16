@@ -1,32 +1,54 @@
 # Sample talk
 
-A complete 15-minute conference deck — [`conference-15min.pdf`](conference-15min.pdf)
-with its [LaTeX source](conference-15min.tex) and the
-[structure plan](structure-plan.md) the skill produced before drafting.
+A complete 30-minute author presentation:
 
-**Provenance.** This deck was built *cold* by an agent following `SKILL.md`
-(v0.1.1) literally, from a single input: the fictional demonstration
-manuscript "Broadband Expansion and Small-Firm Productivity" used as the
-public sample of
-[econ-paper-review-skill](https://github.com/hanlulong/econ-paper-review-skill)
-(see its `docs/sample-review/demo-paper.pdf`). The run took five
-compile/check iterations (score path 84 → 96 → 100, then two visual-polish
-rounds) and finished at a verification score of 100. Where the manuscript
-contradicts itself on a number, the agent's resolution is documented in
-[structure-plan.md](structure-plan.md) — never silently.
+- [`conference-30min.pdf`](conference-30min.pdf) and its [LaTeX source](conference-30min.tex)
+- [`script.pdf`](script.pdf) and its synchronized [rehearsal-script source](script.tex)
+- the shared [result and metadata macros](results.tex)
+- the [claim, emphasis, and asset plan](structure-plan.md) written before drafting
 
-Two honesty notes:
+The main deck has eleven content frames and ten backup frames. Eight backups are
+linked from the main deck; the robustness and policy backups remain available
+while browsing the appendix. It uses one
+column throughout, two native slide tables, native equations, and three tight
+crops of the manuscript's own figures. No demonstration figure was generated
+or redrawn.
 
-- The manuscript is fictional and **contains deliberately planted errors**
-  (it exists to test reviewing tools). The deck presents the paper's claims
-  as a presenter would — including, e.g., its "first causal evidence" claim
-  — because a slides skill presents your paper; refereeing it is the sibling
-  skill's job. Where the manuscript contradicts itself on a number (its
-  abstract's "34 percent" vs. the body's 3.4%), the deck follows the
-  coefficient in the results table.
-- Every number on the slides is tagged with its source table/page in the
-  `.tex` comments — that is the skill's number-provenance rule at work.
+## Provenance and stance
 
-The figures under `figures-slides/` were cropped from the manuscript PDF
-with `scripts/crop_figure.py` (the paper's underlying data are simulated,
-so the figures could not be rebuilt from source).
+The only substantive input was the fictional demonstration manuscript
+*Broadband Expansion and Small-Firm Productivity*, published as the sample for
+[econ-paper-review-skill](https://github.com/hanlulong/econ-paper-review-skill/tree/main/docs/sample-review).
+Its country, program, authors, and data are fictional, and the manuscript
+contains deliberate inconsistencies.
+
+This is still an **author talk**, not a disguised referee report. The positive
+result appears on `This paper` and is supported by the main table and
+heterogeneity evidence. A short `Roadmap` follows the introduction, and a
+dedicated `Data` slide defines the sample, outcome, exposure, and
+communication-intensity measure before the design. The visible pretrend sets
+the interpretation once, beside the event-study evidence that reveals it. It
+is not repeated on the punchline or conclusion, so those frames retain the
+author-talk hierarchy. The concise conclusion has no navigation links and ends
+on the economic implication. Secondary source conflicts are documented in the
+plan and linked appendix rather than promoted into equal-weight contributions.
+
+Every displayed magnitude is traced in `results.tex` or a nearby source
+comment. Where prose and tables disagree, the deck uses the exact table cell,
+states the conflict in backup, and avoids causal or fiscal language the source
+cannot support.
+
+## Verification
+
+- Deck: 23 physical PDF pages; 11 numbered main frames; checker score **100**;
+  no blockers and no overfull boxes. Its one whitespace prompt is reviewed and
+  intentional on the concise conclusion.
+- Script: 9 letter-size pages; 3,041 prepared words; 8 selected Q&A blocks;
+  synchronized title order, no checker findings or warnings, and no overfull
+  boxes.
+- Visual QA: every deck page, every script page, and all three source crops
+  were inspected at rendered size.
+
+The prepared script is about 22.5 minutes at the 135-word-per-minute audit
+pace, leaving about 7.5 minutes for questions. A slower rehearsal should lead
+to trimming—not borrowing from the question period.

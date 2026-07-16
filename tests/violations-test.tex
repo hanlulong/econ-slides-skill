@@ -1,5 +1,5 @@
 % Deliberately broken deck: every frame violates an econ-slides rule.
-% check_deck.py must flag ALL of these. Used as the negative test.
+% Negative and review fixtures for check_deck.py, plus explicit non-violations.
 \documentclass[11pt, aspectratio=169]{beamer}
 \usepackage{econ-slides-house}
 
@@ -60,6 +60,114 @@
     Control mean & --- & 0.48 \\
     \bottomrule
   \end{tabular}
+\end{frame}
+
+% VIOLATION 6: navigation target does not exist
+\begin{frame}{Broken navigation}
+  \hyperlink{app:missing}{\beamergotobutton{Missing backup}}
+\end{frame}
+
+% VIOLATION 7: two generic punchline treatments compete on one frame
+\begin{frame}{Too many highlights}
+  \KeyIdea{First key idea} and \KeyIdea{second key idea} cannot both dominate.
+\end{frame}
+
+% VIOLATION 8: a result box and a KeyIdea compete as primary emphasis
+\begin{frame}{A box and a key phrase cannot both dominate}
+  \KeyIdea{First primary treatment}
+  \begin{ResultBox}[Second primary treatment]
+    One frame still needs one visual hierarchy.
+  \end{ResultBox}
+\end{frame}
+
+% REVIEW 1: prose-only columns should prompt a single-canvas review
+\begin{frame}{Text columns need a real comparison}
+  \begin{columns}
+    \begin{column}{0.48\textwidth}Ordinary prose on the left.\end{column}
+    \begin{column}{0.48\textwidth}Ordinary prose on the right.\end{column}
+  \end{columns}
+\end{frame}
+
+% REVIEW 2: paired minipages are also a prose-only two-column layout
+\begin{frame}{Text minipages need a real comparison}
+  \begin{minipage}{0.48\textwidth}Ordinary prose on the left.\end{minipage}\hfill
+  \begin{minipage}{0.48\textwidth}Ordinary prose on the right.\end{minipage}
+\end{frame}
+
+% VIOLATION 9: arrow-shaped list marker
+\begin{frame}{Arrow bullets flatten the hierarchy}
+  \begin{itemize}
+    \item[$\Rightarrow$] This should be an ordinary bullet or interpretation line
+    \item[→] Unicode arrows are equally mechanical
+  \end{itemize}
+\end{frame}
+
+% VIOLATION 10: prohibited opening label
+\begin{frame}{The economic question}
+  This structural object must be called the Key question.
+\end{frame}
+
+% REVIEW: a concise question belongs in the frame title, not its subtitle
+\begin{frame}{Key question}
+  \framesubtitle{Can a \textcolor{cAccentA}{short title} state the question directly?}
+  The subtitle hides the opening object.
+\end{frame}
+
+% NON-VIOLATION: setup may accompany a question written in the body
+\begin{frame}{Key question}
+  Can a short title state the question directly?
+\end{frame}
+
+% REVIEW: a roadmap is an orientation device, not an emphasis hierarchy
+\begin{frame}{Roadmap}
+  \begin{enumerate}
+    \item \textbf{Setting and data}
+    \item \textbf{Design and result}
+    \item \textbf{Interpretation}
+  \end{enumerate}
+\end{frame}
+
+% NON-VIOLATION: regular-weight Roadmap entries are the default
+\begin{frame}{Roadmap}
+  \begin{enumerate}
+    \item Setting and data
+    \item Design and result
+    \item Interpretation
+  \end{enumerate}
+\end{frame}
+
+% STRUCTURE CONTROL: the checker does not impose a Key-question/Roadmap order.
+\begin{frame}
+  \frametitle{This Paper}
+  The answer appears early.
+\end{frame}
+\begin{frame}{Data appears too soon}
+  The paper and audience determine whether a Roadmap is useful here.
+\end{frame}
+
+% REVIEW 3: a static exhibit needs a bottom interpretation line
+\begin{frame}{A table without an economic reading}
+  \centering
+  \begin{tabular}{lc}
+    \toprule
+    Treatment & 0.12 \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+% VIOLATION 12: the conclusion is not a navigation hub
+\begin{frame}{Conclusion}
+  \begin{itemize}
+    \item Main answer
+    \item First support
+    \item Second support
+    \item Robustness inventory
+    \item New detail
+  \end{itemize}
+  \PlaceNav{\hyperlink{app:existing}{\beamergotobutton{Backup}}}
+\end{frame}
+\begin{frame}{Defined target}
+  \hypertarget{app:existing}{}Target exists so this is not a dead-link test.
 \end{frame}
 
 \end{document}

@@ -1,0 +1,13 @@
+\documentclass[11pt, aspectratio=169]{beamer}
+\usepackage{econ-slides-house}
+\providecommand{\AppendixStart}{\appendix}
+\begin{document}
+\begin{frame}{Rollout timing identifies the effect}
+  \begin{itemize}\item<1-> one \item<2-> two\end{itemize}
+\end{frame}
+\begin{frame}<1-3>[label=main:effects]{Effects build over three years}
+  \only<1|handout:0>{a}\only<2|handout:1>{b}\only<3>{c}
+\end{frame}
+\AppendixStart
+\begin{frame}{Robustness}\hypertarget{app:r}{} x \end{frame}
+\end{document}

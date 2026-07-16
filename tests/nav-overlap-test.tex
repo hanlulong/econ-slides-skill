@@ -1,0 +1,29 @@
+% Regression: a centered takeaway must not run underneath a bottom-right
+% navigation pill. Use TakeawayWithNav to fix this deliberate violation.
+\documentclass[11pt,aspectratio=169]{beamer}
+\usepackage{econ-slides-house}
+\begin{document}
+\begin{frame}{A long takeaway collides with navigation}
+  \centering
+  \rule{0.78\textwidth}{0.53\textheight}
+  \vspace*{6em}
+  \Takeaway{This centered takeaway deliberately occupies the navigation lane at the lower right.}
+  \hypertarget{main:here}{}%
+  \PlaceNav{\hyperlink{app:there}{\beamergotobutton{Long appendix button}}}
+\end{frame}
+\AppendixStart
+\begin{frame}{Linked appendix}
+  \hypertarget{app:there}{}%
+  \begin{ResultBox}[Target]
+    The target exists; only the bottom-lane collision is under test.
+  \end{ResultBox}
+  \begin{itemize}
+    \item The appendix destination is valid and reachable.
+      \begin{itemize}\item navigation integrity is separate from layout integrity\end{itemize}
+    \item The deliberate defect remains on the main slide.
+      \begin{itemize}\item use \texttt{\string\TakeawayWithNav} to reserve the lane\end{itemize}
+  \end{itemize}
+  \TakeawayWithNav{The appendix itself uses the reserved navigation lane correctly.}
+  \BackButton{main:here}
+\end{frame}
+\end{document}

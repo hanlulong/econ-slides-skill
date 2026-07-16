@@ -1,0 +1,21 @@
+% Regression: a noframenumbering frame repeats the prior numeric footer but is
+% not an overlay build. The first frame's density violation must be audited.
+\documentclass[11pt,aspectratio=169]{beamer}
+\usepackage{econ-slides-house}
+\begin{document}
+\begin{frame}{Dense numbered frame}
+  \begin{itemize}
+    \item One
+    \item Two
+    \item Three
+    \item Four
+    \item Five
+    \item Six
+  \end{itemize}
+\end{frame}
+\begin{frame}[noframenumbering]{A different unnumbered frame}
+  \begin{ResultBox}[Separate frame]
+    Repeating a counter does not make two titles one overlay sequence.
+  \end{ResultBox}
+\end{frame}
+\end{document}

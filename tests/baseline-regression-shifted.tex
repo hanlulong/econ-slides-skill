@@ -1,0 +1,12 @@
+% The same inherited overflow moves from page 1 to page 2 after a scoped edit.
+\documentclass[11pt,aspectratio=169]{beamer}
+\usepackage{econ-slides-house}
+\begin{document}
+\begin{frame}{New orientation frame}
+  The requested local edit adds one ordinary frame before existing material.
+\end{frame}
+\begin{frame}{Inherited overflow}
+  \noindent\hspace{0.8\textwidth}%
+  \mbox{baseline overflow sentinel beyond the right edge}
+\end{frame}
+\end{document}

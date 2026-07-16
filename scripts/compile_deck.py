@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile a Beamer deck and triage what went wrong.
+"""Compile a Beamer deck or article script and triage what went wrong.
 
 Usage:
     python3 scripts/compile_deck.py talk.tex [--engine xelatex] [--build-dir build]
@@ -28,11 +28,11 @@ TRIAGE = [
      "Undefined command — usually a macro used without its package, or a typo."),
     (r"! Missing \$ inserted",
      "Math outside math mode — check underscores/carets in text, e.g. in titles."),
-    (r"! LaTeX Error: Environment (\w+) undefined",
+    (r"! LaTeX Error: Environment ([\w*-]+) undefined",
      "Environment {0} undefined — a package is missing or the theme is not loaded."),
     (r"! Package tikz Error",
      "TikZ error — check node syntax and library loading."),
-    (r"! Extra \}, or forgotten \\$",
+    (r"! Extra \}, or forgotten \$",
      "Unbalanced braces — often an unescaped % or & inside a table cell."),
     (r"! LaTeX Error: Command \\(\w+) already defined",
      "Macro clash: \\{0} defined twice — likely a package conflict."),
@@ -55,6 +55,23 @@ def find_error(log_text: str) -> tuple[str, str] | None:
     return None
 
 
+def page_count(log_text: str) -> int | None:
+    """Read TeX's output page count even when the log wraps mid-number.
+
+    TeX hard-wraps long ``Output written on ...`` lines at about 79 columns.
+    With a long output path, even ``13 pages`` can become ``1\n3 pages``.
+    """
+    match = re.search(
+        r"Output written on .*?\(([\d\s]+?)p\s*a\s*g\s*e\s*s?\b",
+        log_text,
+        re.S,
+    )
+    if not match:
+        return None
+    digits = re.sub(r"\s+", "", match.group(1))
+    return int(digits) if digits else None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("texfile", type=Path)
@@ -67,6 +84,8 @@ def main() -> int:
     ap.add_argument("--passes", type=int, default=2)
     ap.add_argument("--json", action="store_true", help="machine-readable output")
     args = ap.parse_args()
+    if args.passes <= 0:
+        ap.error("--passes must be positive")
 
     tex = args.texfile.resolve()
     if not tex.exists():
@@ -80,7 +99,9 @@ def main() -> int:
     build.mkdir(parents=True, exist_ok=True)
 
     env = os.environ.copy()
-    themes = args.themes_dir or Path(__file__).resolve().parent.parent / "themes"
+    # Resolve before changing cwd to the deck directory. A caller may pass a
+    # relative --themes-dir from the repository root.
+    themes = (args.themes_dir or Path(__file__).resolve().parent.parent / "themes").resolve()
     # os.pathsep: ':' on Unix, ';' on Windows (TeX Live/MiKTeX expect it)
     sep = os.pathsep
     env["TEXINPUTS"] = f".{sep}{themes}{sep}" + env.get("TEXINPUTS", "")
@@ -88,7 +109,7 @@ def main() -> int:
     cmd = [args.engine, "-interaction=nonstopmode", "-halt-on-error",
            f"-output-directory={build}", tex.name]
     ok = True
-    for _ in range(max(1, args.passes)):
+    for _ in range(args.passes):
         proc = subprocess.run(cmd, cwd=tex.parent, env=env,
                               capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
@@ -104,9 +125,7 @@ def main() -> int:
                     "log": str(log_path)}
     if result["ok"]:
         result["overfull"] = len(re.findall(r"^Overfull \\[hv]box", log_text, re.M))
-        # the log hard-wraps at ~79 chars, so the filename may split across lines
-        m = re.search(r"Output written on .*?\((\d+) pages?", log_text, re.S)
-        result["pages"] = int(m.group(1)) if m else None
+        result["pages"] = page_count(log_text)
     else:
         err = find_error(log_text)
         result["error"], result["hint"] = err if err else ("unknown", "inspect the log")

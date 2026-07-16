@@ -10,8 +10,8 @@
 % Unlike the bundled themes, this package imposes NO look: no fonts, no
 % margins, no footer, no bullet shapes. It only provides the interface the
 % skill writes decks against, so any deck compiles unchanged under a stock
-% theme. (One exception: navigation symbols are removed — every craft guide
-% agrees on that.)
+% theme. Two interface-level exceptions are deliberate: navigation symbols are
+% removed, and appendix frames use the shared A1, A2, ... display convention.
 %
 % Part of econ-slides (https://github.com/hanlulong/econ-slides-skill). MIT.
 
@@ -41,8 +41,19 @@
 \colorlet{cBad}{cAccentB}
 
 % ---- Semantic interface ----
-\newcommand{\KeyIdea}[1]{\textcolor{cHighlight}{\textbf{#1}}}
-\newcommand{\Takeaway}[1]{\par\smallskip\centering\footnotesize\textit{#1}\par}
+\providecommand{\AuthorAffil}[2]{%
+  \begin{tabular}[t]{@{}c@{}}#1\\[-0.12em]{\scriptsize #2}\end{tabular}}
+\newcommand{\KeyIdea}[1]{\textbf{\usebeamercolor[fg]{structure}#1}}
+\newlength{\ExhibitReadingGap}
+\setlength{\ExhibitReadingGap}{0.72em}
+\newcommand{\Takeaway}[1]{\par\vspace{\ExhibitReadingGap}\noindent
+  \begin{minipage}{\textwidth}\raggedright\normalsize
+    \leavevmode{\usebeamercolor[fg]{structure}\raise0.7pt\hbox{\scriptsize$\bullet$}}\hspace{0.55em}#1
+  \end{minipage}\par}
+\newcommand{\TakeawayWithNav}[1]{\par\vspace{\ExhibitReadingGap}\noindent
+  \begin{minipage}{\textwidth}\raggedright\normalsize
+    \leavevmode{\usebeamercolor[fg]{structure}\raise0.7pt\hbox{\scriptsize$\bullet$}}\hspace{0.55em}#1
+  \end{minipage}\par\vspace{0.34cm}}
 \newcommand{\graycite}[1]{{\color{gray}\scriptsize #1}}
 \newcommand{\Et}{\mathbb{E}_t}
 \newcommand{\RunIn}[1]{\textbf{\usebeamercolor[fg]{structure}#1}}
@@ -68,6 +79,7 @@
 
 \newcommand{\AppendixStart}{%
   \appendix
+  \gdef\insertframenumber{A\arabic{framenumber}}%
   \begin{frame}[plain]\centering\vfill{\Huge\bfseries Appendix}\vfill\end{frame}%
   \addtocounter{framenumber}{-1}}
 

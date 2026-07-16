@@ -1,0 +1,532 @@
+% Rehearsal script synchronized to conference-30min.tex.
+% Check:
+% python3 ../../scripts/check_script.py script.tex \
+%   --deck conference-30min.tex --slot-minutes 30
+\documentclass[11pt]{article}
+\usepackage[margin=0.78in,headheight=14pt]{geometry}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{needspace}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\input{results.tex}
+
+\definecolor{ScriptBlue}{HTML}{1F4E79}
+\definecolor{ScriptGray}{HTML}{666666}
+\setstretch{1.05}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+\widowpenalty=10000
+\clubpenalty=10000
+\displaywidowpenalty=10000
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small\textcolor{ScriptGray}{\PaperShortTitle}}
+\rhead{\small\textcolor{ScriptGray}{Rehearsal script}}
+\cfoot{\thepage}
+
+\newcommand{\Pause}{\textcolor{ScriptGray}{\textit{[pause]}}}
+\newcommand{\Cue}[1]{\par\nobreak\smallskip\noindent\textcolor{ScriptGray}{\footnotesize
+  \textbf{Live cue:} #1}\par}
+\newcommand{\scriptopening}[2]{%
+  \Needspace{10\baselineskip}%
+  \section*{Opening \hfill\normalfont\small\textcolor{ScriptGray}{#1}}
+  #2\par}
+\newcommand{\scriptframe}[3]{%
+  % Keep a heading with at least the first three lines, without forcing the
+  % large blank bands produced by reserving most of a page.
+  \Needspace{11\baselineskip}%
+  \par\medskip\noindent\textcolor{ScriptBlue}{\rule{\linewidth}{0.55pt}}%
+  \par\smallskip\noindent
+  \textbf{#1}\hfill\textcolor{ScriptGray}{\small #2}\par\smallskip
+  #3\par}
+\newcommand{\ScriptAppendix}{%
+  \clearpage
+  \section*{\mbox{Q\&A appendix} \hfill
+    \normalfont\small\textcolor{ScriptGray}{conditional; excluded from talk time}}}
+
+\title{Speaker script\\[0.25em]\large \PaperFullTitle}
+\author{\ScriptAuthors}
+\date{30-minute conference session \quad \VenueDate}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+\scriptopening{0.5 min}{%
+  Good morning. I am Astrid Lindqvist, and this is joint work with Tomas Berg.
+  The setting and data are synthetic, but the economic problem is real:
+  distance can keep a small firm from using outside expertise. We ask whether
+  productivity is higher after broadband reaches a municipality, and whether
+  the difference is greatest for firms that depend heavily on communication.
+  This connects digital infrastructure to the way firms organize production.
+  \Cue{Greeting; coauthor; quiet demo disclaimer; exact empirical questions.}
+}
+
+\scriptframe{Key question}{2.2 min}{%
+  Think about a small manufacturer that needs an accountant, software support,
+  and help coordinating with suppliers. Hiring each specialist full time makes
+  little sense. A large firm can spread that fixed cost over many workers; a
+  small firm usually has to buy the service outside. The problem is that
+  working with a distant provider takes communication, and communication used
+  to be expensive and slow.
+
+  Broadband can change that calculation. Its value is not simply that email
+  arrives faster. It can widen the set of specialists a firm can reach and make
+  day-to-day coordination with a remote provider practical. That may move some
+  tasks across the boundary of the firm. If a better specialist produces more
+  value without a proportional increase in labor, we should see higher value
+  added per worker.
+
+  Small firms are a particularly interesting test. They have the strongest
+  reason to look outside for expertise because an internal specialist is
+  costly. At the same time, they may have less money and managerial capacity to
+  reorganize around a new technology. So the sign and size of the productivity
+  response are not obvious in advance.
+
+  We ask two linked questions. First, is labor productivity higher after
+  commercial backbone service reaches the firm's municipality? Second, is
+  that difference larger for firms that began with more
+  communication-intensive work? The second question is what gives the first
+  one economic content. If remote coordination is the relevant friction, the
+  firms with more tasks that can use it should display the larger difference.
+
+  We observe the common date when service becomes available in each
+  municipality and follow firms around that date. We do not observe each
+  subscription decision. So throughout the talk, ``broadband arrival'' means
+  local availability. That is the policy change we can measure consistently
+  for every firm.
+  \Cue{Organization problem; why small firms; two questions; availability.}
+}
+
+\scriptframe{This paper}{1.8 min}{%
+  Here is what we do. We combine the rollout dates for
+  \ResMunicipalities\ municipalities with annual records for \ResFirms\ small
+  firms from 2008 through 2019. That gives us a long panel in which the same
+  firm can be followed before and after service reaches its municipality.
+
+  The first result is easy to interpret. In the years after local service
+  arrives, \ResultHeadlineSpoken. This is a sizeable difference for a change
+  in one piece of local infrastructure: the firm is producing more value from
+  the same labor input. The estimate remains close to that value when we
+  add firm controls, regional trends, or municipality-level clustering.
+
+  We then build a simple task-sourcing model to ask which firms should benefit
+  most. Broadband lowers the cost of coordinating with a specialist at a
+  distance. A firm gains more from that change when a larger share of its work
+  can use the specialist. The data line up with that prediction. A
+  one-standard-deviation increase in pre-rollout communication intensity adds
+  \ResCommSDGap\ log points to the post-arrival difference, about one-fifth of
+  the headline association.
+
+  The contribution is to connect a place-based infrastructure change to a
+  within-firm organizational margin. The average result tells us the scale of
+  the productivity pattern. The model and the cross-firm comparison tell us
+  where that pattern is strongest and why. Together they suggest that
+  \ResultImplicationSpoken.
+  \Cue{Data link; headline result; task-sourcing prediction; organizational contribution.}
+}
+
+\scriptframe{Roadmap}{0.3 min}{%
+  I will make three stops. First, the rollout and the firm data. Second, the
+  timing comparison and the main productivity result. Third, the task-sourcing
+  model and the cross-firm evidence that speaks to it.
+  \Cue{Setting and data; design and evidence; model and interpretation.}
+}
+
+\scriptframe{Broadband reached every municipality in eight waves}{2.2 min}{%
+  The rollout gives us a simple piece of timing variation. Calendar year is on
+  the horizontal axis, and the vertical axis is the cumulative share of
+  Nordavia's \ResMunicipalities\ municipalities with commercial backbone
+  service. Every step is a new wave of municipalities coming online.
+
+  Three dates tell most of the story. The first wave arrives in 2011, half the
+  municipalities are connected by 2014, and the last wave arrives in 2018. In
+  the middle of the sample, firms in one part of the country have service while
+  firms elsewhere are still waiting. We use that overlap to compare firms at
+  different points in the rollout. By the end, every municipality is connected,
+  so the comparison comes from earlier and later arrival rather than from a
+  group that never receives service.
+
+  The 2010 Digital Infrastructure Act set the goal of universal coverage. The
+  RDDF then recorded when each backbone segment entered commercial service.
+  Construction followed geography---distance and terrain mattered---but also a
+  policy priority score. The score moved low-productivity municipalities with
+  stronger projected growth toward the front of the queue. That detail will be
+  useful when we look at the event-time pattern.
+
+  The policy object is local access to the backbone. The paper reports take-up
+  above 90 percent within two years among firms with more than five employees,
+  so service availability often became actual access in that group. But the
+  common, consistently measured change is the municipal service date. We use
+  that date as the starting point and then ask how firm outcomes move around
+  it.
+
+  The staircase is therefore more than institutional background. It creates
+  the staggered timing in the empirical design. The next step is to connect
+  those municipal dates to the same firms over time and to measure which firms
+  had the greatest potential to use communication at a distance.
+  \Cue{Axes and three dates; source of variation; selected timing; availability.}
+}
+
+\scriptframe{Data}{2.4 min}{%
+  We build the analysis from three administrative sources. The business
+  register tells us which firms exist and where their headquarters are. Audited
+  accounts give us value added and investment. Employer--employee records give
+  us employment and the occupation of each worker. After linking them, one
+  observation is a firm in a year.
+
+  The panel follows \ResFirms\ small firms from 2008 through 2019, for
+  \ResFirmYears\ firm-year observations. Firms start with 3 to 49 employees and
+  have positive sales. The panel is balanced, so every firm appears in all
+  twelve years. This is helpful for a within-firm design: the set of firms does
+  not change as we move from the pre-rollout to the post-rollout period.
+
+  Our outcome is real value added per worker. We deflate value added using the
+  producer-price index for the firm's industry, divide by full-time-equivalent
+  employment, and take logs. The object is easy to interpret: how much real
+  value the firm produces for each unit of labor. It captures changes in the
+  productivity of the firm's overall production process, including changes in
+  how inputs and tasks are organized.
+
+  We assign each firm the commercial-service date of its headquarters
+  municipality. The broadband indicator turns on in that year and stays on.
+  This gives us a common measure of when the local communication constraint
+  changes, even though individual subscription dates are not recorded.
+
+  The final ingredient is communication intensity. We take each firm's 2008
+  wage-bill share in occupations with above-median communication requirements.
+  Client contact, supplier coordination, and remote support are examples. The
+  measure is fixed in 2008, before any municipality receives service. So a firm
+  that later changes its workforce cannot move itself into a different initial
+  category.
+
+  These links give us exactly the three objects the argument needs: an outcome,
+  a service-arrival date, and a pre-rollout measure of the tasks that may benefit
+  from cheaper remote coordination. We now use the timing to compare changes
+  within firms.
+  \Cue{Linked records; balanced survivor panel; outcome; exposure; 2008 task mix.}
+}
+
+\scriptframe{The design follows firms as local backbone service arrives}{2.5 min}{%
+  The design asks how a firm's productivity changes when local service arrives.
+  On the left of the equation is log real value added per worker. The colored
+  term switches on in the service year for the firm's municipality. Beta
+  compares the firm's pre- and post-arrival years with other rollout cohorts in
+  the same year.
+
+  Firm fixed effects make this a within-firm comparison. They absorb features
+  such as a firm's long-run product mix, management style, and location. Year
+  fixed effects absorb national shocks: a recession, a common change in input
+  prices, or an economy-wide technology shift. We are therefore asking whether
+  the same firm moves differently when its municipality reaches a different
+  point on the rollout clock.
+
+  The firms that are waiting provide the intuitive benchmark for firms that
+  have just received service. Because all municipalities eventually connect,
+  that benchmark changes over time. Early in the program there are many
+  not-yet-served places; near the end there are few. The regression combines
+  those timing comparisons into one summary coefficient.
+
+  The key economic assumption is about the path without broadband. Earlier-
+  and later-served municipalities should otherwise have followed similar
+  productivity trends, after we remove firm and year effects. This is why the
+  rollout rule matters. Places with stronger projected growth moved up the
+  queue. If those projections were informative, earlier cohorts might already
+  have been on a different path.
+
+  We examine that issue directly with event time. Rather than collapse all
+  post-arrival years into one indicator, the event study shows how productivity
+  evolves in each year before and after service. The pre-arrival coefficients
+  tell us whether the cohorts were already moving differently as arrival
+  approached. The post-arrival coefficients show whether the trajectory
+  changes or continues.
+
+  Finally, service timing is assigned at the municipality level. Firms in the
+  same municipality can share local shocks, so the most informative standard
+  errors allow their outcomes to move together. The results table reports that
+  municipality-level clustering. I will use the table for scale and the event
+  study for the shape of the timing pattern.
+  \Cue{Within-firm timing comparison; fixed effects; path without broadband; clustering.}
+}
+
+\scriptframe{Labor productivity is about 3.4\% higher after arrival}{2.2 min}{%
+  Start with the first row. Every column uses the full panel and includes firm
+  and year effects. The colored entry in the first column is \ResBaseline\ log
+  points. At this magnitude, that is naturally read as about 3.4 percent higher
+  real value added per worker in the post-arrival years.
+
+  To make the comparison concrete, take the same firm before and after local
+  service arrives and use firms elsewhere in the rollout to net out the common
+  year. The post-arrival observations are associated with about 3.4 percent
+  more output per worker. That is the economic object behind the coefficient.
+
+  The next two columns ask how much that scale changes when we alter the
+  controls. Adding firm-level covariates moves the estimate only slightly, from
+  \ResBaseline\ to \ResControls. Allowing each region to have its own linear
+  trend lowers it to \ResTrends. The point is not the last decimal place. The
+  different ways of absorbing observed firm changes and smooth regional trends
+  all leave us with a difference of roughly three percent or a little more.
+
+  The final column changes the uncertainty calculation. It keeps the point
+  estimate at \ResMunicipalCluster\ but clusters firms by municipality, which is
+  where the service date varies. The standard error rises from
+  \ResBaselineSE\ to \ResMunicipalClusterSE. That is the comparison I would use
+  for inference because firms in the same place can share local shocks.
+
+  So this table does two jobs. It tells us that the post-arrival productivity
+  difference is economically meaningful, and it shows that its scale is not
+  coming from one control set. What the table cannot show is whether the
+  difference begins only when broadband arrives. For that, we need to open up
+  the timing and look at the years on both sides of arrival.
+  \Cue{Read the first row; 3.4 percent in levels; controls preserve scale; municipal SE; event time next.}
+}
+
+\scriptframe{Productivity rises before and after broadband arrives}{2.4 min}{%
+  Now open up the timing. The horizontal axis measures years relative to the
+  arrival of commercial service in a firm's municipality. Zero is the arrival
+  year, and negative values are the years before it. The year just before
+  arrival is the reference point. The vertical axis shows the difference in log
+  labor productivity relative to that year.
+
+  Before looking to the right, look to the left of zero. Several years before
+  service, the coefficients are lower. They then climb steadily as arrival gets
+  closer. The important feature is the slope, not the exact value of any point:
+  productivity is already moving before the backbone becomes commercially
+  available.
+
+  After zero, the coefficients continue to rise. That is why the average
+  post-arrival coefficient in the table is positive. But the post-period begins
+  on a trajectory that was already underway. The clean timing story would have
+  shown the earlier and later cohorts moving together before arrival and then
+  separating afterward. That is not the pattern here.
+
+  The rollout rule helps explain what we see. Municipalities with low current
+  productivity but stronger projected growth received priority. If those
+  projections captured real momentum, the early cohorts would be expected to
+  catch up even without broadband. Their pre-arrival rise may be exactly the
+  growth that placed them earlier in the queue.
+
+  The visible pretrend limits the estimates to a descriptive reading. We see a
+  clear rise in productivity around the rollout, but this timing comparison
+  cannot separate the broadband response from the catch-up path used to choose
+  arrival dates. That is the interpretation-changing boundary in the design,
+  and this is the point in the talk where it belongs.
+
+  There is still a useful pattern we can probe. If cheaper remote
+  coordination is part of the pattern, the association should be larger for
+  firms whose work relies more heavily on communication. The model turns that
+  idea into a precise cross-firm prediction, and the final table asks whether
+  the data follow it.
+  \Cue{Orient event time; pre-period trajectory; selection logic; descriptive boundary.}
+}
+
+\scriptframe{The model predicts larger gains for communication-intensive firms}{2.5 min}{%
+  The model puts one organizational choice at the center of the paper. Some
+  tasks must stay inside, such as operating a machine. Accounting, software
+  support, customer contact, and supplier coordination can potentially be
+  bought from a remote specialist. Theta is the firm's share of tasks in that
+  second group.
+
+  A specialist can perform those tasks better; that is the quality advantage
+  phi. But using the specialist has two costs. The firm pays the provider's
+  price, and it pays a coordination cost, kappa, whenever information and
+  decisions have to travel across distance. Broadband reduces the coordination
+  cost. It makes the relationship easier to manage without changing the
+  specialist's underlying price or quality.
+
+  The inequality on the slide describes the interesting case. Before broadband,
+  the quality gain is not enough to cover price plus coordination. The firm
+  keeps the task inside. After broadband lowers kappa, the same outside provider
+  becomes worthwhile, and the firm switches the eligible task to that
+  specialist. \Pause\ The productivity gain comes from this change in who
+  performs the task.
+
+  Now compare two firms that cross the threshold. One has only a few tasks that
+  can move. The other relies heavily on communication and can apply the
+  specialist's quality advantage to a much larger part of production. The
+  second firm gains more. That is what the positive derivative says: within the
+  switching region, the productivity gain rises with theta.
+
+  The threshold also gives us useful intuition about average effects. A firm
+  that already used the specialist before broadband has no new sourcing change.
+  A firm for which remote work remains too costly also does not switch. The
+  response comes from firms near enough to the margin that lower coordination
+  costs change the organization of production.
+
+  In the data, theta is the firm's 2008 wage-bill share in
+  communication-intensive occupations. It is fixed before rollout and captures
+  how much work could plausibly benefit from coordination at a distance. The
+  model's empirical prediction is simple: the post-arrival productivity
+  difference should be larger when that initial share is higher.
+  \Cue{Task choice; switching threshold; positive comparative static; empirical proxy.}
+}
+
+\scriptframe{The broadband association is larger for communication-intensive firms}{2.4 min}{%
+  This table takes the prediction directly to the data. Both columns use log
+  labor productivity and the same firm and year effects as before. The first
+  column allows the post-arrival difference to vary with the firm's 2008
+  communication intensity. The second gives the average post-arrival result as
+  a benchmark.
+
+  Focus on the colored interaction row. The coefficient is \ResInteraction.
+  Because communication intensity is a share, a positive coefficient means
+  that the productivity difference grows as we move toward firms with more
+  communication-heavy work. The sign is exactly the one predicted by the task
+  model.
+
+  The broadband coefficient above it, \ResInteractionIntercept, is the fitted
+  post-arrival difference for a hypothetical firm with zero communication
+  intensity. For a firm elsewhere in the distribution, we add the interaction
+  coefficient times its initial task share. So the economically interesting
+  object is the slope across firms, not that intercept by itself.
+
+  A one-standard-deviation comparison puts the slope in useful units. The
+  standard deviation of communication intensity is \ResCommSD. Multiply that by
+  \ResInteraction, and the post-arrival difference is \ResCommSDGap\ log points
+  larger. In percentage terms, that is about 0.64 percentage points. Compared
+  with the main 3.4 percent difference, it is roughly one-fifth as large.
+
+  Think again about the two firms in the model. Moving one standard deviation
+  toward the communication-intensive firm does not replace the average result;
+  it adds about 0.64 percentage points to it. This is a comparison that lives
+  well inside the observed distribution, rather than an extreme contrast
+  between a firm with no communication tasks and one made up entirely of them.
+
+  Fixing task intensity in 2008 is important for the interpretation. Firms are
+  ranked by the work they did before broadband, so later workforce
+  reorganization does not mechanically create the interaction. The initial
+  task share delivers the cross-firm pattern the model told us to look for:
+  the broadband difference is larger where communication-intensive work was
+  initially more important.
+  \Cue{Orient columns; positive interaction; one-SD equals 0.64 points; model prediction.}
+}
+
+\begin{samepage}
+\scriptframe{Conclusion}{1.2 min}{%
+  Let me close with the paper's main message. Labor productivity is about 3.4
+  percent higher after broadband reaches a municipality. The difference is
+  larger for firms that entered the rollout with more communication-intensive
+  work: one standard deviation adds \ResCommSDGap\ log points, about one-fifth
+  of the main difference.
+
+  The model explains why that cross-firm pattern is economically meaningful.
+  Better connectivity can make a distant specialist practical and move tasks
+  across the boundary of the firm. Firms with more eligible tasks have more to
+  gain when that coordination cost falls.
+
+  The broader contribution is to connect public infrastructure with the
+  organization of production, not only access. That is why \ResultImplicationSpoken. More generally, the value of a network
+  depends on which production constraint it relaxes and which firms face that
+  constraint most strongly. This broadens the policy question from coverage alone to
+  the organizational frictions that determine whether firms can turn a
+  connection into higher productivity.
+  \Cue{3.4 percent; larger for communication-intensive firms; organization; broader implication.}
+}
+\end{samepage}
+
+% A standalone single-column cue sheet for use after full-script rehearsal.
+\Needspace{12\baselineskip}
+\section*{Live cue layer}
+\textcolor{ScriptGray}{Frame title and first spoken sentence, in deck order.}
+\raggedright\small
+\begin{enumerate}\setlength{\itemsep}{0.55em}\setlength{\topsep}{0.50em}
+  \item \textbf{Key question} --- Think about a small manufacturer that needs an accountant, software support, and help coordinating with suppliers.
+  \item \textbf{This paper} --- Here is what we do.
+  \item \textbf{Roadmap} --- I will make three stops.
+  \item \textbf{Broadband reached every municipality in eight waves} --- The rollout gives us a simple piece of timing variation.
+  \item \textbf{Data} --- We build the analysis from three administrative sources.
+  \item \textbf{The design follows firms as local backbone service arrives} --- The design asks how a firm's productivity changes when local service arrives.
+  \item \textbf{Labor productivity is about 3.4\% higher after arrival} --- Start with the first row.
+  \item \textbf{Productivity rises before and after broadband arrives} --- Now open up the timing.
+  \item \textbf{The model predicts larger gains for communication-intensive firms} --- The model puts one organizational choice at the center of the paper.
+  \item \textbf{The broadband association is larger for communication-intensive firms} --- This table takes the prediction directly to the data.
+  \item \textbf{Conclusion} --- Let me close with the paper's main message.
+\end{enumerate}
+\normalsize
+
+\ScriptAppendix
+
+\scriptframe{The balanced panel describes surviving small firms}{if asked}{%
+  The source requires at least four consecutive observations, then reports
+  a balanced panel of \ResFirms\ firms observed in every year from 2008 through
+  2019. It does not explain that added balance restriction. The final panel
+  accounts exactly for \ResFirmYears\ firm-years, but it excludes
+  entry, exit, and firms that fail the restrictions. Table 1 also reports an impossible
+  employment combination: a mean of 23.4 and a maximum of 19. I do not use
+  those employment moments in the talk. The productivity comparison therefore
+  applies to selected survivors.
+}
+
+\scriptframe{Projected growth helped determine rollout order}{if asked}{%
+  The 2010 Act committed the government to universal coverage by 2018. The RDDF
+  then sequenced municipalities with a score that favored places below the
+  median in current productivity but above the median in projected growth.
+  Distance and terrain also constrained construction, but the paper does not
+  isolate their independent role in timing. A natural next step would be to
+  separate engineering variation from the growth score and ask whether
+  productivity is stable before the resulting timing change.
+}
+
+\scriptframe{The placebo table and prose point in different directions}{if asked}{%
+  Table 3 reports a placebo coefficient of \ResPlacebo\ with a standard error
+  of \ResPlaceboSE. Using the rounded entries, that is about two reported
+  standard errors below zero. The prose nevertheless calls it statistically
+  indistinguishable from zero, and the source supplies no exact p-value or
+  confidence interval. I therefore do not read the placebo as a clean
+  validation or rejection of the design.
+}
+
+\scriptframe{Two numerical inconsistencies require correction}{if asked}{%
+  The abstract says 34 percent, the body says 3.4 percent, and Table 2 reports
+  0.034 log points. The region-trend prose also says 0.024 while Table 2 reports
+  0.030. The talk therefore uses the exact table units and cells: 0.034 log
+  points for the baseline and 0.030 for region trends. Both narrative values
+  require correction before publication.
+}
+
+\scriptframe{Municipal assignment calls for municipal-level inference}{if asked}{%
+  Treatment timing varies across \ResMunicipalities\ municipalities, while the
+  baseline clusters by firm. Table 2 provides a municipality-clustered column:
+  the point estimate remains \ResMunicipalCluster\ and the standard error rises
+  from \ResBaselineSE\ to \ResMunicipalClusterSE. Because arrival varies by
+  municipality, I would emphasize the municipality-clustered uncertainty. It
+  does not solve selection in the rollout score or the visible pretrend.
+}
+
+\scriptframe{Larger gains require tasks to switch providers}{if asked}{%
+  The proof covers the threshold-crossing case: remote sourcing is too expensive
+  before broadband and becomes worthwhile afterward. Only then does lower
+  coordination cost move eligible tasks to the specialized provider. If remote
+  sourcing is worthwhile in both periods, or in neither, the sourcing decision
+  does not change and this channel can generate zero gain. The proposition is
+  therefore conditional.
+}
+
+\scriptframe{The interaction is consistent with, not unique to, outsourcing}{if asked}{%
+  The interaction shows that the post-arrival difference is larger for firms
+  with higher pre-program communication intensity. That sign matches the model.
+  But the data do not observe which tasks move outside the firm, payments to
+  remote providers, or task reorganization around arrival. Other characteristics
+  of communication-intensive firms could generate the same pattern. Direct
+  sourcing measures before and after arrival would distinguish the proposed
+  mechanism from those alternatives.
+}
+
+\scriptframe{The six-year payback is not traceable from the reported inputs}{if asked}{%
+  The paper compares a claimed annual flow of \ResPolicyValue\ with construction
+  cost of \ResPolicyCost. But it does not report the aggregate firm value-added
+  input needed to reproduce the flow. The calculation also moves from a
+  labor-productivity level association to TFP, annual growth, and fiscal return
+  without causality, persistence, discounting, maintenance, coverage, or
+  incidence assumptions. Gross output is not government revenue. I therefore
+  exclude the payback and cost-effectiveness claims from the talk's conclusion.
+}
+
+\Needspace{7\baselineskip}
+\section*{Standing Q\&A stance}
+Hear the whole question and count to three. Answer the strongest version in
+one sentence before adding detail. Concede a genuine limitation directly,
+then separate the paper's supported pattern from what remains to be shown.
+
+\end{document}
