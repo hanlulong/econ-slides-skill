@@ -19,7 +19,7 @@
 
 `econ-slides` 是一个面向 Claude Code 和 Codex 的 Agent Skill（智能体技能）。AI 生成的幻灯片通常败在两处：版面凌乱，演讲没有论证主线。本技能同时解决这两个问题：它汇集多位知名经济学家的演讲方法论，把论文自身的逻辑依赖结构转化为一场演讲，并在交付前通过编译、测量渲染后的版面几何、逐页目检来验证结果。
 
-*适用于实证、理论、结构式及混合型经济学研究。*
+*为经济学而生，也适用于任何以证据、模型与回归表为基础的研究报告。*
 
 > **初次接触 Claude Code 或 Codex？** 它们是在你自己电脑上运行的 AI 智能体，可配合你现有的 Claude 或 ChatGPT 订阅使用，几分钟即可完成安装（[Claude Code](https://docs.anthropic.com/en/docs/claude-code) · [Codex](https://openai.com/index/codex/)）。装好任意一个之后，econ-slides 只需粘贴一段话即可安装。
 

@@ -21,7 +21,7 @@ leading economists, turns the paper's own dependency graph into a talk, and
 verifies the result by compiling, measuring the rendered geometry, and looking
 at every page before delivery.
 
-*Built for empirical, theoretical, structural, and mixed economics research.*
+*Built for economics. Works for any research talk built on evidence, models, and regression tables.*
 
 > **New to Claude Code or Codex?** They are AI agents that run on your own machine and work with your existing Claude or ChatGPT subscription — setup takes a few minutes ([Claude Code](https://docs.anthropic.com/en/docs/claude-code) · [Codex](https://openai.com/index/codex/)). With either installed, econ-slides is one paste away.
 
