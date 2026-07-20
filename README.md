@@ -23,8 +23,6 @@ at every page before delivery.
 
 *Built for economics. Works for any research talk built on evidence, models, and regression tables.*
 
-> **New to Claude Code or Codex?** They are AI agents that run on your own machine and work with your existing Claude or ChatGPT subscription — setup takes a few minutes ([Claude Code](https://docs.anthropic.com/en/docs/claude-code) · [Codex](https://openai.com/index/codex/)). With either installed, econ-slides is one paste away.
-
 ## What it does
 
 - **Paper → talk.** Give it a manuscript and a total-session clock from 15 to

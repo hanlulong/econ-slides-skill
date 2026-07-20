@@ -21,8 +21,6 @@
 
 *为经济学而生，也适用于任何以证据、模型与回归表为基础的研究报告。*
 
-> **初次接触 Claude Code 或 Codex？** 它们是在你自己电脑上运行的 AI 智能体，可配合你现有的 Claude 或 ChatGPT 订阅使用，几分钟即可完成安装（[Claude Code](https://docs.anthropic.com/en/docs/claude-code) · [Codex](https://openai.com/index/codex/)）。装好任意一个之后，econ-slides 只需粘贴一段话即可安装。
-
 ## 它能做什么
 
 - **论文 → 演讲。** 给它一份稿件和一个 15 到 90 分钟的总时长，它会构建一条带领听众走完全程的最短路径：问题、答案、必要的实证或理论铺垫、证据或命题、解读、含义。顺序和每页的结构始终取决于论文本身。
