@@ -5,6 +5,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#install)
 [![Codex](https://img.shields.io/badge/Codex-ready-brightgreen.svg)](#install)
+[![en](https://img.shields.io/badge/lang-English-red.svg)](./README.md)
+[![中文](https://img.shields.io/badge/语言-中文-yellow.svg)](./README.zh-CN.md)
 
 | The punchline slide | The main result table |
 |---|---|
