@@ -21,7 +21,7 @@ at every page before delivery.
 
 *Built for empirical, theoretical, structural, and mixed economics research.*
 
-> **New to Claude Code or Codex?** They are AI agents that run on your own machine — setup takes a few minutes ([Claude Code](https://docs.anthropic.com/en/docs/claude-code) · [Codex](https://openai.com/index/codex/)). With either installed, econ-slides is one paste away.
+> **New to Claude Code or Codex?** They are AI agents that run on your own machine and work with your existing Claude or ChatGPT subscription — setup takes a few minutes ([Claude Code](https://docs.anthropic.com/en/docs/claude-code) · [Codex](https://openai.com/index/codex/)). With either installed, econ-slides is one paste away.
 
 ## What it does
 
