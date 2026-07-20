@@ -6,6 +6,12 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#install)
 [![Codex](https://img.shields.io/badge/Codex-ready-brightgreen.svg)](#install)
 
+| The punchline slide | The main result table |
+|---|---|
+| ![Punchline slide from an AI-built Beamer talk: the main result, one supporting heterogeneity pattern, and the implication](docs/images/sample-punchline.png) | ![Main-result slide: four exact Table 2 estimates with one highlighted cell and a concise economic reading](docs/images/sample-mainresult.png) |
+
+*Two slides the skill built cold from a demonstration paper — [browse the full sample deck and speaker script](docs/sample-talk/).*
+
 `econ-slides` is an Agent Skill for Claude Code and Codex. AI-generated slides
 often fail twice: the layout is messy, and the talk has no argument. This
 skill addresses both. It synthesizes professional presentation guidance from
@@ -14,6 +20,8 @@ verifies the result by compiling, measuring the rendered geometry, and looking
 at every page before delivery.
 
 *Built for empirical, theoretical, structural, and mixed economics research.*
+
+> **New to Claude Code or Codex?** They are AI agents that run on your own machine — setup takes a few minutes ([Claude Code](https://docs.anthropic.com/en/docs/claude-code) · [Codex](https://openai.com/index/codex/)). With either installed, econ-slides is one paste away.
 
 ## What it does
 
@@ -68,13 +76,10 @@ at every page before delivery.
 
 ## See it
 
-Two slides from the staggered-rollout [sample deck](docs/sample-talk/), built
-for a 30-minute total session. Its prepared script runs about 22.5 minutes,
-leaving about one quarter of the session for questions:
-
-| The punchline slide | The main result table |
-|---|---|
-| ![Punchline slide: the main result, one supporting heterogeneity pattern, and the implication](docs/images/sample-punchline.png) | ![Main-result slide: four exact Table 2 estimates with one highlighted cell and a concise economic reading](docs/images/sample-mainresult.png) |
+The two slides at the top of this page come from the staggered-rollout
+[sample deck](docs/sample-talk/), built for a 30-minute total session. Its
+prepared script runs about 22.5 minutes, leaving about one quarter of the
+session for questions.
 
 **[Browse the staggered-rollout benchmark →](docs/sample-talk/)**. It includes
 deck and script PDFs, LaTeX sources, and a structure plan. It uses the
