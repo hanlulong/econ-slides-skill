@@ -1,0 +1,29 @@
+name: Report a bad slide
+description: The skill produced an ugly, dishonest, or broken slide — bad slides are bugs here.
+title: "[Bad slide]: "
+labels: ["bad-slide"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What the skill produced
+      description: Paste the frame's .tex, attach a screenshot, or describe the slide. Redact anything confidential — enough context to judge is plenty.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What a good slide would have done
+      description: What is wrong — layout, honesty of a number or claim, compile failure, checker miss?
+    validations:
+      required: true
+  - type: input
+    id: setup
+    attributes:
+      label: Client and request
+      placeholder: "Claude Code (macOS), 30-minute conference talk from an empirical paper"
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Checker output, log excerpts, or the paper context (redacted) if relevant.

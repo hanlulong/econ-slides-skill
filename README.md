@@ -10,7 +10,7 @@
 |---|---|
 | ![Punchline slide from an AI-built Beamer talk: the main result, one supporting heterogeneity pattern, and the implication](docs/images/sample-punchline.png) | ![Main-result slide: four exact Table 2 estimates with one highlighted cell and a concise economic reading](docs/images/sample-mainresult.png) |
 
-*Two slides the skill built cold from a demonstration paper — [browse the full sample deck and speaker script](docs/sample-talk/).*
+*Two slides the skill built cold from a demonstration paper — see the full [sample deck (PDF)](docs/sample-talk/conference-30min.pdf) and [speaker script (PDF)](docs/sample-talk/script.pdf).*
 
 `econ-slides` is an Agent Skill for Claude Code and Codex. AI-generated slides
 often fail twice: the layout is messy, and the talk has no argument. This
@@ -93,7 +93,7 @@ private rather than being shipped with the skill.
 
 ## Install
 
-Requires Python 3.10+, a TeX distribution with XeLaTeX (TeX Live / MacTeX / MiKTeX), and PyMuPDF (`pip install pymupdf`).
+Requires Python 3.10+, a TeX distribution with XeLaTeX (TeX Live / MacTeX / MiKTeX), and PyMuPDF (`python3 -m pip install --user pymupdf`, or install it in a venv if your Python is externally managed).
 
 Paste this into Claude Code or Codex:
 
@@ -101,9 +101,10 @@ Paste this into Claude Code or Codex:
 Help me install the econ-slides skill from
 https://github.com/hanlulong/econ-slides-skill: clone it, then link the
 folder as an Agent Skill — into ~/.claude/skills/econ-slides for Claude Code
-and ~/.codex/skills/econ-slides for Codex (whichever of the two I use).
-Verify python3 and xelatex are available and pymupdf is installed, then
-confirm the skill loads.
+and ~/.agents/skills/econ-slides for Codex (whichever of the two I use).
+Verify python3 and xelatex are available and pymupdf is installed (use
+--user or a venv if pip is externally managed), then confirm the skill
+loads.
 ```
 
 <details>
@@ -113,22 +114,24 @@ macOS / Linux:
 
 ```bash
 git clone https://github.com/hanlulong/econ-slides-skill.git
-pip install pymupdf
+python3 -m pip install --user pymupdf   # or into a venv if pip is externally managed
 
 # Claude Code (global skills directory)
 ln -s "$(pwd)/econ-slides-skill" ~/.claude/skills/econ-slides
 
-# Codex CLI (same skill format, its own directory)
-ln -s "$(pwd)/econ-slides-skill" ~/.codex/skills/econ-slides
+# Codex (shared agent-skills directory)
+mkdir -p ~/.agents/skills
+ln -s "$(pwd)/econ-slides-skill" ~/.agents/skills/econ-slides
 ```
 
 Windows (PowerShell — use `python` rather than `python3`):
 
 ```powershell
 git clone https://github.com/hanlulong/econ-slides-skill.git
-pip install pymupdf
+python -m pip install --user pymupdf
 New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\econ-slides" -Target "$PWD\econ-slides-skill"
-New-Item -ItemType Junction -Path "$env:USERPROFILE\.codex\skills\econ-slides" -Target "$PWD\econ-slides-skill"
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.agents\skills" | Out-Null
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.agents\skills\econ-slides" -Target "$PWD\econ-slides-skill"
 ```
 
 Both clients read the same `SKILL.md`; any agent that can read it can use
@@ -162,7 +165,7 @@ a note on where every headline claim and number came from.
 
 ## Themes
 
-Three bundled looks, one semantic interface — a finished deck switches themes by changing one `\usepackage` line:
+Three bundled looks plus a stock-theme adapter, one semantic interface — a finished deck switches themes by changing one `\usepackage` line:
 
 | Theme | Look | For |
 |---|---|---|
