@@ -73,7 +73,10 @@ that the v0.1.1 notes described.
   waive a literal `??`. A log much older than the PDF gets a note.
 - `check_script.py --genre conference|seminar|job-talk|discussant` sets the
   speech window for a `--slot-minutes` clock. Only an overrun fails; a script
-  under the window gets a warning, as the docs already said. The summary line
+  under the window gets a warning, as the docs already said. The warning gives
+  the shortfall in minutes and, past 10 minutes, cites Piazzesi's limit
+  instead of calling it fine; declared minute labels below the window no
+  longer get a fill target. The summary line
   and JSON now show the assumed speaking pace (`--wpm`, default 135), which
   SKILL.md and speaker-script.md now tell the agent to ask for.
 - `discussant.md` lists typical discussant allocations (ASHEcon: usually 5–7

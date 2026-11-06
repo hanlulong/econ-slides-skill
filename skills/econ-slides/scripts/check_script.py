@@ -61,6 +61,8 @@ QA_PREFERRED_LO, QA_PREFERRED_HI = 40, 90
 # Conference slots keep 20--25% for questions. Seminars and job talks expect
 # interruptions: Piazzesi plans 60 of 90 minutes; Startz says to leave time for
 # them. A discussant has a ceiling only; shorter discussions are common.
+# Piazzesi: "Stopping early is fine ... but not by more than 10 min".
+EARLY_END_LIMIT_MINUTES = 10.0
 SPEECH_SHARE = {
     "conference": (0.75, 0.80),
     "seminar": (0.60, 0.70),
@@ -74,23 +76,34 @@ def strip_comments(src: str) -> str:
     return re.sub(r"(?<!\\)%[^\n]*", "", src)
 
 
-def tex_tree(path: Path, seen: set[Path] | None = None) -> str:
-    """Read TeX source with local input/include files expanded in place."""
+def tex_tree(path: Path, seen: set[Path] | None = None,
+             root: Path | None = None) -> str:
+    """Read TeX source with local input/include files expanded in place.
+
+    A nested \\input is resolved from the main file's folder first, as TeX
+    does when it builds there, then from the including file's folder.
+    """
     if seen is None:
         seen = set()
     resolved = path.resolve()
-    if resolved in seen or not resolved.exists():
+    if resolved in seen or not resolved.is_file():
         return ""
     seen.add(resolved)
-    src = strip_comments(resolved.read_text(encoding="utf-8", errors="replace"))
+    root = root or resolved.parent
+    try:
+        src = strip_comments(resolved.read_text(encoding="utf-8",
+                                                errors="replace"))
+    except OSError:
+        return ""
 
     def expand(match: re.Match) -> str:
         child = Path(match.group(1).strip())
         if child.suffix == "":
             child = child.with_suffix(".tex")
         if not child.is_absolute():
-            child = resolved.parent / child
-        return tex_tree(child, seen)
+            child = next((folder / child for folder in (root, resolved.parent)
+                          if (folder / child).is_file()), root / child)
+        return tex_tree(child, seen, root)
 
     return re.sub(r"\\(?:input|include)\s*\{([^{}]+)\}", expand, src)
 
@@ -659,7 +672,6 @@ def main() -> int:
         timing_mode = "total-session"
         share_lo, share_hi = SPEECH_SHARE[args.genre]
         lower, upper = args.slot_minutes * share_lo, args.slot_minutes * share_hi
-        target_minutes = (lower + upper) / 2 if share_lo else upper
         qa_lower = args.slot_minutes - upper
         qa_upper = args.slot_minutes - lower
         window = (f"{lower:.1f}--{upper:.1f}" if share_lo
@@ -672,14 +684,21 @@ def main() -> int:
                 f"leaving at least {qa_lower:.1f} min for questions); cut "
                 "scope, never speed up")
         elif talking_minutes < lower:
+            shortfall = lower - talking_minutes
+            if shortfall > EARLY_END_LIMIT_MINUTES:
+                advice = (f"that is more than the {EARLY_END_LIMIT_MINUTES:g} "
+                          "minutes early Piazzesi accepts, so add scope from "
+                          "the paper or confirm that a shorter talk is intended")
+            else:
+                advice = ("ending a little early is fine, so decide on scope "
+                          "rather than add filler")
             warnings.append(
                 f"[total-time] {talking_minutes:.1f} min of planned speech at "
-                f"{args.wpm:g} wpm is under the {args.genre} window "
-                f"({window} min of {args.slot_minutes:g}); ending early is "
-                "fine, so decide on scope rather than add filler")
+                f"{args.wpm:g} wpm ends {shortfall:.1f} min before the "
+                f"{args.genre} window ({window} min of "
+                f"{args.slot_minutes:g}); {advice}")
     else:
         timing_mode = "speaking-time"
-        target_minutes = args.speaking_minutes
         lower, upper = 0.0, args.speaking_minutes
         qa_lower = qa_upper = None
         if talking_minutes > args.speaking_minutes:
@@ -692,10 +711,11 @@ def main() -> int:
     hinted_total = sum(value for value in hinted if value is not None)
     if hinted and all(value is not None for value in hinted):
         if args.slot_minutes is not None:
-            if hinted_total < lower or hinted_total > upper:
+            # Only an overrun matters; a short plan is a scope decision.
+            if hinted_total > upper:
                 warnings.append(
-                    f"[time-label] declared main budgets sum to {hinted_total:.1f} min; "
-                    f"target about {target_minutes:.1f}")
+                    f"[time-label] declared main budgets sum to {hinted_total:.1f} min, "
+                    f"above the {args.genre} window ceiling of {upper:.1f} min")
         elif hinted_total > upper:
             warnings.append(
                 f"[time-label] declared main budgets sum to {hinted_total:.1f} min; "
@@ -776,6 +796,11 @@ def main() -> int:
 
 def run() -> int:
     """Run main(), keeping a crash (exit 3) apart from script findings (exit 1)."""
+    for stream in (sys.stdout, sys.stderr):  # Windows ANSI code pages
+        try:
+            stream.reconfigure(errors="backslashreplace")
+        except (AttributeError, ValueError):
+            pass
     try:
         return main()
     except Exception as exc:  # noqa: BLE001  (report, never pass as a verdict)

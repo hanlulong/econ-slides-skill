@@ -719,10 +719,15 @@ def run(*extra):
     return proc.returncode, json.loads(proc.stdout)
 def timing(result, bucket):
     return [x for x in result[bucket] if x.startswith("[total-time]")]
-# 22.5 min of speech. Under the 32-min conference window: a warning only.
+# 22.5 min of speech. Under the 32-min conference window: a warning only,
+# and no fill target for the declared minute labels.
 status, r = run("--slot-minutes", "32")
 assert status == 0 and timing(r, "warnings") and not timing(r, "findings")
 assert r["genre"] == "conference" and r["wpm"] == 135
+assert not any("target about" in w for w in r["warnings"])
+# Far below a 90-min seminar window: the warning names Piazzesi's 10 minutes.
+status, r = run("--slot-minutes", "90", "--genre", "seminar")
+assert status == 0 and "10 minutes early" in timing(r, "warnings")[0]
 # Over the 28-min conference ceiling (22.4): a finding.
 status, r = run("--slot-minutes", "28")
 assert status == 1 and timing(r, "findings")
