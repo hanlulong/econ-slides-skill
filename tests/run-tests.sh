@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
 # econ-slides test suite. Requires a TeX Live engine, Python 3, and PyMuPDF.
 #   bash tests/run-tests.sh
+# With PyMuPDF in a venv, put that venv first on PATH:
+#   PATH="$HOME/.venvs/econ-slides/bin:$PATH" bash tests/run-tests.sh
 set -uo pipefail
 cd "$(dirname "$0")/.."
+# Every PDF check needs PyMuPDF; fail once, clearly, rather than test by test.
+if ! python3 -c 'import pymupdf' 2>/dev/null; then
+  echo "error: PyMuPDF is not importable by python3 ($(command -v python3))." >&2
+  echo "  Put the venv that has it first on PATH, for example:" >&2
+  echo "    PATH=\"\$HOME/.venvs/econ-slides/bin:\$PATH\" bash tests/run-tests.sh" >&2
+  exit 2
+fi
 # The skill (SKILL.md, references, scripts, templates, themes) lives here;
 # Python snippets below import its helpers as ``scripts.*``.
 SKILL_DIR=skills/econ-slides

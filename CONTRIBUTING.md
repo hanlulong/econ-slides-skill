@@ -11,7 +11,10 @@ Bug reports and improvements are welcome.
   issue first so the design can be agreed — the reference files encode
   deliberate craft rules, and a well-meaning change can break them silently.
 - Run `bash tests/run-tests.sh` before a pull request that touches
-  `skills/econ-slides/scripts/` or `skills/econ-slides/themes/`.
+  `skills/econ-slides/scripts/` or `skills/econ-slides/themes/`. It needs a
+  TeX Live install and a `python3` that can import PyMuPDF. If PyMuPDF lives
+  in a venv, put that venv first on `PATH`:
+  `PATH="$HOME/.venvs/econ-slides/bin:$PATH" bash tests/run-tests.sh`.
 
 By contributing you agree that your contribution is licensed under the
 [MIT License](LICENSE).
