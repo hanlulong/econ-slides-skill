@@ -4,7 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 if ! python3 -c 'import pymupdf' 2>/dev/null; then
   echo "error: PyMuPDF is not importable by python3 ($(command -v python3));" \
-       "put the venv that has it first on PATH" >&2
+       "put a venv with PyMuPDF 1.24.3 or newer first on PATH" >&2
   exit 2
 fi
 

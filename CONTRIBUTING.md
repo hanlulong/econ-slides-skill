@@ -3,7 +3,7 @@
 Bug reports and improvements are welcome.
 
 - **Bad slides are bugs.** If the skill produced an ugly, dishonest, or broken
-  slide, open a ["Report a bad slide"](../../issues/new?template=bad-slide.yml)
+  slide, open a ["Report a bad slide"](https://github.com/hanlulong/econ-slides-skill/issues/new?template=bad-slide.yml)
   issue with the `.tex` snippet or a screenshot — redact anything confidential.
 - **Small fixes** (typos, docs, checker false positives): open a pull request
   directly.

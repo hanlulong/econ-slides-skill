@@ -24,7 +24,8 @@ that the v0.1.1 notes described.
   whichever folder it points at, because the clone now carries plugin
   manifests.
 - Remove any manual link before installing the plugin, so a client never loads
-  two copies.
+  two copies. That includes the `~/.codex/skills/econ-slides` link that the
+  v0.1.x README told Codex users to make; Codex still loads it.
 - Scripts are now called as `<skill-dir>/scripts/...`, where `<skill-dir>` is
   the folder that holds `SKILL.md`. Paths inside the skill are unchanged.
 
@@ -146,7 +147,14 @@ that the v0.1.1 notes described.
     venv route.
 - Codex manual installs use `~/.agents/skills` (changed on `main` after v0.1.1).
 - Both READMEs say how to update and uninstall a plugin, manual or paste-in
-  install.
+  install. The uninstall `rm -f` also removes a v0.1.x `~/.codex/skills` link
+  and does not fail when only one client was linked.
+- The paste-in install prompt says what to do when xelatex is missing (install
+  a TeX distribution) apart from a failed Python check (a venv), and its `uv`
+  example installs the requirements with `uv pip install -p`, since a
+  `uv venv` has no pip.
+- `requirements.txt` asks for PyMuPDF 1.24.3 or newer, the first release
+  that installs the `pymupdf` module name the test runners and SKILL.md use.
 - `compile_deck.py` hints: a missing figure or `\input` file gets a path hint
   instead of "tlmgr install", whether the figure is named with its extension
   (XeTeX's "Unable to load picture", the pdfTeX and LuaTeX driver errors) or
@@ -193,7 +201,8 @@ that the v0.1.1 notes described.
   Econometrica" is Tabarrok's, as quoted by Startz with his caveat; Shapiro's
   "30 minute talk" line credits Matthew Rabin. The README no longer calls the
   guides "unanimous" about literature reviews, and the Acknowledgments now
-  link the Startz, Piazzesi, Meager, Dallas Fed and ASHEcon guides.
+  link the Startz, Piazzesi, Meager, Tabarrok, Davis, Dallas Fed and ASHEcon
+  guides.
 - `compile_deck.py` reports a missing themes folder clearly instead of
   failing inside TeX.
 - A nested `\input` is resolved from the main file's folder, as TeX does, so

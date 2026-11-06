@@ -8,6 +8,7 @@ cd "$(dirname "$0")/.."
 # Every PDF check needs PyMuPDF; fail once, clearly, rather than test by test.
 if ! python3 -c 'import pymupdf' 2>/dev/null; then
   echo "error: PyMuPDF is not importable by python3 ($(command -v python3))." >&2
+  echo "  The suite needs PyMuPDF 1.24.3 or newer (older releases provide only 'fitz')." >&2
   echo "  Put the venv that has it first on PATH, for example:" >&2
   echo "    PATH=\"\$HOME/.venvs/econ-slides/bin:\$PATH\" bash tests/run-tests.sh" >&2
   exit 2

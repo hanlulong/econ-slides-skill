@@ -58,10 +58,13 @@ then link its skills/econ-slides folder as an Agent Skill — into
 ~/.claude/skills/econ-slides for Claude Code and ~/.agents/skills/econ-slides
 for Codex (whichever of the two I use).
 Verify that xelatex is available, that `python3 --version` is 3.10 or newer,
-and that python3 can import pymupdf (PyMuPDF). If either check fails, create
-~/.venvs/econ-slides with a Python 3.10+ (for example `uv venv -p 3.12`),
-install the repo's requirements.txt there, and tell me to run the skill's
-scripts with that venv's python. Then confirm the skill loads.
+and that python3 can import pymupdf (PyMuPDF). If xelatex is missing, tell me
+which TeX distribution to install (MacTeX, TeX Live or MiKTeX). If the Python
+version or the PyMuPDF check fails, create ~/.venvs/econ-slides with a Python
+3.10+ and install the repo's requirements.txt there (for example
+`uv venv -p 3.12 ~/.venvs/econ-slides && uv pip install -p ~/.venvs/econ-slides -r requirements.txt`),
+and tell me to run the skill's scripts with that venv's python. Then confirm
+the skill loads.
 ```
 
 也可以从 [OpenEcon.ai 插件市场](https://github.com/OpenEconAI/plugins)以插件形式安装。
@@ -87,7 +90,7 @@ codex plugin add econ-slides@openeconai
 <details>
 <summary>从 0.1.x 升级</summary>
 
-0.2.0 起，技能从仓库根目录移到了 `skills/econ-slides/`。指向克隆根目录的旧链接在 `git pull` 之后仍然可用，但 Claude Code 现在会把它作为插件式文件夹加载（`econ-slides@skills-dir`，以 `/econ-slides:econ-slides` 调用）。如需保留不带前缀的 `/econ-slides`，请把 `~/.claude/skills/econ-slides` 重新链接到 `<clone>/skills/econ-slides`。在 Codex 中，无论链接指向哪个文件夹，手动链接都会显示为 `econ-slides:econ-slides`，因为克隆目录带有插件清单。
+0.2.0 起，技能从仓库根目录移到了 `skills/econ-slides/`。指向克隆根目录的旧链接在 `git pull` 之后仍然可用，但 Claude Code 现在会把它作为插件式文件夹加载（`econ-slides@skills-dir`，以 `/econ-slides:econ-slides` 调用）。如需保留不带前缀的 `/econ-slides`，请把 `~/.claude/skills/econ-slides` 重新链接到 `<clone>/skills/econ-slides`。在 Codex 中，无论链接指向哪个文件夹，手动链接都会显示为 `econ-slides:econ-slides`，因为克隆目录带有插件清单。v0.1.x 曾让 Codex 用户链接 `~/.codex/skills/econ-slides`，Codex 至今仍会加载该目录：安装插件前请删除这个链接（或把它移到 `~/.agents/skills`），否则 Codex 会把技能列出两次。
 
 </details>
 
@@ -113,11 +116,11 @@ codex plugin remove econ-slides@openeconai
 
 ```bash
 git -C /path/to/econ-slides-skill pull                      # 更新
-rm ~/.claude/skills/econ-slides ~/.agents/skills/econ-slides # 卸载：只删除链接
+rm -f ~/.claude/skills/econ-slides ~/.agents/skills/econ-slides ~/.codex/skills/econ-slides # 卸载：只删除链接
 rm -rf /path/to/econ-slides-skill ~/.venvs/econ-slides       # 可选：删除克隆目录和虚拟环境
 ```
 
-在 Windows 上，`cmd /c rmdir "$env:USERPROFILE\.claude\skills\econ-slides"`（`.agents\skills\econ-slides` 同理）只删除目录联接，不会动到克隆目录；不要对目录联接使用 `Remove-Item -Recurse`。
+在 Windows 上，`cmd /c rmdir "$env:USERPROFILE\.claude\skills\econ-slides"`（`.agents\skills\econ-slides` 以及 v0.1.x 的 `.codex\skills\econ-slides` 同理）只删除目录联接，不会动到克隆目录；不要对目录联接使用 `Remove-Item -Recurse`。
 
 </details>
 
@@ -250,7 +253,7 @@ requirements.txt             脚本所需的 PyMuPDF
 
 ## 致谢
 
-演讲方法规则综合了以下公开指南：[Jesse Shapiro](https://shapiro.scholars.harvard.edu/notes-and-lectures)（“How to Give an Applied Micro Talk”）、[Rachael Meager](https://sites.google.com/view/rachaelmeager)（公开演讲幻灯片）、[Paul Goldsmith-Pinkham](https://paulgp.com/beamer_tips.pdf)、[John Cochrane](https://faculty.wcas.northwestern.edu/mdo738/teaching/cochrane.pdf)（“Writing Tips for Ph.D. Students”第 4 节 Seminar presentations）、[Dick Startz](https://www.econ.ucsb.edu/~startz/Guide_Job_Market_Presentations.pdf)、[Marc Bellemare](https://marcfbellemare.com/wordpress/10053)、[Monika Piazzesi](https://web.stanford.edu/~niederle/piazzesi.pdf)、Alex Tabarrok、David Evans、Darren Lubotsky、Donald Davis、Keith Head，以及[达拉斯联储](https://www.dallasfed.org/~/media/documents/educate/events/esp/tipsdiscussant.pdf)和 [ASHEcon](https://ashecon.org/activities/news/how-to-be-a-good-discussant) 的评论人指南。验证方法借鉴了 [beamer-skill](https://github.com/Noi1r/beamer-skill)（PDF 渲染目检）和 [Pedro Sant'Anna 的工作流](https://github.com/pedrohcgs/claude-code-my-workflow)（可执行的质量关卡）；TikZ 定位规则改编自 Scott Cunningham 的 MixtapeTools。实现为原创；公开指南仅作署名链接，未捆绑或复制。
+演讲方法规则综合了以下公开指南：[Jesse Shapiro](https://shapiro.scholars.harvard.edu/notes-and-lectures)（“How to Give an Applied Micro Talk”）、[Rachael Meager](https://sites.google.com/view/rachaelmeager)（公开演讲幻灯片）、[Paul Goldsmith-Pinkham](https://paulgp.com/beamer_tips.pdf)、[John Cochrane](https://faculty.wcas.northwestern.edu/mdo738/teaching/cochrane.pdf)（“Writing Tips for Ph.D. Students”第 4 节 Seminar presentations）、[Dick Startz](https://www.econ.ucsb.edu/~startz/Guide_Job_Market_Presentations.pdf)、[Marc Bellemare](https://marcfbellemare.com/wordpress/10053)、[Monika Piazzesi](https://web.stanford.edu/~niederle/piazzesi.pdf)、[Alex Tabarrok](https://mason.gmu.edu/~atabarro/HowToGiveAGreatSeminar.pptx)（“How to Give a Great Seminar”）、David Evans、Darren Lubotsky、[Donald Davis](https://www.columbia.edu/~drd28/SuccessfulPaperSeminar.pdf)（“What Makes for a Successful Paper and Seminar?”）、Keith Head，以及[达拉斯联储](https://www.dallasfed.org/~/media/documents/educate/events/esp/tipsdiscussant.pdf)（为其本科生学术会议 Economic Scholars Program 撰写）和 [ASHEcon](https://ashecon.org/activities/news/how-to-be-a-good-discussant) 的评论人指南。验证方法借鉴了 [beamer-skill](https://github.com/Noi1r/beamer-skill)（PDF 渲染目检）和 [Pedro Sant'Anna 的工作流](https://github.com/pedrohcgs/claude-code-my-workflow)（可执行的质量关卡）；TikZ 定位规则改编自 Scott Cunningham 的 MixtapeTools。实现为原创；公开指南仅作署名链接，未捆绑或复制。
 
 ## 许可证
 

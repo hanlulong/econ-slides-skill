@@ -114,10 +114,13 @@ then link its skills/econ-slides folder as an Agent Skill — into
 ~/.claude/skills/econ-slides for Claude Code and ~/.agents/skills/econ-slides
 for Codex (whichever of the two I use).
 Verify that xelatex is available, that `python3 --version` is 3.10 or newer,
-and that python3 can import pymupdf (PyMuPDF). If either check fails, create
-~/.venvs/econ-slides with a Python 3.10+ (for example `uv venv -p 3.12`),
-install the repo's requirements.txt there, and tell me to run the skill's
-scripts with that venv's python. Then confirm the skill loads.
+and that python3 can import pymupdf (PyMuPDF). If xelatex is missing, tell me
+which TeX distribution to install (MacTeX, TeX Live or MiKTeX). If the Python
+version or the PyMuPDF check fails, create ~/.venvs/econ-slides with a Python
+3.10+ and install the repo's requirements.txt there (for example
+`uv venv -p 3.12 ~/.venvs/econ-slides && uv pip install -p ~/.venvs/econ-slides -r requirements.txt`),
+and tell me to run the skill's scripts with that venv's python. Then confirm
+the skill loads.
 ```
 
 Or install it as a plugin from the [OpenEcon.ai marketplace](https://github.com/OpenEconAI/plugins).
@@ -152,7 +155,10 @@ Code now loads it as a plugin-style folder (`econ-slides@skills-dir`, invoked as
 `/econ-slides:econ-slides`). To keep the bare `/econ-slides`, re-link
 `~/.claude/skills/econ-slides` to `<clone>/skills/econ-slides`. Codex lists a
 manual link to this clone as `econ-slides:econ-slides` either way, because the
-clone carries plugin manifests.
+clone carries plugin manifests. v0.1.x told Codex users to link
+`~/.codex/skills/econ-slides`, which Codex still loads: remove that link (or
+move it to `~/.agents/skills`) before installing the plugin, or Codex lists
+the skill twice.
 
 </details>
 
@@ -179,12 +185,12 @@ where it is):
 
 ```bash
 git -C /path/to/econ-slides-skill pull                      # update
-rm ~/.claude/skills/econ-slides ~/.agents/skills/econ-slides # uninstall: removes the links only
+rm -f ~/.claude/skills/econ-slides ~/.agents/skills/econ-slides ~/.codex/skills/econ-slides # uninstall: removes the links only
 rm -rf /path/to/econ-slides-skill ~/.venvs/econ-slides       # optional: the clone and the venv
 ```
 
 On Windows, `cmd /c rmdir "$env:USERPROFILE\.claude\skills\econ-slides"` (and the
-same for `.agents\skills\econ-slides`) removes a junction without touching the
+same for `.agents\skills\econ-slides` and a v0.1.x `.codex\skills\econ-slides`) removes a junction without touching the
 clone; avoid `Remove-Item -Recurse` on a junction.
 
 </details>
@@ -340,8 +346,11 @@ The craft rules synthesize public guides by
 [Dick Startz](https://www.econ.ucsb.edu/~startz/Guide_Job_Market_Presentations.pdf),
 [Marc Bellemare](https://marcfbellemare.com/wordpress/10053),
 [Monika Piazzesi](https://web.stanford.edu/~niederle/piazzesi.pdf),
-Alex Tabarrok, David Evans, Darren Lubotsky, Donald Davis, Keith Head, and the
-[Dallas Fed](https://www.dallasfed.org/~/media/documents/educate/events/esp/tipsdiscussant.pdf) and
+[Alex Tabarrok](https://mason.gmu.edu/~atabarro/HowToGiveAGreatSeminar.pptx) ("How to Give a Great Seminar"),
+David Evans, Darren Lubotsky,
+[Donald Davis](https://www.columbia.edu/~drd28/SuccessfulPaperSeminar.pdf) ("What Makes for a Successful Paper and Seminar?"),
+Keith Head, and the
+[Dallas Fed](https://www.dallasfed.org/~/media/documents/educate/events/esp/tipsdiscussant.pdf) (written for its undergraduate Economic Scholars Program) and
 [ASHEcon](https://ashecon.org/activities/news/how-to-be-a-good-discussant) discussant guides. The verification
 approach learns from [beamer-skill](https://github.com/Noi1r/beamer-skill)
 (PDF-render visual auditing) and
