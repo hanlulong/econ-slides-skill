@@ -76,10 +76,43 @@ Before using a causal verb, check all of the following against the source:
    panel is not the original population.
 3. **Diagnostics**: read the plotted coefficients and intervals, not only the
    paper's caption. Visible pre-trends override prose that says "no pre-trend."
+   The converse does not hold: flat pre-period coefficients are a partial and
+   often low-powered check, and they cannot confirm that post-period trends
+   would have stayed parallel (Roth 2022). Never write that pre-period
+   coefficients "test" or "validate" parallel trends; they "check for
+   diverging trends before treatment".
 4. **Estimator**: the method is valid for the assignment structure and effect
    heterogeneity claimed. A robustness table does not repair a mismatched
-   estimand.
+   estimand. For staggered adoption, run the check below.
 5. **Inference**: uncertainty respects the assignment level and dependence.
+
+**Staggered adoption.** When treatment timing varies across units and the
+paper's headline is a static two-way fixed-effects (TWFE) coefficient:
+
+- A static TWFE coefficient is a weighted average of all two-by-two
+  comparisons, including comparisons that use already-treated units as
+  controls (Goodman-Bacon 2021); with heterogeneous or growing effects some
+  weights can be negative (de Chaisemartin and D'Haultfœuille 2020).
+- Compare it with the event-study path and with any cohort-specific or
+  heterogeneity-robust estimates the paper reports (Callaway and Sant'Anna
+  2021; Sun and Abraham 2021; Borusyak, Jaravel and Spiess 2024; de
+  Chaisemartin and D'Haultfœuille 2020).
+- If the paper reports robust estimates, headline those. If it reports only
+  cohort-specific comparisons with not-yet-treated units, headline that
+  evidence and show the static coefficient as a regression-weighted summary.
+  If the static coefficient sits below every post-treatment or cohort
+  estimate, record it as `conflicted (estimator)` in the ledger and never call
+  it "the average effect".
+- In a TWFE event study with staggered timing, the lead and lag coefficients
+  can be contaminated by effects from other periods, so even the pre-trend
+  reading is not clean (Sun and Abraham 2021).
+- Never compute a robust estimate the paper does not report; ask, or name
+  the gap in the delivery note.
+
+`design-checks.md` gives the same kind of check for regression
+discontinuity, instrumental variables, shift-share, synthetic control,
+randomized experiments and multiple testing, and lists full references for the
+papers cited here.
 
 Classify a failed link by consequence. If it invalidates the headline, use
 descriptive language and state the boundary once beside the design or result.
@@ -96,6 +129,14 @@ story.
 - Heterogeneity is **consistent with** a channel unless the evidence
   discriminates that mechanism from alternatives. An interaction coefficient
   does not by itself identify an unobserved behavior.
+- When a heterogeneity cut or a secondary outcome becomes a supporting claim,
+  record whether it was pre-specified and how many alternatives the paper
+  reports. A support picked from many cuts is labeled exploratory
+  (`design-checks.md` §Multiple testing).
+- An Implication line inherits the ledger status of the evidence beneath it.
+  When the primary result is `descriptive only`, the Implication avoids causal
+  verbs ("matters", "raises", "drives"): write "gains are concentrated where
+  ...", not "infrastructure matters most where ...".
 - Trace policy calculations as a unit-preserving chain on the slide or in its
   note. Do not silently turn a labor-productivity level effect into TFP growth,
   annual output, fiscal revenue, welfare, or comparative cost-effectiveness.

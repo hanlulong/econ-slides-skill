@@ -192,6 +192,7 @@ skills/econ-slides/          技能本体（手动安装时链接这个文件夹
                              在不改变风格的前提下增补、打磨、评论或改编
     exhibit-surgery.md       回归表 → 幻灯片表格；图形；数值溯源
     source-integrity.md      论断↔证据台账；识别策略、模型与政策核查
+    design-checks.md         DiD、RD、IV、shift-share、合成控制与 RCT 幻灯片必须呈现的内容
     speaker-script.md        计时、口语表达、点击同步、问答与可打印质检
     style-guide.md           主题、文件工程、构建与交付规范
   themes/                    三套内置外观 + 标准主题兼容适配器

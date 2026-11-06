@@ -42,7 +42,10 @@ Always apply `references/slide-rules.md` (rendered layout guidance) and
 editing frames. `references/style-guide.md` covers file engineering: themes,
 master-and-cuts, appendix links.
 For any source-to-talk job, also apply `references/source-integrity.md` before
-planning the arc; it governs what the deck is allowed to claim.
+planning the arc; it governs what the deck is allowed to claim. For a causal
+design (difference-in-differences, event study, regression discontinuity,
+instrumental variables, shift-share, synthetic control, experiment), check the
+matching card in `references/design-checks.md`.
 For any existing-deck request, read `references/existing-deck-workflow.md` and
 `references/beamer-layout-mechanics.md` before editing. The target deck's
 rendered PDF and nearby source idioms outrank this skill's bundled themes and

@@ -36,9 +36,20 @@ with eight seconds. Never paste one as the other.
 
 - Every number shown comes from the user's materials, tagged at draft time:
   `0.034 (0.008)  % Table 2, col (3), p.24`.
-- Never re-round beyond dropping digits (0.0342 → 0.034 is fine; 0.034 →
-  "about 0.05" is fabrication). Never average, rescale, or convert units
-  without showing the conversion on the slide or in the note.
+- Round, never truncate, and never round coarser than the source supports:
+  0.0342 → 0.034 and 0.0347 → 0.035 are fine; 0.034 → "about 0.05" is
+  fabrication. Never average, rescale, or convert units without showing the
+  conversion on the slide or in the note.
+- Log points are not percent. For a dummy or a change in a log outcome, the
+  percent effect is 100 × (exp(b) − 1) (Halvorsen and Palmquist 1980). Saying
+  "about b × 100 percent" is a fair approximation only for |b| up to about
+  0.1 (0.034 → 3.5% exactly, "about 3.4%"); at 0.14 the exact effect is 15%,
+  so show the conversion.
+- A ratio derived from rounded entries carries the rounding range. From an
+  estimate reported as −0.004 and a standard error reported as 0.002, the t
+  ratio lies anywhere between about 1.4 and 3; say "roughly two standard
+  errors, but rounding leaves it between about 1.4 and 3", never "two standard
+  errors" as a verdict.
 - Derived magnitudes ("one SD ⇒ 0.7%") show their arithmetic in the slide
   note or takeaway, with inputs traceable to the paper.
 - Missing number → `\TODO{<what is needed>}` in red, surfaced to the user.
@@ -81,8 +92,13 @@ Procedure, in order:
    plain-language reading; never manufacture a rescaling to make the line
    sound more intuitive. "Significant" is not a magnitude.
 7. Typeset: `booktabs` (never vertical rules), right-aligned numbers,
-   2–3 significant digits, `threeparttable` with the clustering and stars
-   convention in `tablenotes`. Keep it at its natural size when it fits. Only
+   2–3 significant digits, `threeparttable` with the clustering convention in
+   `tablenotes`. Reproduce the source's inference convention and never add
+   significance stars the paper does not report. Standard errors (or
+   confidence intervals) in parentheses are the default; the AER Style Guide
+   says "Do not use asterisks to denote significance", and Startz notes that
+   the AER no longer uses stars. If the source uses stars, keep them and state
+   the thresholds in the note. Keep it at its natural size when it fits. Only
    an oversized table should be reduced with a command such as
    `\resizebox{0.8\textwidth}{!}{...}`; never use that command to enlarge a
    small table merely to hit a width target. Font floor: if fitting drops below
@@ -108,14 +124,14 @@ from the user's paper and keep the provenance comments:
   \begin{tabular}{lccc}
     \toprule
     & (1) OLS & (2) +Controls & \textcolor{cTreatment}{(3) +Trends} \\ \midrule
-    Broadband $\times$ Post & 0.041*** & 0.036*** & \textcolor{cTreatment}{\textbf{0.034***}} \\
+    Broadband $\times$ Post & 0.041 & 0.036 & \textcolor{cTreatment}{\textbf{0.034}} \\
      & (0.009) & (0.008) & \textcolor{cTreatment}{(0.008)} \\ \midrule
     Controls & No & Yes & Yes \\
     Observations & 148,220 & 148,220 & 148,220 \\
     \bottomrule
   \end{tabular}
   \begin{tablenotes}\footnotesize
-    \item SEs clustered by municipality. *** $p<0.01$.
+    \item SEs clustered by municipality in parentheses.
   \end{tablenotes}
 \end{threeparttable}}
 \Takeaway{One SD of exposure moves productivity by 0.7 percent.}
@@ -223,13 +239,24 @@ enlarge the source exhibit only while its labels and reading remain balanced.
 ## Event-study / coefficient plots (the workhorse)
 
 - Reference line at zero, treatment date marked, CIs shaded or as bars,
-  pre-period visually distinguishable. Normalized coefficient (t = −1)
-  shown, not silently dropped.
+  pre-period visually distinguishable. State the plot's base period. In a
+  TWFE event study, show the normalized coefficient (t = −1) rather than
+  silently dropping it. Plots from the newer difference-in-differences
+  estimators build pre- and post-period coefficients differently, so do not
+  read them with TWFE habits (Roth 2024).
+- Pre-period coefficients are a partial, often low-powered check; they never
+  confirm parallel trends (Roth 2022). When the paper reports a sensitivity
+  analysis for violations of parallel trends (Rambachan and Roth 2023), put
+  it in a backup; when it does not, the reading line says "pre-arrival
+  coefficients show no diverging trend", not "parallel trends hold".
+- With staggered timing and a static TWFE headline, compare the post-period
+  path with the static coefficient before choosing the headline
+  (`source-integrity.md` §Staggered adoption).
 - Axis label carries the unit ("log points × 100" ≠ "percent" — say which).
   Caption/axis unit mismatches are a classic referee catch; check both
   against the paper's numbers.
 - Overlay build (optional, if it aids reasoning): pre-period first, then
-  post — the audience judges parallel trends before seeing the effect.
+  post, so the audience sees the pre-period before the effect.
 
 ## TikZ and diagrams
 

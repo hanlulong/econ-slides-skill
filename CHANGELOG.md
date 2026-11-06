@@ -74,6 +74,10 @@ that the v0.1.1 notes described.
 - `requirements.txt` (PyMuPDF) and a `tlmgr install` line for BasicTeX, TinyTeX
   and other minimal TeX installs.
 - A Contents list in each reference file over 100 lines.
+- `references/design-checks.md`: one card each for difference-in-differences
+  and event studies, regression discontinuity, instrumental variables,
+  shift-share, synthetic control, randomized experiments and multiple testing
+  (what the slide must show, the usual overclaim, canonical references).
 - Trigger evals for `claude plugin eval` (`evals/`): three requests the skill
   should take and three it should leave alone.
 - Unreleased work from `main` since v0.1.1:
@@ -121,6 +125,24 @@ that the v0.1.1 notes described.
 - Codex manual installs use `~/.agents/skills` (changed on `main` after v0.1.1).
 - `tests/run-tests.sh` is executable and removes generated sources on exit,
   even after an interrupt.
+
+- Econometric guidance:
+  - `source-integrity.md` adds a staggered-adoption check. A static two-way
+    fixed-effects coefficient is compared with the event-study path and any
+    cohort or heterogeneity-robust estimates; robust evidence is headlined, and
+    a static coefficient below all of them is `conflicted (estimator)`.
+  - Pre-period coefficients are described as a partial, often low-powered
+    check that never "tests" or "validates" parallel trends (Roth 2022), with
+    Rambachan–Roth sensitivity in backup when the paper has it, and a warning
+    not to read newer estimators' event-study plots as TWFE plots.
+  - The default table recipe no longer adds significance stars. It reproduces
+    the source's convention, following the AER Style Guide ("Do not use
+    asterisks to denote significance").
+  - Numbers are rounded, never truncated. Log points convert to percent as
+    100 × (exp(b) − 1) once |b| exceeds about 0.1, and a ratio of rounded
+    entries carries its rounding range.
+  - A supporting heterogeneity cut records whether it was pre-specified, and
+    an Implication line under a descriptive result avoids causal verbs.
 
 ### Fixed
 

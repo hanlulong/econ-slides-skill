@@ -269,6 +269,7 @@ skills/econ-slides/          the skill itself (link this folder for a manual ins
                              add, polish, discuss, or retarget without restyling
     exhibit-surgery.md       regression table → slide table; figures; number provenance
     source-integrity.md      claim↔evidence ledger; identification, model, and policy checks
+    design-checks.md         what DiD, RD, IV, shift-share, synthetic control, and RCT slides must show
     speaker-script.md        timing, oral craft, click sync, Q&A, and printable QA
     style-guide.md           themes, file engineering, build and delivery conventions
   themes/                    three bundled looks + stock-theme compatibility adapter
