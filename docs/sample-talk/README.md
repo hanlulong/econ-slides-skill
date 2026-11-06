@@ -34,9 +34,10 @@ the heterogeneity evidence.
 
 The rollout is staggered, so the main evidence is the paper's cohort-by-cohort
 comparison (Figure 3): each 2011–2015 cohort against municipalities connected
-at least three years later, which never uses an already-connected place as a
-control. The pooled two-way coefficient (0.034 log points, Table 2) sits at
-the low end of those comparisons and below every post-arrival event-study
+at least three years later. Those are clean-control comparisons if the event
+window ends before the controls connect; the paper does not state the window,
+and the slide says so. The pooled two-way coefficient (0.034 log points,
+Table 2) sits, by eye, at the low end of those comparisons and below every post-arrival event-study
 coefficient, the pattern a pooled estimate shows when effects grow over time
 (Goodman-Bacon 2021). It is reported as a summary and kept in backup, not
 headlined; the plan's ledger marks it `conflicted (estimator)`. A short `Roadmap` follows the introduction, and a

@@ -12,11 +12,11 @@
 
 ## Emphasis ledger
 
-- **Primary takeaway:** each 2011--2015 rollout cohort is more productive after backbone arrival than municipalities connected at least three years later (paper Figure 3). These comparisons never use an already-connected municipality as a control, so they are the heterogeneity-robust evidence for a staggered rollout. Signs only: no bar value is read from pixels.
+- **Primary takeaway:** each 2011--2015 rollout cohort is more productive after backbone arrival than municipalities connected at least three years later (paper Figure 3). They are clean-control comparisons if the event window ends before the controls connect; the paper does not state the window, so the slide says so. Signs only: no bar value is read from pixels.
 - **Support 1:** the pooled two-way coefficient is 0.034 log points (Table 2, col. 1), between 0.030 and 0.033 with controls or trends. It is a regression-weighted summary that sits at the low end of the cohort bars and below every post-arrival event-study coefficient (visual reading), so it is shown in backup, not headlined.
 - **Support 2:** one standard deviation more pre-program communication intensity adds 0.0064 log points, about one-fifth of the pooled 0.034 difference (`0.032 x 0.20`). This cut is the paper's model-motivated heterogeneity test (Proposition 1), and the paper reports no other heterogeneity cuts.
 - **Boundary:** projected growth helped determine rollout order, and the paper's event-study figure rises before arrival; the talk therefore describes associations rather than causal effects or fiscal returns.
-- **Implication:** the productivity differences are largest where communication frictions bind. Worded descriptively, because the evidence beneath it is `descriptive only`.
+- **Implication:** the differences track communication intensity, as the model predicts. Tied to what is measured (2008 communication intensity) with the model as interpretation, and worded descriptively, because the evidence beneath it is `descriptive only`.
 
 ## Claim--evidence ledger
 
@@ -26,6 +26,7 @@
 | The estimation panel contains 9,400 firms and 112,800 firm-years from 2008 to 2019. | Sample construction and Table 1. | pp. 1, 4--5; Table 1 | supported |
 | Treatment is municipal backbone availability, not observed firm take-up. | Baseline treatment definition and Appendix B. | pp. 4--6, 11 | supported |
 | Each 2011--2015 cohort is more productive after arrival than municipalities connected at least three years later. | Cohort-by-cohort comparisons with not-yet-connected controls; signs read from the figure. | Figure 3, p. 8 | descriptive only |
+| Figure 3 is in log points, as its caption says. | The caption reads "Percent change in productivity levels by rollout cohort"; the y-axis reads "Log points". | Figure 3, p. 8 | conflicted; axis used (consistent with Table 2's 0.034 log points) |
 | The paper's "positive ... for every rollout cohort" covers all eight waves. | Figure 3 shows only the 2011--2015 cohorts; later waves have no municipality connected three years after them. | Section 6.2 and Figure 3, p. 8 | conflicted; figure scope used |
 | The pooled two-way coefficient, 0.034 log points with reported SE 0.002, is the average effect. | Static TWFE with staggered arrival; it sits at the low end of the cohort bars and below every post-arrival event-study point. | Table 2, col. (1), p. 7; Figures 2--3 | conflicted (estimator); shown as a summary |
 | Table 2 coefficients span 0.030--0.034 across the four reported specifications. | Exact Table 2 cells. | Table 2, cols. (1)--(4), p. 7 | descriptive only |
@@ -91,7 +92,7 @@ The script includes conditional answers only for the high-probability sample, as
 |---|---|---|---|---|
 | `figures-slides/fig1_rollout.png` | reused unchanged | Tight crop of paper Figure 1; cropped from the manuscript PDF without redrawing | The paper's own rollout exhibit is the clearest account of staggered coverage | `91f6b8dbdc0dfa2f90ec7abb0552e23bb894b99f6d34fd170d6717768a0dfae6` |
 | `figures-slides/fig2_event_study.png` | reused unchanged | Tight crop of paper Figure 2; cropped from the manuscript PDF without redrawing | The source figure is load-bearing for dynamics and the causal boundary | `8beec2977db1d03d1c3ca9b0846eeb67d92a7df5b8190402b4fc3d9fcdbc7ae1` |
-| `figures-slides/fig3_cohorts.png` | reused unchanged | Tight crop of paper Figure 3; cropped from the manuscript PDF without redrawing | Load-bearing main evidence: the paper's heterogeneity-robust cohort comparisons | `64e5aeaebf82c8a003fc13525410fd28f3b5507a2e8148edd40a8b39b14933d9` |
+| `figures-slides/fig3_cohorts.png` | reused unchanged | Tight crop of paper Figure 3; cropped from the manuscript PDF without redrawing | Load-bearing main evidence: the paper's cohort comparisons with later-connected controls | `64e5aeaebf82c8a003fc13525410fd28f3b5507a2e8148edd40a8b39b14933d9` |
 | Table 2 | native TeX table (backup) | Exact cells from paper Table 2, p. 7; stars as in the source | The paper table is too wide at presentation scale; a native shortened table preserves exact inputs | not a raster asset |
 | Table 4 | native TeX table | Exact cells from paper Table 4, p. 9; SD from Table 1, p. 5 | The native table makes the load-bearing interaction and one-SD arithmetic readable | not a raster asset |
 | TWFE and model equations | native TeX equations | Paper equations (6), (3), and Proposition 1 | Equations are clearer and more faithful than a generated design or mechanism diagram | not a raster asset |

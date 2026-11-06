@@ -60,7 +60,7 @@
     \item \KeyIdea{\ResultHeadlineSlide}
       \vspace{0.16em}
       \begin{itemize}\setlength{\itemsep}{0.42em}
-        \item Pooled two-way estimate: \ResBaseline\ log points, the low end of the cohort range
+        \item Pooled two-way estimate: \ResBaseline\ log points, a weighted summary (backup)
       \end{itemize}
     \item \textbf{\textcolor{cTasks}{Communication-intensive firms} show a larger difference.}
       \vspace{0.16em}
@@ -124,22 +124,22 @@
       +X_{it}'\delta+\varepsilon_{it}
   \]
   \begin{itemize}\setlength{\itemsep}{0.68em}
-    \item \RunIn{Comparison:} each wave versus municipalities connected 3+ years later
-    \item \RunIn{Pooled summary:} one coefficient across all timing comparisons
+    \item \RunIn{Equation:} pools all timing comparisons, including already-connected controls
+    \item \RunIn{Main evidence:} each \ResCohortYears\ wave versus places connected 3+ years later
     \item \RunIn{Counterfactual:} municipalities served at different dates would follow similar paths
     \item \RunIn{Diagnostic:} pre-arrival coefficients check for diverging trends before arrival
   \end{itemize}
 \end{frame}
 
-% ---- 7. Main evidence: heterogeneity-robust cohort comparisons ----
+% ---- 7. Main evidence: cohort comparisons with later-connected controls ----
 \begin{frame}{Each \ResCohortYears\ cohort is more productive after arrival}
   \hypertarget{main:estimates}{}%
-  \framesubtitle{Paper Figure 3; each cohort versus municipalities connected at least three years later}
+  \framesubtitle{Paper Figure 3; versus places connected 3+ years later (event window not stated)}
   \centering
   % Exact crop of paper Figure 3, p. 8; reused without redrawing. Signs only;
   % no bar value is read from pixels.
   \includegraphics[height=0.58\textheight,keepaspectratio]{figures-slides/fig3_cohorts.png}
-  \TakeawayWithNav{\textbf{Estimator:} no already-connected municipality serves as a control here.}
+  \TakeawayWithNav{\textbf{Reading:} every wave shown is higher after arrival; no single wave drives the sign.}
   \PlaceNav{\hyperlink{app:pooled}{\beamergotobutton{Pooled estimate}}\;\hyperlink{app:sourceconflicts}{\beamergotobutton{Source notes}}\;\hyperlink{app:inference}{\beamergotobutton{Inference}}}
 \end{frame}
 

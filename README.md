@@ -10,7 +10,7 @@
 
 | The punchline slide | The main result |
 |---|---|
-| ![Punchline slide from an AI-built Beamer talk: the main result, one supporting heterogeneity pattern, and the implication](docs/images/sample-punchline.png) | ![Main-result slide: the paper's cohort-by-cohort comparisons for a staggered rollout, each against municipalities connected later, with a one-line reading on the estimator](docs/images/sample-mainresult.png) |
+| ![Punchline slide from an AI-built Beamer talk: the main result, one supporting heterogeneity pattern, and the implication](docs/images/sample-punchline.png) | ![Main-result slide: the paper's cohort-by-cohort comparisons for a staggered rollout, each against municipalities connected later, with a one-line reading that no single wave drives the sign](docs/images/sample-mainresult.png) |
 
 *Two slides the skill built cold from a demonstration paper — see the full [sample deck (PDF)](docs/sample-talk/conference-30min.pdf) and [speaker script (PDF)](docs/sample-talk/script.pdf).*
 

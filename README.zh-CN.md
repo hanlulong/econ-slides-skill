@@ -13,7 +13,7 @@
 
 | 核心结论页 | 主结果页 |
 |---|---|
-| ![AI 生成 Beamer 演讲中的核心结论页：主结果、一个支撑性的异质性模式和由此得出的含义](docs/images/sample-punchline.png) | ![主结果页：交错推行下论文的逐批次（cohort）比较，每一批都与之后才接通的城市比较，并附一句关于估计量的解读](docs/images/sample-mainresult.png) |
+| ![AI 生成 Beamer 演讲中的核心结论页：主结果、一个支撑性的异质性模式和由此得出的含义](docs/images/sample-punchline.png) | ![主结果页：交错推行下论文的逐批次（cohort）比较，每一批都与之后才接通的城市比较，并附一句解读：结论的符号不取决于任何单独一批](docs/images/sample-mainresult.png) |
 
 *这两页由本技能对一篇演示论文冷启动生成——完整的[示例幻灯片（PDF）](docs/sample-talk/conference-30min.pdf)与[演讲讲稿（PDF）](docs/sample-talk/script.pdf)。*
 
