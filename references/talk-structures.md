@@ -4,6 +4,15 @@ How to plan a deck for each genre. Slide counts are for *content* slides;
 title, section dividers, and appendix are counted separately, although each
 still consumes some presentation time.
 
+## Contents
+
+- Slide budget
+- Choose the author story before the slide list
+- Audience obligations and an adaptable author-talk path
+- Per-role frame anatomy (different sections have different structures)
+- Genre adjustments
+- Retargeting a deck to a new venue
+
 ## Slide budget
 
 First distinguish the **total session** from **planned speech**. Unless the

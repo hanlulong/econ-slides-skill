@@ -5,6 +5,16 @@ generates a speaker script alongside any deck on request (and offers it by
 default for conference talks and job talks). Everything here is
 audience-oriented and written for the ear, not the eye.
 
+## Contents
+
+- The deliverable
+- Timing and budgets
+- Slide ↔ voice division of labor
+- Oral language rules
+- Sync with the deck (mechanical rules)
+- Genre and venue variants
+- What the script is for
+
 ## The deliverable
 
 `script.tex` — a standalone `article` that compiles to a printable

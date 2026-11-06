@@ -6,6 +6,14 @@ box whose paragraphs, lists, displays, tables, glue, navigation, and theme
 footer compete for the same height. A small source edit can therefore reflow
 the entire lower half of a slide.
 
+## Contents
+
+- The mental model
+- Consequences of common edits
+- Stable layout procedure
+- Existing-deck rule
+- Verification loop
+
 ## The mental model
 
 1. The theme fixes the usable text rectangle: page size minus headline,

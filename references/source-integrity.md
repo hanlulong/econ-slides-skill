@@ -6,6 +6,15 @@ causal than it is. Paper prose is a claim; assignment rules, exhibits, table
 notes, units, and algebra are the evidence. For an author talk, this pass
 protects the authors' story; it does not turn the deck into a referee report.
 
+## Contents
+
+- Build a claim--evidence ledger before the outline
+- Keep disclosure proportionate in an author talk
+- Identification and estimands
+- Models, mechanisms, and policy arithmetic
+- Numbers, figures, and contradictions
+- Delivery audit
+
 ## Build a claim--evidence ledger before the outline
 
 For every candidate headline, record four fields in `structure-plan.md`:

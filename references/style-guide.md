@@ -1,5 +1,12 @@
 # Style guide: themes, files, and deck engineering
 
+## Contents
+
+- Themes
+- File engineering
+- Build and check
+- Delivery conventions
+
 ## Themes
 
 Three bundled themes, one semantic interface — full reference in

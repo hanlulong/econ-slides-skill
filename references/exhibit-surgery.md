@@ -4,6 +4,17 @@ The most economics-specific work this skill does. A paper exhibit is built
 for a referee with unlimited time; a slide exhibit is built for a listener
 with eight seconds. Never paste one as the other.
 
+## Contents
+
+- Where numbers live (level semantics)
+- Number provenance (governs everything below)
+- Regression table → slide table
+- Figures
+- Event-study / coefficient plots (the workhorse)
+- TikZ and diagrams
+- Individual QA for every new, rebuilt, or cropped figure
+- The visual pass (why the renders exist)
+
 ## Where numbers live (level semantics)
 
 - **Inference details (standard errors, t-stats, stars, clustering) live

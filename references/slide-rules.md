@@ -6,6 +6,21 @@ diagnostics rather than permission to restyle it. `scripts/check_deck.py`
 reports a measurable subset, while the rendered pages and the argument decide
 the detailed treatment.
 
+## Contents
+
+- Titles
+- Story hierarchy and frame anatomy
+- Bullets and body text
+- Single-column default
+- Filling space with depth, not breadth
+- Setup and conclusion discipline
+- Color consistency across the deck
+- Overlays
+- Math
+- Color
+- Voice and anti-AI tells
+- Slide-count sanity (checker-visible symptoms of deeper problems)
+
 ## Titles
 
 - The title page preserves the paper's actual title. Do not replace it with a
