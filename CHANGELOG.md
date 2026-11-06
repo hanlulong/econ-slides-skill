@@ -182,6 +182,17 @@ that the v0.1.1 notes described.
 
 ### Documentation
 
+- The 30-minute sample talk now headlines the paper's heterogeneity-robust
+  evidence for its staggered rollout: the cohort-by-cohort comparisons with
+  later-connected municipalities (Figure 3, 2011–2015 cohorts). The static
+  two-way coefficient (0.034 log points), which sits below every post-arrival
+  event-study point, moves to a backup as a pooled summary, and the script no
+  longer describes it as a comparison with waiting firms only. The design
+  slide says pre-arrival coefficients "check for diverging trends" rather than
+  "test" parallel trends; the Implication avoids a causal verb; the placebo
+  backup reports the rounding range of its t ratio; and the README images are
+  regenerated.
+
 - The sample-talk README notes that its figure crops, metadata and results
   derive from the econ-paper-review-skill demonstration manuscript, which is
   distributed under the PolyForm Noncommercial License 1.0.0.

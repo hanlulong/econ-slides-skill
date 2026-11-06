@@ -60,12 +60,12 @@
     \item \KeyIdea{\ResultHeadlineSlide}
       \vspace{0.16em}
       \begin{itemize}\setlength{\itemsep}{0.42em}
-        \item The difference survives firm controls and region-specific trends
+        \item Pooled two-way estimate: \ResBaseline\ log points, the low end of the cohort range
       \end{itemize}
     \item \textbf{\textcolor{cTasks}{Communication-intensive firms} show a larger difference.}
       \vspace{0.16em}
       \begin{itemize}\setlength{\itemsep}{0.42em}
-        \item One SD adds \ResCommSDGap\ log points, about one-fifth of the main difference
+        \item One SD adds \ResCommSDGap\ log points, about one-fifth of the pooled difference
         \item The model links this pattern to the value of remote coordination
       \end{itemize}
   \end{enumerate}
@@ -124,54 +124,34 @@
       +X_{it}'\delta+\varepsilon_{it}
   \]
   \begin{itemize}\setlength{\itemsep}{0.68em}
-    \item \RunIn{Comparison:} within-firm changes across municipal arrival dates
-    \item \RunIn{Fixed effects:} remove permanent firm differences and common year shocks
+    \item \RunIn{Comparison:} each wave versus municipalities connected 3+ years later
+    \item \RunIn{Pooled summary:} one coefficient across all timing comparisons
     \item \RunIn{Counterfactual:} municipalities served at different dates would follow similar paths
-    \item \RunIn{Diagnostic:} pre-arrival coefficients test that condition
+    \item \RunIn{Diagnostic:} pre-arrival coefficients check for diverging trends before arrival
   \end{itemize}
 \end{frame}
 
-% ---- 7. Main estimates ----
-\begin{frame}{Labor productivity is about 3.4\% higher after arrival}
+% ---- 7. Main evidence: heterogeneity-robust cohort comparisons ----
+\begin{frame}{Each \ResCohortYears\ cohort is more productive after arrival}
   \hypertarget{main:estimates}{}%
-  \framesubtitle{Log labor productivity; firm and year fixed effects}
+  \framesubtitle{Paper Figure 3; each cohort versus municipalities connected at least three years later}
   \centering
-  % Exact cells from paper Table 2, p. 7. No paper-table paste.
-  {\small\renewcommand{\arraystretch}{1.10}
-  \begin{tabular}{lcccc}
-    \toprule
-      & Baseline & Firm controls & Region trends & Municipal SEs \\
-    \midrule
-    \textcolor{cBroadband}{Broadband}
-      & \textcolor{cBroadband}{\textbf{\ResBaseline***}}
-      & \ResControls***
-      & \ResTrends***
-      & \ResMunicipalCluster*** \\
-      & \textcolor{cBroadband}{(\ResBaselineSE)}
-      & (\ResControlsSE)
-      & (\ResTrendsSE)
-      & (\ResMunicipalClusterSE) \\
-    Firm and year effects & Yes & Yes & Yes & Yes \\
-    Observations & \ResFirmYears & \ResFirmYears & \ResFirmYears & \ResFirmYears \\
-    \bottomrule
-  \end{tabular}}
-  \smallskip
-
-  {\footnotesize SEs are firm-clustered except the final column
-  (municipality-clustered); stars reproduce the source.\par}
-  \TakeawayWithNav[\ExhibitReadingGapRoomy]{The productivity difference remains about 3\% with firm controls and regional trends.}
-  \PlaceNav{\hyperlink{app:sourceconflicts}{\beamergotobutton{Source notes}}\;\hyperlink{app:inference}{\beamergotobutton{Inference}}}
+  % Exact crop of paper Figure 3, p. 8; reused without redrawing. Signs only;
+  % no bar value is read from pixels.
+  \includegraphics[height=0.58\textheight,keepaspectratio]{figures-slides/fig3_cohorts.png}
+  \TakeawayWithNav{\textbf{Estimator:} no already-connected municipality serves as a control here.}
+  \PlaceNav{\hyperlink{app:pooled}{\beamergotobutton{Pooled estimate}}\;\hyperlink{app:sourceconflicts}{\beamergotobutton{Source notes}}\;\hyperlink{app:inference}{\beamergotobutton{Inference}}}
 \end{frame}
 
 % ---- 8. Dynamic evidence and the one main caveat ----
 \begin{frame}{Productivity rises before and after broadband arrives}
   \hypertarget{main:eventstudy}{}%
-  \framesubtitle{Paper Figure 2; $t=-1$ omitted; firm-clustered 95\% intervals}
+  \framesubtitle{Paper Figure 2; two-way event study; $t=-1$ omitted; firm-clustered 95\% intervals}
   \centering
   % Exact crop of paper Figure 2, p. 7; no coefficient is read from pixels.
   \includegraphics[height=0.60\textheight,keepaspectratio]{figures-slides/fig2_event_study.png}
   \TakeawayWithNav{\textbf{Limitation:} The visible pretrend limits the estimates to a descriptive reading.}
-  \PlaceNav{\hyperlink{app:assignment}{\beamergotobutton{Assignment}}\;\hyperlink{app:cohorts}{\beamergotobutton{Cohorts}}\;\hyperlink{app:placebo}{\beamergotobutton{Placebo}}}
+  \PlaceNav{\hyperlink{app:assignment}{\beamergotobutton{Assignment}}\;\hyperlink{app:placebo}{\beamergotobutton{Placebo}}}
 \end{frame}
 
 % ---- 9. Model prediction ----
@@ -228,7 +208,7 @@
   \end{tabular}}
   \smallskip
 
-  {\footnotesize Firm-clustered SEs; communication-intensity SD = \ResCommSD\ (Table 1).\par}
+  {\footnotesize Firm-clustered SEs; *** $p<0.01$ as in the source; communication-intensity SD = \ResCommSD\ (Table 1).\par}
   \TakeawayWithNav[\ExhibitReadingGapRoomy]{The larger gap for communication-intensive firms matches the model.}
   \PlaceNav{\hyperlink{app:mechanism}{\beamergotobutton{Interpretation}}}
 \end{frame}
@@ -238,7 +218,7 @@
   \hypertarget{main:conclusion}{}%
   \medskip
   \begin{itemize}\setlength{\itemsep}{1.45em}
-    \item \KeyIdea{Productivity is about 3.4\% higher after \textcolor{cBroadband}{broadband} becomes available.}
+    \item \KeyIdea{Each \ResCohortYears\ cohort is more productive after \textcolor{cBroadband}{broadband} arrives.}
     \item The difference is larger for \textcolor{cTasks}{communication-intensive firms}.
   \end{itemize}
 
@@ -286,19 +266,40 @@
   \BackButton{main:eventstudy}
 \end{frame}
 
-% ---- A3. Cohorts ----
-\begin{frame}{Reported cohort estimates are positive across waves}
-  \hypertarget{app:cohorts}{}%
-  \framesubtitle{Each cohort compared with municipalities treated at least three years later}
+% ---- A3. Pooled two-way estimate ----
+\begin{frame}{The pooled two-way estimate sits at the low end}
+  \hypertarget{app:pooled}{}%
+  \framesubtitle{Paper Table 2, p. 7; log labor productivity, firm and year fixed effects}
   \centering
-  % Exact crop of paper Figure 3, p. 8; reused without redrawing.
-  \includegraphics[height=0.60\textheight,keepaspectratio]{figures-slides/fig3_cohorts.png}
-  \TakeawayWithNav{\textbf{Identification:} similar signs across cohorts do not establish parallel untreated trends.}
-  \BackButton{main:eventstudy}
+  % Exact cells from paper Table 2, p. 7. No paper-table paste.
+  {\small\renewcommand{\arraystretch}{1.10}
+  \begin{tabular}{lcccc}
+    \toprule
+      & Baseline & Firm controls & Region trends & Municipal SEs \\
+    \midrule
+    \textcolor{cBroadband}{Broadband}
+      & \textcolor{cBroadband}{\textbf{\ResBaseline***}}
+      & \ResControls***
+      & \ResTrends***
+      & \ResMunicipalCluster*** \\
+      & \textcolor{cBroadband}{(\ResBaselineSE)}
+      & (\ResControlsSE)
+      & (\ResTrendsSE)
+      & (\ResMunicipalClusterSE) \\
+    Firm and year effects & Yes & Yes & Yes & Yes \\
+    Observations & \ResFirmYears & \ResFirmYears & \ResFirmYears & \ResFirmYears \\
+    \bottomrule
+  \end{tabular}}
+  \smallskip
+
+  {\footnotesize SEs are firm-clustered except the final column
+  (municipality-clustered); *** $p<0.01$, as in the source.\par}
+  \TakeawayWithNav[\ExhibitReadingGapRoomy]{\textbf{Estimator:} a weighted mix of all timing comparisons, it can understate rising effects.}
+  \BackButton{main:estimates}
 \end{frame}
 
 % ---- A4. Placebo ----
-\begin{frame}{The placebo table and prose point in different directions}
+\begin{frame}{Rounded placebo entries cannot confirm the prose}
   \hypertarget{app:placebo}{}%
   \framesubtitle{Pre-treatment sample; rollout years permuted across municipalities}
   % Exact Table 3 cells, p. 8.
@@ -313,11 +314,11 @@
   \end{tabular}\par}
   \medskip
   \begin{itemize}\setlength{\itemsep}{0.50em}
-    \item The coefficient-to-SE ratio is about $-2$ using rounded reported entries
+    \item The coefficient-to-SE ratio is about $-2$; rounding allows $-1.4$ to $-3$
     \item The prose calls the estimate statistically indistinguishable from zero
     \item The source provides no exact $p$-value or confidence interval
   \end{itemize}
-  \TakeawayWithNav{\textbf{Conflict:} the estimate is about two standard errors from zero, contrary to the prose.}
+  \TakeawayWithNav{\textbf{Unresolved:} the rounded entries fit both a zero and a nonzero reading.}
   \BackButton{main:eventstudy}
 \end{frame}
 
@@ -337,10 +338,10 @@
   \medskip
   \begin{itemize}\setlength{\itemsep}{0.54em}
     \item The talk reports the coefficient's table unit: log points
-    \item The main result table uses exact Table 2 cells in every specification
+    \item The pooled-estimate backup uses exact Table 2 cells in every specification
     \item A 0.034 log-point difference is approximately 3.4\%, not 34\%
   \end{itemize}
-  \TakeawayWithNav{\textbf{Correction:} exact cells support a 3.4\% headline; both narrative values need revision.}
+  \TakeawayWithNav{\textbf{Correction:} the exact cell is 0.034 log points; both narrative values need revision.}
   \BackButton{main:estimates}
 \end{frame}
 

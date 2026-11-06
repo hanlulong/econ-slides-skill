@@ -203,7 +203,7 @@ assert not script["findings"]
 PY
 }
 
-if benchmark_contract primary docs/sample-talk 23 11 9 8; then
+if benchmark_contract primary docs/sample-talk 23 11 9 9; then
   ok "30-minute staggered-rollout benchmark compiles, ships, and stays synchronized"
 else
   bad "30-minute staggered-rollout benchmark contract"

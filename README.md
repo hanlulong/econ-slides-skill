@@ -8,9 +8,9 @@
 [![en](https://img.shields.io/badge/lang-English-red.svg)](./README.md)
 [![中文](https://img.shields.io/badge/语言-中文-yellow.svg)](./README.zh-CN.md)
 
-| The punchline slide | The main result table |
+| The punchline slide | The main result |
 |---|---|
-| ![Punchline slide from an AI-built Beamer talk: the main result, one supporting heterogeneity pattern, and the implication](docs/images/sample-punchline.png) | ![Main-result slide: four exact Table 2 estimates with one highlighted cell and a concise economic reading](docs/images/sample-mainresult.png) |
+| ![Punchline slide from an AI-built Beamer talk: the main result, one supporting heterogeneity pattern, and the implication](docs/images/sample-punchline.png) | ![Main-result slide: the paper's cohort-by-cohort comparisons for a staggered rollout, each against municipalities connected later, with a one-line reading on the estimator](docs/images/sample-mainresult.png) |
 
 *Two slides the skill built cold from a demonstration paper — see the full [sample deck (PDF)](docs/sample-talk/conference-30min.pdf) and [speaker script (PDF)](docs/sample-talk/script.pdf).*
 
@@ -81,7 +81,7 @@ at every page before delivery.
 
 The two slides at the top of this page come from the staggered-rollout
 [sample deck](docs/sample-talk/), built for a 30-minute total session. Its
-prepared script runs about 22.5 minutes, leaving about one quarter of the
+prepared script runs about 23 minutes, leaving about one quarter of the
 session for questions.
 
 **[Browse the staggered-rollout benchmark →](docs/sample-talk/)**. It includes

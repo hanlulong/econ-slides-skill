@@ -11,9 +11,9 @@
 
 *中英文如有出入，以[英文版](./README.md)为准。*
 
-| 核心结论页 | 主结果表格页 |
+| 核心结论页 | 主结果页 |
 |---|---|
-| ![AI 生成 Beamer 演讲中的核心结论页：主结果、一个支撑性的异质性模式和由此得出的含义](docs/images/sample-punchline.png) | ![主结果页：Table 2 中四个精确估计值、一个高亮单元格和一句简洁的经济学解读](docs/images/sample-mainresult.png) |
+| ![AI 生成 Beamer 演讲中的核心结论页：主结果、一个支撑性的异质性模式和由此得出的含义](docs/images/sample-punchline.png) | ![主结果页：交错推行下论文的逐批次（cohort）比较，每一批都与之后才接通的城市比较，并附一句关于估计量的解读](docs/images/sample-mainresult.png) |
 
 *这两页由本技能对一篇演示论文冷启动生成——完整的[示例幻灯片（PDF）](docs/sample-talk/conference-30min.pdf)与[演讲讲稿（PDF）](docs/sample-talk/script.pdf)。*
 
@@ -39,7 +39,7 @@
 
 ## 效果展示
 
-页面顶部的两页幻灯片来自交错推行（staggered-rollout）[示例演讲](docs/sample-talk/)，按 30 分钟总时长构建；其配套讲稿约 22.5 分钟，为提问留出约四分之一的时间。
+页面顶部的两页幻灯片来自交错推行（staggered-rollout）[示例演讲](docs/sample-talk/)，按 30 分钟总时长构建；其配套讲稿约 23 分钟，为提问留出约四分之一的时间。
 
 **[浏览完整的示例基准 →](docs/sample-talk/)**：包含幻灯片与讲稿的 PDF 和 LaTeX 源文件，以及一份结构规划。它使用来自 [econ-paper-review-skill](https://github.com/hanlulong/econ-paper-review-skill) 的虚构演示论文；来源说明见示例的 [README](docs/sample-talk/README.md)。
 
