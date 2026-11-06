@@ -93,7 +93,12 @@ private rather than being shipped with the skill.
 
 ## Install
 
-Requires Python 3.10+, a TeX distribution with XeLaTeX (TeX Live / MacTeX / MiKTeX), and PyMuPDF (`python3 -m pip install --user pymupdf`, or install it in a venv if your Python is externally managed).
+Requires Python 3.10+ with PyMuPDF, and a TeX distribution with XeLaTeX
+(TeX Live / MacTeX / MiKTeX). If `python3 -c "import fitz"` already works,
+there is nothing to install on the Python side. Otherwise, put PyMuPDF in a
+dedicated virtual environment (`pip install --user` is also blocked when your
+Python is externally managed, PEP 668) and run the skill's scripts with that
+environment's `python`; `uv run --with pymupdf python ...` works too.
 
 Paste this into Claude Code or Codex:
 
@@ -102,21 +107,29 @@ Help me install the econ-slides skill from
 https://github.com/hanlulong/econ-slides-skill: clone it, then link the
 folder as an Agent Skill — into ~/.claude/skills/econ-slides for Claude Code
 and ~/.agents/skills/econ-slides for Codex (whichever of the two I use).
-Verify python3 and xelatex are available and pymupdf is installed (use
---user or a venv if pip is externally managed), then confirm the skill
-loads.
+Verify python3 and xelatex are available and that python3 can import fitz
+(PyMuPDF). If it cannot, create ~/.venvs/econ-slides, install the repo's
+requirements.txt there, and tell me to run the skill's scripts with that
+venv's python. Then confirm the skill loads.
 ```
 
 <details>
 <summary>Manual installation</summary>
 
+Clone into a stable location: the links below point at the clone, so
+moving or deleting it breaks the install.
+
 macOS / Linux:
 
 ```bash
 git clone https://github.com/hanlulong/econ-slides-skill.git
-python3 -m pip install --user pymupdf   # or into a venv if pip is externally managed
+
+# PyMuPDF, only if `python3 -c "import fitz"` fails: use a dedicated venv
+python3 -m venv ~/.venvs/econ-slides
+~/.venvs/econ-slides/bin/python -m pip install -r econ-slides-skill/requirements.txt
 
 # Claude Code (global skills directory)
+mkdir -p ~/.claude/skills
 ln -s "$(pwd)/econ-slides-skill" ~/.claude/skills/econ-slides
 
 # Codex (shared agent-skills directory)
@@ -128,10 +141,27 @@ Windows (PowerShell — use `python` rather than `python3`):
 
 ```powershell
 git clone https://github.com/hanlulong/econ-slides-skill.git
-python -m pip install --user pymupdf
+# PyMuPDF, only if `python -c "import fitz"` fails: use a dedicated venv
+python -m venv "$env:USERPROFILE\.venvs\econ-slides"
+& "$env:USERPROFILE\.venvs\econ-slides\Scripts\python.exe" -m pip install -r econ-slides-skill\requirements.txt
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\skills" | Out-Null
 New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\econ-slides" -Target "$PWD\econ-slides-skill"
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.agents\skills" | Out-Null
 New-Item -ItemType Junction -Path "$env:USERPROFILE\.agents\skills\econ-slides" -Target "$PWD\econ-slides-skill"
+```
+
+With a venv, run the scripts as `~/.venvs/econ-slides/bin/python
+<skill-dir>/scripts/...` (Windows: `...\Scripts\python.exe`), or tell the
+agent which interpreter has PyMuPDF.
+
+On a minimal TeX (BasicTeX, TinyTeX, or another `scheme-basic` install), add
+the packages the bundled themes, templates, and sample use (run with `sudo`
+if your TeX tree is system-owned):
+
+```bash
+tlmgr install xetex beamer translator pgf xcolor appendixnumberbeamer booktabs \
+  multirow threeparttable tcolorbox environ trimspaces needspace setspace \
+  microtype mathpazo palatino fontname sansmathaccent koma-script
 ```
 
 Both clients read the same `SKILL.md`; any agent that can read it can use
@@ -224,7 +254,7 @@ Rachael Meager,
 [Paul Goldsmith-Pinkham](https://paulgp.com/beamer_tips.pdf),
 [John Cochrane](https://faculty.wcas.northwestern.edu/mdo738/teaching/cochrane.pdf),
 Dick Startz,
-[Marc Bellemare](https://profiles.shsu.edu/dpg006/present.htm), Monika
+[Marc Bellemare](https://marcfbellemare.com/wordpress/10053), Monika
 Piazzesi, Alex Tabarrok, David Evans, Darren Lubotsky, Donald Davis, Keith
 Head, and the Dallas Fed and ASHEcon discussant guides. The verification
 approach learns from [beamer-skill](https://github.com/Noi1r/beamer-skill)

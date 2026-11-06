@@ -73,7 +73,7 @@ echo "== handout mode collapses, rather than overprinting, builds =="
 sed 's/\\documentclass\[11pt, aspectratio=169\]{beamer}/\\documentclass[11pt, aspectratio=169, handout]{beamer}/' \
     tests/interface-test.tex > tests/_handout.tex
 if compile_clean tests/_handout.tex --build-dir tests/build-suite; then
-  HPAGES=$(python3 -c "import fitz; print(fitz.open('tests/build-suite/_handout.pdf').page_count)")
+  HPAGES=$(python3 -c "import pymupdf; print(pymupdf.open('tests/build-suite/_handout.pdf').page_count)")
   [ "$HPAGES" = "7" ] && ok "handout collapses overlays (7 pages)" \
                       || bad "handout page count $HPAGES (want 7)"
 else
@@ -89,7 +89,7 @@ for stock in Madrid CambridgeUS; do
   if compile_clean "$src" --build-dir tests/build-suite \
       && ship_clean "tests/build-suite/$stem.pdf" "$src" "tests/build-suite/$stem.log" \
       && python3 - "$stock" <<'PY'
-import fitz, re, sys
+import pymupdf as fitz, re, sys
 stock = sys.argv[1]
 text = fitz.open(f"tests/build-suite/_compat-{stock}.pdf")[-1].get_text()
 raise SystemExit(0 if re.search(r"A\s*1", text) else 1)
@@ -142,7 +142,7 @@ benchmark_contract() {
   fi
   python3 - "$source_dir" "$build" "$expected_deck_pages" \
       "$expected_main" "$expected_script_pages" "$expected_qa" <<'PY'
-import fitz
+import pymupdf as fitz
 import json
 from pathlib import Path
 import subprocess

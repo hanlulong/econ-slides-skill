@@ -17,6 +17,12 @@ Dallas Fed / ASHEcon discussant guides).
 
 ## Routing
 
+`<skill-dir>` below means the folder that contains this `SKILL.md` (in Claude
+Code, `${CLAUDE_SKILL_DIR}`; Codex does not substitute it). `python3` means a
+Python 3.10+ that can `import pymupdf`; if it cannot, use the interpreter that
+has PyMuPDF (for example `~/.venvs/econ-slides/bin/python`) or
+`uv run --with pymupdf python`.
+
 Identify the job first; read only the references you need.
 
 | Job | Route |

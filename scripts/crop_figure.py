@@ -10,7 +10,8 @@ Usage:
         --bbox 72,150,540,420 --out figures-slides/fig2_event_study.png
 
 Renders at 300 DPI so the crop stays legible when scaled to slide width.
-Requires PyMuPDF: pip install pymupdf
+Requires PyMuPDF (requirements.txt). If this Python lacks it, use a venv
+or ``uv run --with pymupdf python ...`` rather than ``pip install --user``.
 """
 
 from __future__ import annotations
@@ -21,10 +22,20 @@ import sys
 from pathlib import Path
 
 try:
-    import fitz  # PyMuPDF
+    import pymupdf as fitz  # PyMuPDF >= 1.24 (``fitz`` is deprecated in 2.x)
 except ImportError:  # pragma: no cover
-    print("error: PyMuPDF missing — pip install pymupdf", file=sys.stderr)
-    sys.exit(1)
+    try:
+        import fitz  # older PyMuPDF releases
+    except ImportError:
+        print("error: PyMuPDF is not importable by this Python "
+              f"({sys.executable}).\n"
+              "  Run the script with an interpreter that has it, e.g. a venv:\n"
+              "    python3 -m venv ~/.venvs/econ-slides\n"
+              "    ~/.venvs/econ-slides/bin/python -m pip install pymupdf\n"
+              "    ~/.venvs/econ-slides/bin/python <this script> ...\n"
+              "  or: uv run --with pymupdf python <this script> ...",
+              file=sys.stderr)
+        sys.exit(1)
 
 
 def candidate_regions(page: fitz.Page) -> list[fitz.Rect]:
