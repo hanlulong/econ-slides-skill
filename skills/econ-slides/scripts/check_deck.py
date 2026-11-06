@@ -28,8 +28,9 @@ Checks (geometry measured from the PDF itself, not guessed from source):
 Score starts at 100 and deducts only for objective or strongly actionable
 findings. Edge overflow, serious overfull boxes, navigation collisions, dead
 links, undefined citations or references, prohibited arrow markers, the
-disallowed question label, and conclusion links are hard blockers. Wrapped text, density, sparse layout, prose columns,
-emphasis, exhibit readings, and conclusion density are review prompts: judge
+disallowed question label, and conclusion links are hard blockers. Wrapped
+text, density, sparse layout, prose columns, emphasis, exhibit readings, and
+conclusion density are review prompts: judge
 them against the paper and target deck, and never trigger filler or a forced
 structure.
 --render-dir writes one PNG per page

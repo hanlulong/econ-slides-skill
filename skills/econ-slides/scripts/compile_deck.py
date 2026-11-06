@@ -178,9 +178,11 @@ def main() -> int:
     # relative --themes-dir from the repository root.
     themes = (args.themes_dir or BUNDLED_THEMES).resolve()
     if not themes.is_dir():
-        print(f"error: themes directory {themes} not found — the skill's "
-              "scripts/ and themes/ must stay together in one skill folder, "
-              "or pass --themes-dir", file=sys.stderr)
+        reason = ("--themes-dir does not exist" if args.themes_dir else
+                  "the skill's scripts/ and themes/ must stay together in one "
+                  "skill folder, or pass --themes-dir")
+        print(f"error: themes directory {themes} not found — {reason}",
+              file=sys.stderr)
         return 1
     # os.pathsep: ':' on Unix, ';' on Windows (TeX Live/MiKTeX expect it)
     sep = os.pathsep
