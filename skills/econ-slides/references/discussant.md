@@ -10,6 +10,14 @@ written for the Economic Scholars Program, an undergraduate research
 conference it runs with Austin College; the advice carries over, but its
 10-minute limit is that conference's rule, not a general norm.
 
+## Contents
+
+- Time and size discipline
+- An adaptable discussant path
+- Tone rules
+- The spoken layer
+- Number provenance (applies with extra force)
+
 ## Time and size discipline
 
 First determine what the clock means. An organizer's “10-minute discussion”
