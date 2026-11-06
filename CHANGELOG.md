@@ -22,7 +22,7 @@ that the v0.1.1 notes described.
   re-link `~/.claude/skills/econ-slides` to `<clone>/skills/econ-slides`.
 - Codex lists a manual link to the clone as `econ-slides:econ-slides`,
   whichever folder it points at, because the clone now carries plugin
-  manifests. It triggers the same way as before.
+  manifests.
 - Remove any manual link before installing the plugin, so a client never loads
   two copies.
 - Scripts are now called as `<skill-dir>/scripts/...`, where `<skill-dir>` is

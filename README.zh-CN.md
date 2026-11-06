@@ -86,7 +86,7 @@ codex plugin add econ-slides@openeconai
 <details>
 <summary>从 0.1.x 升级</summary>
 
-0.2.0 起，技能从仓库根目录移到了 `skills/econ-slides/`。指向克隆根目录的旧链接在 `git pull` 之后仍然可用，但 Claude Code 现在会把它作为插件式文件夹加载（`econ-slides@skills-dir`，以 `/econ-slides:econ-slides` 调用）。如需保留不带前缀的 `/econ-slides`，请把 `~/.claude/skills/econ-slides` 重新链接到 `<clone>/skills/econ-slides`。在 Codex 中，无论链接指向哪个文件夹，手动链接都会显示为 `econ-slides:econ-slides`，因为克隆目录带有插件清单；触发方式与之前相同。
+0.2.0 起，技能从仓库根目录移到了 `skills/econ-slides/`。指向克隆根目录的旧链接在 `git pull` 之后仍然可用，但 Claude Code 现在会把它作为插件式文件夹加载（`econ-slides@skills-dir`，以 `/econ-slides:econ-slides` 调用）。如需保留不带前缀的 `/econ-slides`，请把 `~/.claude/skills/econ-slides` 重新链接到 `<clone>/skills/econ-slides`。在 Codex 中，无论链接指向哪个文件夹，手动链接都会显示为 `econ-slides:econ-slides`，因为克隆目录带有插件清单。
 
 </details>
 

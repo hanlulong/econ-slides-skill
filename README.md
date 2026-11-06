@@ -148,7 +148,7 @@ Code now loads it as a plugin-style folder (`econ-slides@skills-dir`, invoked as
 `/econ-slides:econ-slides`). To keep the bare `/econ-slides`, re-link
 `~/.claude/skills/econ-slides` to `<clone>/skills/econ-slides`. Codex lists a
 manual link to this clone as `econ-slides:econ-slides` either way, because the
-clone carries plugin manifests; it triggers the same as before.
+clone carries plugin manifests.
 
 </details>
 
