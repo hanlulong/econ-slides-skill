@@ -4,10 +4,17 @@
 Usage:
     python3 scripts/compile_deck.py talk.tex [--engine xelatex] [--build-dir build]
                                              [--themes-dir PATH] [--passes 2]
+                                             [--timeout 600]
 
 Runs the engine non-interactively, parses the log, and prints a compact
 human/machine-readable verdict: OK with page count, or the first real error
 with its line number and a triage hint. Exit code 0 on success, 1 on failure.
+
+When the source (including local \\input files) uses \\bibliography{...} or
+\\addbibresource{...}, BibTeX or Biber runs between the first and the final
+passes, with the source directory on BIBINPUTS/BSTINPUTS. Undefined citations
+and cross-references left in the final log are counted as ``undefined_refs``;
+check_deck.py treats them as a hard blocker.
 """
 
 from __future__ import annotations
@@ -20,6 +27,10 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+# Sibling helpers are imported by path so the script runs from any directory.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from check_script import tex_tree  # noqa: E402  (no PyMuPDF dependency)
 
 TRIAGE = [
     (r"! LaTeX Error: File `([^']+)' not found",
@@ -72,6 +83,60 @@ def page_count(log_text: str) -> int | None:
     return int(digits) if digits else None
 
 
+# ``Citation `key' on page 3 undefined`` from LaTeX and natbib; biblatex uses
+# straight quotes. TeX hard-wraps log lines at 79 columns, so a long key or the
+# page clause may continue on the next line.
+UNDEFINED_RE = re.compile(
+    r"(?:LaTeX|Package natbib) Warning: (Citation|Reference) [`']"
+    r"([^'\s]+(?:\n[^'\s]+)?)'\s+on\s+page\s+(\d+)\s+undefined")
+UNDEFINED_SUMMARY_RE = re.compile(
+    r"LaTeX Warning: There were undefined references"
+    r"|Package natbib Warning: There were undefined citations")
+BIBER_RERUN_RE = re.compile(r"Package biblatex Warning: Please \(re\)run Biber")
+BIBTEX_RE = re.compile(r"\\bibliography\s*\{")
+BIBLATEX_RE = re.compile(r"\\addbibresource\s*(?:\[[^]]*\])?\s*\{")
+
+
+def undefined_references(log_text: str) -> dict:
+    """Summarize unresolved citations and cross-references in a final log.
+
+    Returns ``{"items": [{"kind", "key", "page"}...], "summary": bool,
+    "biber_rerun": bool}``. Items are unique by kind and key (first page
+    kept). ``summary`` records LaTeX's or natbib's end-of-run notice, which
+    can appear without per-key lines; ``biber_rerun`` records biblatex's
+    request for a Biber run, whose citations are then unresolved.
+    """
+    items: list[dict] = []
+    seen: set[tuple[str, str]] = set()
+    for match in UNDEFINED_RE.finditer(log_text):
+        kind = match.group(1).lower()
+        key = match.group(2).replace("\n", "").strip()
+        if (kind, key) in seen:
+            continue
+        seen.add((kind, key))
+        items.append({"kind": kind, "key": key, "page": int(match.group(3))})
+    return {"items": items,
+            "summary": bool(UNDEFINED_SUMMARY_RE.search(log_text)),
+            "biber_rerun": bool(BIBER_RERUN_RE.search(log_text))}
+
+
+def undefined_count(info: dict) -> int:
+    """Count unresolved items; a bare summary or Biber request counts once."""
+    return len(info["items"]) or int(info["summary"] or info["biber_rerun"])
+
+
+def bibliography_tool(tex: Path) -> str | None:
+    """Return ``bibtex``, ``biber``, or None for the deck's bibliography."""
+    src = tex_tree(tex)
+    if BIBLATEX_RE.search(src):
+        backend = re.search(r"backend\s*=\s*(\w+)", src)
+        return "bibtex" if backend and backend.group(1).startswith("bibtex") \
+            else "biber"
+    if BIBTEX_RE.search(src):
+        return "bibtex"
+    return None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("texfile", type=Path)
@@ -82,10 +147,14 @@ def main() -> int:
     ap.add_argument("--themes-dir", type=Path, default=None,
                     help="added to TEXINPUTS so \\usepackage{econ-slides-*} resolves")
     ap.add_argument("--passes", type=int, default=2)
+    ap.add_argument("--timeout", type=float, default=600,
+                    help="seconds allowed per engine or bibliography run (default 600)")
     ap.add_argument("--json", action="store_true", help="machine-readable output")
     args = ap.parse_args()
     if args.passes <= 0:
         ap.error("--passes must be positive")
+    if args.timeout <= 0:
+        ap.error("--timeout must be positive")
 
     tex = args.texfile.resolve()
     if not tex.exists():
@@ -106,26 +175,75 @@ def main() -> int:
     sep = os.pathsep
     env["TEXINPUTS"] = f".{sep}{themes}{sep}" + env.get("TEXINPUTS", "")
 
+    # BibTeX/Biber run in the build directory, where the .aux/.bcf live; the
+    # source directory supplies the .bib and .bst files.
+    for var in ("BIBINPUTS", "BSTINPUTS"):
+        env[var] = f"{tex.parent}{sep}" + env.get(var, "")
+
     cmd = [args.engine, "-interaction=nonstopmode", "-halt-on-error",
            f"-output-directory={build}", tex.name]
+    bib_tool = bibliography_tool(tex)
+    # A bibliography needs one pass to write citations, the tool, and two more
+    # passes so labels and citations settle.
+    passes = max(args.passes, 3) if bib_tool else args.passes
     ok = True
-    for _ in range(args.passes):
-        proc = subprocess.run(cmd, cwd=tex.parent, env=env,
-                              capture_output=True, text=True, timeout=600)
+    stdout = ""
+    timed_out: str | None = None
+    bib: dict | None = None
+    if bib_tool:
+        bib = {"tool": bib_tool, "ran": False, "returncode": None}
+    for index in range(passes):
+        try:
+            proc = subprocess.run(cmd, cwd=tex.parent, env=env, capture_output=True,
+                                  text=True, timeout=args.timeout)
+        except subprocess.TimeoutExpired:
+            ok = False
+            timed_out = f"{args.engine} timed out after {args.timeout:g}s"
+            break
+        stdout = proc.stdout
         if proc.returncode != 0:
             ok = False
             break
+        if index == 0 and bib is not None:
+            if shutil.which(bib_tool) is None:
+                bib["warning"] = f"{bib_tool} not on PATH; citations stay undefined"
+                continue
+            try:
+                bproc = subprocess.run([bib_tool, tex.stem], cwd=build, env=env,
+                                       capture_output=True, text=True,
+                                       timeout=args.timeout)
+            except subprocess.TimeoutExpired:
+                bib["warning"] = f"{bib_tool} timed out after {args.timeout:g}s"
+                continue
+            bib["ran"] = True
+            bib["returncode"] = bproc.returncode
+            if bproc.returncode != 0:
+                # BibTeX exits 1 on warnings (for example a missing entry) and
+                # 2 on errors; either way the final log reports what is left.
+                tail = (bproc.stdout or bproc.stderr).strip().splitlines()[-3:]
+                bib["warning"] = f"{bib_tool} exited {bproc.returncode}: " + \
+                    " | ".join(tail)
 
     log_path = build / (tex.stem + ".log")
     log_text = (log_path.read_text(encoding="utf-8", errors="replace")
-                if log_path.exists() else proc.stdout)
+                if log_path.exists() else stdout)
     pdf_path = build / (tex.stem + ".pdf")
 
     result: dict = {"ok": ok and pdf_path.exists(), "pdf": str(pdf_path),
                     "log": str(log_path)}
+    if bib is not None:
+        result["bibliography"] = bib
     if result["ok"]:
         result["overfull"] = len(re.findall(r"^Overfull \\[hv]box", log_text, re.M))
         result["pages"] = page_count(log_text)
+        undefined = undefined_references(log_text)
+        result["undefined_refs"] = undefined_count(undefined)
+        result["undefined"] = undefined["items"]
+    elif timed_out:
+        result["error"] = timed_out
+        result["hint"] = ("The engine did not finish. Look for an infinite loop "
+                          "(a runaway \\loop, TikZ/pgfplots recursion, or a "
+                          "prompt despite nonstopmode), or raise --timeout.")
     else:
         err = find_error(log_text)
         result["error"], result["hint"] = err if err else ("unknown", "inspect the log")
@@ -133,8 +251,16 @@ def main() -> int:
     if args.json:
         print(json.dumps(result, indent=2))
     elif result["ok"]:
-        print(f"OK: {result['pages']} pages, {result['overfull']} overfull box warnings")
+        print(f"OK: {result['pages']} pages, {result['overfull']} overfull box warnings, "
+              f"{result['undefined_refs']} undefined citations/references")
         print(f"pdf: {pdf_path}")
+        if result["undefined_refs"]:
+            keys = ", ".join(f"{u['kind']} {u['key']}" for u in undefined["items"][:8])
+            print("warning: unresolved citations or references render as [?] or ??"
+                  + (f": {keys}" if keys else "")
+                  + " — check_deck.py blocks delivery until they are fixed")
+        if bib is not None and bib.get("warning"):
+            print(f"warning: {bib['warning']}")
     else:
         print(f"FAILED: {result['error']}")
         print(f"hint: {result['hint']}")

@@ -137,10 +137,13 @@ python3 <skill-dir>/scripts/check_deck.py talk/build/sed-2026.pdf \
 ```
 
 - `compile_deck.py`: XeLaTeX, two passes, themes dir on `TEXINPUTS`,
-  triaged first error on failure.
+  triaged first error on failure. A deck with `\bibliography` or
+  `\addbibresource` gets BibTeX or Biber and three passes; the result reports
+  `undefined_refs`, and `--timeout` (default 600 s) bounds each run.
 - `check_deck.py`: geometry-measured layout audit + numeric triage score.
   Objective failures—compilation errors, missing assets, edge overflow,
-  serious overfull boxes, collisions, broken links, and unreadable content—
+  serious overfull boxes, collisions, broken links, undefined citations or
+  references, and unreadable content—
   block delivery. Wrapped text, density, columns, emphasis, and sparse-layout
   findings require visual and editorial review against the target deck, not
   automatic padding or a forced rewrite:

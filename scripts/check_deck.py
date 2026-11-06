@@ -13,6 +13,8 @@ Checks (geometry measured from the PDF itself, not guessed from source):
   wrapped-bullet  a bullet whose text wraps to further lines
   density         more than MAX_BULLETS top-level bullets on one slide
   overfull        Overfull \\hbox/\\vbox warnings parsed from the .log
+  undefined-ref   an undefined citation or cross-reference: LaTeX/natbib/biblatex
+                  warnings in the .log, or a [?], (?) or ?? marker in the PDF text
   pause-chain     3+ \\pause in one frame (overlay used as decoration)
   dead-link       a navigation target is absent from the TeX source
   arrow-bullet    a right arrow is used as a list marker
@@ -25,8 +27,8 @@ Checks (geometry measured from the PDF itself, not guessed from source):
 
 Score starts at 100 and deducts only for objective or strongly actionable
 findings. Edge overflow, serious overfull boxes, navigation collisions, dead
-links, prohibited arrow markers, the disallowed question label, and conclusion
-links are hard blockers. Wrapped text, density, sparse layout, prose columns,
+links, undefined citations or references, prohibited arrow markers, the
+disallowed question label, and conclusion links are hard blockers. Wrapped text, density, sparse layout, prose columns,
 emphasis, exhibit readings, and conclusion density are review prompts: judge
 them against the paper and target deck, and never trigger filler or a forced
 structure.
@@ -39,7 +41,9 @@ output and pass it back with --baseline-json. Objective blockers are compared
 as a multiset of semantic signatures: page numbers and volatile measurements
 are ignored, but text/link/title context and occurrence counts are retained.
 Inherited blockers remain visible but do not fail the edited deck; new
-blockers still fail. Review prompts and visual inspection remain necessary.
+blockers still fail. Undefined citations and references are never waived:
+a [?] or ?? on screen fails every deck, inherited or not. Review prompts and
+visual inspection remain necessary.
 
 Requires PyMuPDF (requirements.txt). If this Python lacks it, use a venv
 or ``uv run --with pymupdf python ...`` rather than ``pip install --user``.
@@ -53,6 +57,10 @@ import json
 import re
 import sys
 from pathlib import Path
+
+# Sibling helper imported by path so the script runs from any directory.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from compile_deck import undefined_references  # noqa: E402  (no PyMuPDF)
 
 try:
     import pymupdf as fitz  # PyMuPDF >= 1.24 (``fitz`` is deprecated in 2.x)
@@ -88,10 +96,18 @@ DEDUCT = {"edge-overflow": 15, "wrapped-title": 0, "wrapped-bullet": 0,
           "question-label": 5, "question-subtitle": 0,
           "roadmap-emphasis": 0,
           "exhibit-reading": 0, "conclusion-link": 10,
-          "conclusion-density": 0}
+          "conclusion-density": 0, "undefined-ref": 10}
 HARD_BLOCKERS = {"edge-overflow", "overfull", "nav-footer-overlap",
                  "dead-link", "arrow-bullet", "question-label",
-                 "conclusion-link"}
+                 "conclusion-link", "undefined-ref"}
+# Blockers that a --baseline-json comparison never treats as inherited: an
+# unresolved [?] or ?? is visible to the audience whoever introduced it.
+NON_WAIVABLE_BLOCKERS = {"undefined-ref"}
+# What LaTeX, natbib, and the standard styles print for an unresolved key:
+# [?] or [?, ?] (\cite), (?) (natbib), and a bold ?? (\ref). ``What??`` in
+# prose is not matched because the marker must stand alone.
+UNRESOLVED_MARKER_RE = re.compile(
+    r"\[\?(?:\s*,\s*\?)*\]|\(\?(?:\s*[,;]\s*\?)*\)|(?<![\w?])\?\?(?![\w?])")
 
 
 MATH_FONT_RE = re.compile(r"CMMI|CMSY|CMEX|MSBM|MSAM|Math|rsfs", re.I)
@@ -362,6 +378,18 @@ def check_nav_overlap(page: fitz.Page, pno: int) -> list[dict]:
     return findings
 
 
+def check_unresolved_markers(page: fitz.Page, pno: int) -> list[dict]:
+    """Flag the rendered placeholders of undefined citations and references."""
+    markers = UNRESOLVED_MARKER_RE.findall(page.get_text())
+    if not markers:
+        return []
+    shown = ", ".join(sorted({re.sub(r"\s+", " ", m) for m in markers}))
+    return [{"check": "undefined-ref", "page": pno,
+             "detail": f"unresolved citation/reference marker {shown} "
+                       f"x{len(markers)} in the PDF text — define the key, "
+                       "run BibTeX/Biber (compile_deck.py does), or remove it"}]
+
+
 def check_log(log_path: Path) -> list[dict]:
     findings = []
     text = log_path.read_text(encoding="utf-8", errors="replace")
@@ -369,6 +397,20 @@ def check_log(log_path: Path) -> list[dict]:
         if float(m.group(2)) > 2.0:
             findings.append({"check": "overfull", "page": None,
                              "detail": f"\\{m.group(1)}box {m.group(2)}pt too wide/tall"})
+    undefined = undefined_references(text)
+    for item in undefined["items"]:
+        findings.append({"check": "undefined-ref", "page": None,
+                         "detail": f"undefined {item['kind']} {item['key']!r} "
+                                   f"(log, TeX page {item['page']}) — renders as "
+                                   "[?] or ??"})
+    if not undefined["items"] and undefined["biber_rerun"]:
+        findings.append({"check": "undefined-ref", "page": None,
+                         "detail": "biblatex asks for a Biber run — citations are "
+                                   "unresolved; compile with compile_deck.py"})
+    elif not undefined["items"] and undefined["summary"]:
+        findings.append({"check": "undefined-ref", "page": None,
+                         "detail": "the log reports undefined references — rerun "
+                                   "LaTeX or fix the missing keys"})
     return findings
 
 
@@ -597,6 +639,10 @@ def finding_signature(finding: dict) -> str:
         context = detail.split(" — ", 1)[0]
     elif check == "conclusion-link":
         context = "conclusion navigation"
+    elif check == "undefined-ref":
+        # Key the log findings by kind and key; PDF markers by marker text.
+        context = re.sub(r" \(log, TeX page \d+\)", "", detail.split(" — ", 1)[0])
+        context = re.sub(r" x\d+ in the PDF text$", "", context)
     else:
         context = detail
 
@@ -614,7 +660,10 @@ def classify_blocker_regressions(
 
     Matching uses queues keyed by semantic signature. This preserves
     multiplicity: if the baseline has one occurrence and the edited deck has
-    two, exactly one is inherited and one is new.
+    two, exactly one is inherited and one is new. A non-waivable blocker
+    (``NON_WAIVABLE_BLOCKERS``) is always returned with the failing ``new``
+    list, flagged ``"non_waivable": True`` and ``"in_baseline"`` when the
+    baseline already had it, so an inherited ``[?]`` still fails the edit.
     """
     baseline_pool: dict[str, deque[dict]] = defaultdict(deque)
     for finding in baseline_findings:
@@ -631,8 +680,13 @@ def classify_blocker_regressions(
             continue
         signature = finding_signature(finding)
         classified = {**finding, "signature": signature}
-        if baseline_pool[signature]:
+        matched = bool(baseline_pool[signature])
+        if matched:
             baseline_pool[signature].popleft()
+        if finding.get("check") in NON_WAIVABLE_BLOCKERS:
+            new.append({**classified, "non_waivable": True,
+                        "in_baseline": matched})
+        elif matched:
             inherited.append(classified)
         else:
             new.append(classified)
@@ -723,6 +777,7 @@ def main() -> int:
         findings += check_page(doc.load_page(pno), pno + 1, final=final)
         if final:
             findings += check_nav_overlap(doc.load_page(pno), pno + 1)
+            findings += check_unresolved_markers(doc.load_page(pno), pno + 1)
     if args.log:
         findings += check_log(args.log)
     if args.tex:
@@ -782,6 +837,8 @@ def main() -> int:
               "inherited_blockers": inherited_blockers,
               "new_blockers": new_blockers,
               "resolved_blockers": resolved_blockers,
+              "undefined_refs": sum(f["check"] == "undefined-ref"
+                                    for f in findings),
               "findings": findings,
               "rendered": str(args.render_dir) if args.render_dir else None}
     if args.json:

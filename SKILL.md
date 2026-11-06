@@ -329,9 +329,12 @@ untouched checker's JSON first and pass it back with `--baseline-json` as
 specified in `references/existing-deck-workflow.md`; inherited blockers remain
 visible, while only new objective blockers fail the scoped regression check.
 Compilation failures, missing assets, edge
-overflow, unresolved links, serious overfull boxes, collisions, and unreadable
-content are blockers. A wrapped title, bullet, or dense frame triggers an
-editorial and visual review; an intentional readable wrap in the target style
+overflow, unresolved links, undefined citations or cross-references (`[?]`,
+`??`), serious overfull boxes, collisions, and unreadable content are
+blockers. `compile_deck.py` runs BibTeX or Biber when the deck has a
+bibliography and reports `undefined_refs`; the checker fails any deck that
+still shows one, inherited or not. A wrapped title, bullet, or dense frame
+triggers an editorial and visual review; an intentional readable wrap in the target style
 is not itself a failure. A sparse
 layout is a human-review signal, not permission to add filler. On every
 ordinary content slide, inspect the title-to-body gap, spacing between idea

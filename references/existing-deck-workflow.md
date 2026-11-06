@@ -422,6 +422,14 @@ comparison auditable. An additional identical occurrence is new. The ordinary
 `score` continues to describe the edited deck as a whole; `regression_score`
 removes only matched inherited objective blockers.
 
+Undefined citations and cross-references (`undefined-ref`) are the exception:
+the comparison never treats them as inherited, because a `[?]` or `??` on
+screen is never deliverable. They stay in `new_blockers` with
+`"non_waivable": true` (and `"in_baseline": true` when the untouched deck
+already had them). If they predate the edit and fixing them is outside the
+request, report the keys to the user rather than silently rewriting the
+bibliography.
+
 This mode is a scope-control aid, not a waiver of visual QA. It cannot prove
 that an old-looking defect is physically the same object after a wholesale
 rewrite, and it cannot see an ugly crop, reflow inside a box, misleading

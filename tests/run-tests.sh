@@ -716,6 +716,135 @@ else
   bad "wrapped multi-digit page-count regression"
 fi
 
+echo "== undefined citations and references never ship =="
+UNDEF_COMPILE=$(python3 scripts/compile_deck.py tests/undefined-ref-test.tex \
+    --build-dir tests/build-suite --json 2>/dev/null)
+if python3 -c '
+import json,sys
+r=json.load(sys.stdin)
+keys={(u["kind"], u["key"]) for u in r["undefined"]}
+raise SystemExit(0 if r["ok"] and r["undefined_refs"]==2 and keys=={
+    ("citation","missingFixtureKey"), ("reference","tab:missing")} else 1)' \
+    <<<"$UNDEF_COMPILE"; then
+  ok "compile reports undefined citation and reference keys"
+else
+  bad "compile undefined-reference report"
+fi
+
+python3 scripts/check_deck.py tests/build-suite/undefined-ref-test.pdf \
+  --tex tests/undefined-ref-test.tex --log tests/build-suite/undefined-ref-test.log \
+  --json > tests/build-suite/undefined-ref.json 2>/dev/null
+UNDEF_STATUS=$?
+python3 scripts/check_deck.py tests/build-suite/undefined-ref-test.pdf \
+  --json > tests/build-suite/undefined-ref-pdf-only.json 2>/dev/null
+UNDEF_PDF_STATUS=$?
+python3 scripts/check_deck.py tests/build-suite/undefined-ref-test.pdf \
+  --tex tests/undefined-ref-test.tex --log tests/build-suite/undefined-ref-test.log \
+  --baseline-json tests/build-suite/undefined-ref.json \
+  --json > tests/build-suite/undefined-ref-baseline.json 2>/dev/null
+UNDEF_BASE_STATUS=$?
+if python3 - "$UNDEF_STATUS" "$UNDEF_PDF_STATUS" "$UNDEF_BASE_STATUS" <<'PY'
+import json
+import sys
+
+status, pdf_status, base_status = map(int, sys.argv[1:])
+full = json.load(open("tests/build-suite/undefined-ref.json"))
+pdf_only = json.load(open("tests/build-suite/undefined-ref-pdf-only.json"))
+base = json.load(open("tests/build-suite/undefined-ref-baseline.json"))
+assert status == 1 and full["verdict"] == "must fix"
+assert "undefined-ref" in full["blockers"]
+details = " ".join(f["detail"] for f in full["findings"]
+                   if f["check"] == "undefined-ref")
+assert "missingFixtureKey" in details and "tab:missing" in details
+assert full["undefined_refs"] >= 3
+# Without --log, the rendered [?] and ?? markers alone still block.
+assert pdf_status == 1 and "undefined-ref" in pdf_only["blockers"]
+# An inherited undefined reference is never waived by a baseline.
+assert base_status == 1 and base["verdict"] == "must fix"
+assert base["blockers"] == ["undefined-ref"]
+assert base["new_blockers"]
+assert all(item["non_waivable"] and item["in_baseline"]
+           for item in base["new_blockers"])
+assert base["resolved_blockers"] == []
+PY
+then
+  ok "undefined citations/references block, even without a log or with a baseline"
+else
+  bad "undefined-reference blocker"
+fi
+
+if python3 - <<'PY'
+from scripts.check_deck import UNRESOLVED_MARKER_RE
+from scripts.compile_deck import undefined_references, undefined_count
+
+wrapped = (
+    "Package natbib Warning: Citation `missingkey' on page 1 undefined on input line\n"
+    " 6.\n\n"
+    "Package natbib Warning: Citation `thisisaveryveryveryveryverylongcitationkeynam\n"
+    "e2024abc' on page 1 undefined on input line 6.\n"
+    "LaTeX Warning: Citation 'blkey' on page 2 undefined on input line 7.\n"
+    "LaTeX Warning: Citation 'blkey' on page 3 undefined on input line 9.\n"
+)
+info = undefined_references(wrapped)
+keys = [item["key"] for item in info["items"]]
+assert keys == ["missingkey",
+                "thisisaveryveryveryveryverylongcitationkeyname2024abc",
+                "blkey"], keys
+assert undefined_count(undefined_references(
+    "Package biblatex Warning: Please (re)run Biber on the file:")) == 1
+assert undefined_count(undefined_references("No warnings here.")) == 0
+text = "Effects match [?, ?] and Table ??. Authors (?) agree. What?? Why? [1]"
+assert UNRESOLVED_MARKER_RE.findall(text) == ["[?, ?]", "??", "(?)"]
+PY
+then
+  ok "undefined-reference parsers handle wrapped, natbib, and biblatex forms"
+else
+  bad "undefined-reference parser regression"
+fi
+
+BIB_COMPILE=$(python3 scripts/compile_deck.py tests/bib-test.tex \
+    --build-dir tests/build-suite --json 2>/dev/null)
+if python3 -c '
+import json,sys
+import pymupdf
+r=json.load(sys.stdin)
+text="".join(page.get_text() for page in pymupdf.open(r["pdf"]))
+raise SystemExit(0 if r["ok"] and r["bibliography"]["tool"]=="bibtex"
+                 and r["bibliography"]["ran"] and r["undefined_refs"]==0
+                 and "[?]" not in text and "[1]" in text
+                 and "fictional rollout fixture" in text.lower() else 1)' \
+    <<<"$BIB_COMPILE" \
+    && ship_clean tests/build-suite/bib-test.pdf tests/bib-test.tex \
+       tests/build-suite/bib-test.log; then
+  ok "compile runs BibTeX for a \\bibliography deck, which then ships"
+else
+  bad "bibliography-aware compile"
+fi
+
+printf '%s\n' '\documentclass{article}' '\begin{document}' \
+  '\def\loopforever{\loopforever}\loopforever' '\end{document}' > tests/_loop.tex
+LOOP_OUT=$(python3 scripts/compile_deck.py tests/_loop.tex --timeout 2 \
+    --build-dir tests/build-suite --json 2>&1)
+LOOP_STATUS=$?
+if [ "$LOOP_STATUS" = "1" ] && [[ "$LOOP_OUT" != *Traceback* ]] \
+    && python3 -c '
+import json,sys
+r=json.load(sys.stdin)
+raise SystemExit(0 if not r["ok"] and "timed out after 2s" in r["error"] else 1)' \
+    <<<"$LOOP_OUT"; then
+  ok "engine timeout is reported as JSON, not a traceback"
+else
+  bad "engine timeout handling"
+fi
+rm -f tests/_loop.tex
+
+if python3 scripts/compile_deck.py tests/interface-test.tex --timeout 0 \
+     >/dev/null 2>&1; then
+  bad "nonpositive compile timeout"
+else
+  ok "nonpositive compile timeout is rejected"
+fi
+
 echo
 echo "$PASS passed, $FAIL failed"
 exit $((FAIL > 0))

@@ -64,9 +64,11 @@ at every page before delivery.
    use a native slide table, equation, or concise text next. Rebuild or create
    a figure only when necessary, from traceable inputs, with individual visual
    QA. Regression tables are reduced to the rows and columns the talk needs.
-5. **A real verification loop.** `compile_deck.py` compiles and triages errors;
+5. **A real verification loop.** `compile_deck.py` compiles, runs BibTeX or
+   Biber when the deck has a bibliography, and triages errors;
    `check_deck.py` blocks objective failures such as edge overflow, serious
-   overfull boxes, broken links, and navigation collisions while treating
+   overfull boxes, broken links, undefined citations or references (`[?]`,
+   `??`), and navigation collisions while treating
    wrapping, density, columns, emphasis, and whitespace as review prompts.
    For a scoped edit, its baseline mode separates inherited defects from new
    objective regressions without waiving the visual comparison.
