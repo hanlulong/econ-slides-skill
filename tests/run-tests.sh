@@ -849,6 +849,38 @@ else
   ok "nonpositive compile timeout is rejected"
 fi
 
+echo "== plugin packaging stays consistent =="
+if python3 - <<'PY'
+import json
+import re
+from pathlib import Path
+
+claude = json.loads(Path(".claude-plugin/plugin.json").read_text())
+codex = json.loads(Path(".codex-plugin/plugin.json").read_text())
+skill = Path("skills/econ-slides/SKILL.md").read_text()
+front = skill.split("---", 2)[1]
+assert re.search(r"^name: econ-slides$", front, re.M)
+version = re.search(r'^  version: "([^"]+)"$', front, re.M).group(1)
+assert claude["name"] == codex["name"] == "econ-slides"
+assert claude["version"] == codex["version"] == version
+assert claude["skills"] == codex["skills"] == "./skills/"
+assert claude["license"] == codex["license"] == "MIT"
+assert {k: v for k, v in codex.items() if k != "interface"} == claude
+prompts = codex["interface"]["defaultPrompt"]
+assert 1 <= len(prompts) <= 3
+assert all(len(p) <= 128 and "econ-slides" in p for p in prompts)
+# One copy of the skill: no root SKILL.md shim, no top-level Beamer themes/.
+assert not Path("SKILL.md").exists() and not Path("themes").exists()
+assert [p.parent.name for p in Path("skills").glob("*/SKILL.md")] == ["econ-slides"]
+changelog = Path("CHANGELOG.md").read_text()
+assert f"## {version} " in changelog
+PY
+then
+  ok "plugin manifests, skill metadata, and CHANGELOG agree on name and version"
+else
+  bad "plugin packaging consistency"
+fi
+
 echo
 echo "$PASS passed, $FAIL failed"
 exit $((FAIL > 0))
