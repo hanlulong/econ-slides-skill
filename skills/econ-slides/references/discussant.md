@@ -2,10 +2,13 @@
 
 A discussion is its own genre with two jobs (Dallas Fed): help the audience
 understand the paper, and help the author improve it. Every slide serves one
-of the two. Sources: Dallas Fed
+of the two. Sources: the Dallas Fed's
 ["Tips on Being a Good Discussant"](https://www.dallasfed.org/~/media/documents/educate/events/esp/tipsdiscussant.pdf),
 ASHEcon ["How to Be a Good Discussant"](https://ashecon.org/activities/news/how-to-be-a-good-discussant)
-(Burton, Willage and Zanwar, Newsletter 2024:1).
+(Burton, Willage and Zanwar, Newsletter 2024:1). The Dallas Fed tips are
+written for the Economic Scholars Program, an undergraduate research
+conference it runs with Austin College; the advice carries over, but its
+10-minute limit is that conference's rule, not a general norm.
 
 ## Time and size discipline
 
@@ -18,7 +21,7 @@ question share from it, and check it with `check_script.py
 |---|---|---|
 | 15-minute paper presentation | usually 5–7 minutes, often less | ASHEcon (Burton) |
 | Conference session, one discussant per paper | about 7 minutes per paper (15 for two papers) | ASHEcon (Willage; participant guidelines) |
-| Dallas Fed format | 10 minutes, a firm limit | Dallas Fed |
+| Dallas Fed Economic Scholars Program (an undergraduate research conference) | 10 minutes, a firm limit | Dallas Fed |
 
 These are norms, not targets: the organizer's number wins, and "often you can
 do a good discussion in even less time" (ASHEcon). Only when the user gives a

@@ -91,8 +91,9 @@ paper's headline is a static two-way fixed-effects (TWFE) coefficient:
 
 - A static TWFE coefficient is a weighted average of all two-by-two
   comparisons, including comparisons that use already-treated units as
-  controls (Goodman-Bacon 2021); with heterogeneous or growing effects some
-  weights can be negative (de Chaisemartin and D'Haultfœuille 2020).
+  controls (Goodman-Bacon 2021). Some weights can be negative (de
+  Chaisemartin and D'Haultfœuille 2020), so with heterogeneous or growing
+  effects the coefficient can be biased, even in sign.
 - Compare it with the event-study path and with any cohort-specific or
   heterogeneity-robust estimates the paper reports (Callaway and Sant'Anna
   2021; Sun and Abraham 2021; Borusyak, Jaravel and Spiess 2024; de
@@ -135,8 +136,9 @@ story.
   (`design-checks.md` §Multiple testing).
 - An Implication line inherits the ledger status of the evidence beneath it.
   When the primary result is `descriptive only`, the Implication avoids causal
-  verbs ("matters", "raises", "drives"): write "gains are concentrated where
-  ...", not "infrastructure matters most where ...".
+  verbs ("matters", "raises", "drives") and effect nouns ("gains"): write
+  "differences are larger where ...", not "infrastructure matters most
+  where ...".
 - Trace policy calculations as a unit-preserving chain on the slide or in its
   note. Do not silently turn a labor-productivity level effect into TFP growth,
   annual output, fiscal revenue, welfare, or comparative cost-effectiveness.

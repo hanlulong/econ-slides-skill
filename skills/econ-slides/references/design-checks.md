@@ -78,7 +78,11 @@ rather than filling the gap.
 - **Show:** the randomization unit, balance and attrition, and whether the
   estimate is intent-to-treat or treatment-on-the-treated.
 - **Registration:** the AEA journals require field experiments to be
-  "registered prior to submission" (AEA RCT Registry policy). In the talk,
+  "registered prior to submission" (AEA RCT Registry policy), but
+  "Researchers may register during any phase of the trial—forthcoming,
+  ongoing, or completed", and no pre-analysis plan is required. So a
+  registration alone does not show that an outcome was pre-specified: check
+  the registration date and whether a pre-analysis plan exists. In the talk,
   separate pre-specified outcomes and analyses from exploratory ones.
 - **Overclaim:** presenting an exploratory subgroup as a pre-specified test.
 

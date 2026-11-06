@@ -131,7 +131,8 @@ graph or an existing deck gives a better answer.
    Each contribution gets one clear line with a bold lead phrase and, when
    supported, the magnitude in words; add a subpoint only when it earns its
    space. The boundary stays subordinate. **No inference details there** — standard
-   errors and stars live in the results table, not on the punchline.
+   errors (and any stars the source itself uses) live in the results table,
+   not on the punchline.
 8. **Slide tables are not paper tables.** Apply the surgery procedure in
    `references/exhibit-surgery.md`; never paste or `\input` a paper table.
 9. **Use overlays to build reasoning, not decorate.** Progressive reveals are for
@@ -187,7 +188,10 @@ graph or an existing deck gives a better answer.
     has no Data slide unless data, calibration, or estimation is part of the
     paper.
 18. **Protect question time.** Treat the user's clock as the total session
-    unless they explicitly call it speaking time. Size the question reserve to
+    unless they explicitly call it speaking time. For a discussion, an
+    organizer's slot is the discussant's speaking allocation unless the user
+    says the discussant owns a longer session (`references/discussant.md`).
+    Size the question reserve to
     the genre: a conference talk plans 75--80% for prepared speech (20--25%
     for questions); a department seminar or job talk plans about 60--70%,
     because interruptions are expected; a discussion has a ceiling only.
@@ -212,7 +216,9 @@ graph or an existing deck gives a better answer.
 Establish before writing anything: **stance** (author / neutral summary /
 discussant), **genre** (conference talk / seminar / job talk / discussion),
 **total session clock**, whether the user instead stated **speaking time**,
-whether a discussant or a pooled question period sits outside the clock, the
+whether a discussant or a pooled question period sits outside the clock (for
+a discussion, the organizer's slot is speaking time unless the discussant owns
+a longer session), the
 speaker's **pace** (words per minute, from a timed read if unknown), the
 **planned speaking window** and **question reserve**, **audience** (field experts /
 generalists / policy), **theme**, title metadata (including author-to-
@@ -333,6 +339,8 @@ python3 <skill-dir>/scripts/check_deck.py build/talk.pdf \
 
 Always pass both `--tex` and `--log`: without them the checker skips the
 source and log checks, says so, and reports "incomplete" rather than "ship".
+`--log` must come from the build that made the PDF; a TeX error recorded in
+it (`compile-error`) blocks, and a log for another PDF stops the check.
 Exit status 0 means ship, 1 means the deck is not ready, 2 means the check
 could not run, and 3 means the checker crashed; treat 2 and 3 as a broken
 check, never as a verdict.
