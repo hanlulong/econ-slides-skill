@@ -12,9 +12,13 @@ with its line number and a triage hint. Exit code 0 on success, 1 on failure.
 
 When the source (including local \\input files) uses \\bibliography{...} or
 \\addbibresource{...}, BibTeX or Biber runs between the first and the final
-passes, with the source directory on BIBINPUTS/BSTINPUTS. Undefined citations
-and cross-references left in the final log are counted as ``undefined_refs``;
-check_deck.py treats them as a hard blocker.
+passes. It runs from the source directory, as an in-place build would, so
+relative paths such as \\bibliography{../refs} resolve; its .bbl goes to the
+build directory. If the tool cannot find a database or style file, a prebuilt
+<stem>.bbl beside the source (an arXiv or Overleaf export, or an earlier
+in-place build) is used instead of the empty one the tool wrote. Undefined
+citations and cross-references left in the final log are counted as
+``undefined_refs``; check_deck.py treats them as a hard blocker.
 """
 
 from __future__ import annotations
@@ -131,6 +135,71 @@ def undefined_count(info: dict) -> int:
     return len(info["items"]) or int(info["summary"] or info["biber_rerun"])
 
 
+# A missing input leaves the tool's .bbl empty or useless: BibTeX's
+# "I couldn't open database/style file", "I found no database files" (or
+# \\bibdata/\\bibstyle), and Biber's "ERROR - Cannot find 'refs.bib'!".
+MISSING_BIB_INPUT_RE = re.compile(
+    r"I couldn't open (?:database|style) file"
+    r"|I found no (?:database files|style file|\\bibdata command|\\bibstyle command)"
+    r"|ERROR - Cannot find")
+
+
+def run_bibliography(tool: str, tex: Path, build: Path, env: dict,
+                     timeout: float) -> dict:
+    """Run BibTeX or Biber for ``tex`` after the first engine pass.
+
+    Both run from the source directory, the directory an in-place build uses,
+    so a relative ``\\bibliography{../refs}`` or ``\\addbibresource{../refs.bib}``
+    resolves; the .bbl and .blg go to ``build``. When the tool reports a
+    missing database or style file and a prebuilt ``<stem>.bbl`` sits beside
+    the source, the .bbl the tool wrote is discarded (or, for a build in the
+    source directory, the previous one restored), so the prebuilt one still
+    reaches the final passes.
+    """
+    bib: dict = {"tool": tool, "ran": False, "returncode": None}
+    if shutil.which(tool) is None:
+        bib["warning"] = f"{tool} not on PATH; citations stay undefined"
+        return bib
+    bbl = build / (tex.stem + ".bbl")
+    in_place = build == tex.parent
+    prior = bbl.read_bytes() if in_place and bbl.exists() else None
+    run_env = dict(env)
+    if tool == "biber":
+        cmd = [tool, "--output-directory", str(build), tex.stem]
+    else:
+        # BibTeX writes <aux>.bbl and <aux>.blg beside the .aux it is given.
+        # TeX Live's default openout_any=p refuses that for most absolute
+        # paths and for any hidden folder. BibTeX opens no other output
+        # file, so lifting the check for this one call is safe.
+        cmd = [tool, str(build / tex.stem)]
+        run_env["openout_any"] = "a"
+    try:
+        proc = subprocess.run(cmd, cwd=tex.parent, env=run_env,
+                              capture_output=True, text=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        bib["warning"] = f"{tool} timed out after {timeout:g}s"
+        return bib
+    bib["ran"] = True
+    bib["returncode"] = proc.returncode
+    output = (proc.stdout or "") + (proc.stderr or "")
+    if proc.returncode != 0:
+        # BibTeX exits 1 on warnings (for example a missing entry) and 2 on
+        # errors; either way the final log reports what is left.
+        tail = output.strip().splitlines()[-3:]
+        bib["warning"] = f"{tool} exited {proc.returncode}: " + " | ".join(tail)
+    source_bbl = tex.parent / bbl.name
+    fallback = prior is not None or (not in_place and source_bbl.exists())
+    if fallback and MISSING_BIB_INPUT_RE.search(output):
+        if prior is not None:
+            bbl.write_bytes(prior)  # in-place build: put the user's .bbl back
+        else:
+            bbl.unlink(missing_ok=True)  # TeX then reads the source .bbl
+        bib["kept_bbl"] = str(source_bbl)
+        bib["warning"] = (bib.get("warning", f"{tool} reported a missing input")
+                          + f"; kept the existing {source_bbl.name} beside the source")
+    return bib
+
+
 def bibliography_tool(tex: Path) -> str | None:
     """Return ``bibtex``, ``biber``, or None for the deck's bibliography."""
     src = tex_tree(tex)
@@ -188,8 +257,8 @@ def main() -> int:
     sep = os.pathsep
     env["TEXINPUTS"] = f".{sep}{themes}{sep}" + env.get("TEXINPUTS", "")
 
-    # BibTeX/Biber run in the build directory, where the .aux/.bcf live; the
-    # source directory supplies the .bib and .bst files.
+    # BibTeX/Biber run from the source directory, which also stays on the
+    # search path when the caller's BIBINPUTS/BSTINPUTS omit ".".
     for var in ("BIBINPUTS", "BSTINPUTS"):
         env[var] = f"{tex.parent}{sep}" + env.get(var, "")
 
@@ -203,8 +272,6 @@ def main() -> int:
     stdout = ""
     timed_out: str | None = None
     bib: dict | None = None
-    if bib_tool:
-        bib = {"tool": bib_tool, "ran": False, "returncode": None}
     for index in range(passes):
         try:
             proc = subprocess.run(cmd, cwd=tex.parent, env=env, capture_output=True,
@@ -217,25 +284,8 @@ def main() -> int:
         if proc.returncode != 0:
             ok = False
             break
-        if index == 0 and bib is not None:
-            if shutil.which(bib_tool) is None:
-                bib["warning"] = f"{bib_tool} not on PATH; citations stay undefined"
-                continue
-            try:
-                bproc = subprocess.run([bib_tool, tex.stem], cwd=build, env=env,
-                                       capture_output=True, text=True,
-                                       timeout=args.timeout)
-            except subprocess.TimeoutExpired:
-                bib["warning"] = f"{bib_tool} timed out after {args.timeout:g}s"
-                continue
-            bib["ran"] = True
-            bib["returncode"] = bproc.returncode
-            if bproc.returncode != 0:
-                # BibTeX exits 1 on warnings (for example a missing entry) and
-                # 2 on errors; either way the final log reports what is left.
-                tail = (bproc.stdout or bproc.stderr).strip().splitlines()[-3:]
-                bib["warning"] = f"{bib_tool} exited {bproc.returncode}: " + \
-                    " | ".join(tail)
+        if index == 0 and bib_tool:
+            bib = run_bibliography(bib_tool, tex, build, env, args.timeout)
 
     log_path = build / (tex.stem + ".log")
     log_text = (log_path.read_text(encoding="utf-8", errors="replace")

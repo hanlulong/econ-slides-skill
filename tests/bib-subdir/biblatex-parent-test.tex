@@ -1,0 +1,21 @@
+% Relative biblatex fixture: \addbibresource{../bib-test.bib} names a
+% database one folder up. compile_deck.py must run Biber from this folder so
+% the citation resolves (biblatex otherwise prints the bare key).
+\documentclass[11pt,aspectratio=169]{beamer}
+\usepackage{econ-slides-house}
+\usepackage[backend=biber]{biblatex}
+\addbibresource{../bib-test.bib}
+
+\begin{document}
+
+\begin{frame}{Related work}
+  \begin{itemize}
+    \item Rollout timing follows \cite{fixtureRollout2021}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{References}
+  \printbibliography
+\end{frame}
+
+\end{document}

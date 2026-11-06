@@ -10,7 +10,7 @@ export PYTHONPATH="$PWD/$SKILL_DIR${PYTHONPATH:+:$PYTHONPATH}"
 PASS=0; FAIL=0
 # Generated sources live beside their originals so relative \input paths
 # resolve; remove them even when the run is interrupted.
-cleanup() { rm -f skills/econ-slides/templates/_swap-*.tex tests/_*.tex; }
+cleanup() { rm -f skills/econ-slides/templates/_swap-*.tex tests/_*.tex; rm -rf tests/bib-subdir/build; }
 trap cleanup EXIT
 ok()  { echo "  PASS  $1"; PASS=$((PASS+1)); }
 bad() { echo "  FAIL  $1"; FAIL=$((FAIL+1)); }
@@ -823,6 +823,66 @@ raise SystemExit(0 if r["ok"] and r["bibliography"]["tool"]=="bibtex"
   ok "compile runs BibTeX for a \\bibliography deck, which then ships"
 else
   bad "bibliography-aware compile"
+fi
+
+# BibTeX runs from the source folder, so \bibliography{../x} resolves, and a
+# prebuilt .bbl beside the source survives a missing database. Build folders
+# outside the source, hidden ones, and the source folder itself all count.
+cited_clean() {
+  python3 -c '
+import json,sys
+import pymupdf
+r=json.load(sys.stdin)
+text="".join(page.get_text() for page in pymupdf.open(r["pdf"]))
+raise SystemExit(0 if r["ok"] and r["undefined_refs"]==0
+                 and "[?]" not in text and "[1]" in text
+                 and "fictional rollout fixture" in text.lower() else 1)'
+}
+# (tests/bib-subdir/build is the default build folder; the trap removes it.)
+for case in "tests/bib-subdir/bib-parent-test.tex tests/bib-subdir/build" \
+            "tests/bib-subdir/bib-parent-test.tex tests/build-suite/relative" \
+            "tests/bib-subdir/bib-parent-test.tex tests/build-suite/.hidden-build" \
+            "tests/bbl-only/bbl-only-test.tex tests/build-suite/bbl-only"; do
+  read -r src build <<<"$case"
+  stem=$(basename "$src" .tex)
+  args=(--build-dir "$build")
+  [ "$build" = "tests/bib-subdir/build" ] && args=()
+  # ${args[@]+...}: bash 3.2 (macOS) treats an empty array as unset under -u.
+  if python3 skills/econ-slides/scripts/compile_deck.py "$src" ${args[@]+"${args[@]}"} \
+        --json 2>/dev/null | cited_clean \
+      && ship_clean "$build/$stem.pdf" "$src" "$build/$stem.log"; then
+    ok "citations resolve and the deck ships [$stem -> $build]"
+  else
+    bad "source-relative bibliography [$stem -> $build]"
+  fi
+done
+rm -rf tests/bib-subdir/build
+# Biber is optional: some TeX installs ship a binary that cannot run.
+if biber --version >/dev/null 2>&1; then
+  build=tests/build-suite/biblatex
+  if python3 skills/econ-slides/scripts/compile_deck.py \
+        tests/bib-subdir/biblatex-parent-test.tex --build-dir "$build" \
+        --json 2>/dev/null | cited_clean \
+      && ship_clean "$build/biblatex-parent-test.pdf" \
+         tests/bib-subdir/biblatex-parent-test.tex "$build/biblatex-parent-test.log"; then
+    ok "Biber resolves an \\addbibresource{../x.bib} from the source folder"
+  else
+    bad "source-relative Biber datasource"
+  fi
+else
+  echo "  SKIP  source-relative Biber datasource (biber does not run here)"
+fi
+inplace=tests/build-suite/bbl-in-place
+rm -rf "$inplace"; mkdir -p "$inplace"
+cp tests/bbl-only/bbl-only-test.tex tests/bbl-only/bbl-only-test.bbl "$inplace/"
+if python3 skills/econ-slides/scripts/compile_deck.py "$inplace/bbl-only-test.tex" \
+      --build-dir "$inplace" --json 2>/dev/null | cited_clean \
+    && cmp -s "$inplace/bbl-only-test.bbl" tests/bbl-only/bbl-only-test.bbl \
+    && ship_clean "$inplace/bbl-only-test.pdf" "$inplace/bbl-only-test.tex" \
+       "$inplace/bbl-only-test.log"; then
+  ok "an in-place build keeps the prebuilt .bbl when the database is missing"
+else
+  bad "in-place prebuilt .bbl preservation"
 fi
 
 printf '%s\n' '\documentclass{article}' '\begin{document}' \
