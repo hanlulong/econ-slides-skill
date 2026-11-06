@@ -92,6 +92,10 @@ that the v0.1.1 notes described.
 - `requirements.txt` (PyMuPDF) and a `tlmgr install` line for BasicTeX, TinyTeX
   and other minimal TeX installs.
 - A Contents list in each reference file over 100 lines.
+- Light CI: TeX-free unit tests (`tests/test_static.py`) on Python 3.10 with
+  PyMuPDF 1.x and 3.12 with the latest PyMuPDF, the skills-ref and
+  `claude plugin validate --strict` validators, a weekly Markdown link check,
+  and Dependabot for GitHub Actions. Decks are not compiled in CI.
 - `references/design-checks.md`: one card each for difference-in-differences
   and event studies, regression discontinuity, instrumental variables,
   shift-share, synthetic control, randomized experiments and multiple testing
