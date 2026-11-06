@@ -8,7 +8,8 @@ Usage:
 
 Runs the engine non-interactively, parses the log, and prints a compact
 human/machine-readable verdict: OK with page count, or the first real error
-with its line number and a triage hint. Exit code 0 on success, 1 on failure.
+with its line number and a triage hint. Exit code 0 on success, 1 on failure,
+3 if the helper itself crashes.
 
 When the source (including local \\input files) uses \\bibliography{...} or
 \\addbibresource{...}, BibTeX or Biber runs between the first and the final
@@ -42,9 +43,23 @@ from check_script import tex_tree  # noqa: E402  (no PyMuPDF dependency)
 SKILL_DIR = Path(__file__).resolve().parent.parent
 BUNDLED_THEMES = SKILL_DIR / "themes"
 
+PACKAGE_FILE_SUFFIXES = {".sty", ".cls", ".clo", ".def", ".fd", ".cfg",
+                         ".ldf", ".bst", ".tfm"}
+
+
+def missing_file_hint(name: str) -> str:
+    """Tell a missing TeX package apart from a missing figure or input file."""
+    if Path(name).suffix.lower() in PACKAGE_FILE_SUFFIXES:
+        return (f"Missing TeX package file {name}. Find the package that ships "
+                f"it with `tlmgr search --global --file /{name}`, then run "
+                "`tlmgr install <package>` (with sudo when the TeX tree is "
+                "system-owned, as in MacTeX). MiKTeX can install it on demand.")
+    return (f"Missing file {name}: check the path and extension relative to "
+            "the .tex file (figures and \\input files are not TeX packages).")
+
+
 TRIAGE = [
-    (r"! LaTeX Error: File `([^']+)' not found",
-     "Missing package or file: {0}. Install it (tlmgr install <pkg>) or fix the path."),
+    (r"! LaTeX Error: File `([^']+)' not found", missing_file_hint),
     (r"! Undefined control sequence",
      "Undefined command — usually a macro used without its package, or a typo."),
     (r"! Missing \$ inserted",
@@ -62,6 +77,27 @@ TRIAGE = [
 ]
 
 
+def installed_engine(engine: str) -> Path | None:
+    """Find a TeX engine in the usual install folders when PATH misses it."""
+    home = Path.home()
+    newest_first = lambda root, pattern: sorted(  # noqa: E731
+        Path(root).glob(pattern), key=str, reverse=True)
+    folders = [Path("/Library/TeX/texbin"),          # MacTeX
+               *newest_first("/usr/local/texlive", "*/bin/*"),
+               *newest_first("/opt/texlive", "*/bin/*"),
+               *newest_first(home / "Library" / "TinyTeX" / "bin", "*"),
+               *newest_first(home / ".TinyTeX" / "bin", "*"),
+               *newest_first("C:/texlive", "*/bin/*"),
+               home / "AppData" / "Local" / "Programs" / "MiKTeX" / "miktex"
+               / "bin" / "x64"]
+    for folder in folders:
+        for name in (engine, engine + ".exe"):
+            candidate = folder / name
+            if candidate.is_file():
+                return candidate
+    return None
+
+
 def find_error(log_text: str) -> tuple[str, str] | None:
     """Return (error_line, hint) for the first hard error in the log."""
     for pattern, hint in TRIAGE:
@@ -69,7 +105,8 @@ def find_error(log_text: str) -> tuple[str, str] | None:
         if m:
             line_m = re.search(re.escape(m.group(0)) + r".*?\nl\.(\d+)", log_text, re.S)
             loc = f" (source line {line_m.group(1)})" if line_m else ""
-            return m.group(0) + loc, hint.format(*m.groups())
+            text = hint(*m.groups()) if callable(hint) else hint.format(*m.groups())
+            return m.group(0) + loc, text
     m = re.search(r"^! (.+)$", log_text, re.M)
     if m:
         return m.group(0), "Unrecognized error — read the log around this line."
@@ -260,7 +297,16 @@ def main() -> int:
         print(f"error: {tex} not found", file=sys.stderr)
         return 1
     if shutil.which(args.engine) is None:
-        print(f"error: {args.engine} not on PATH — install TeX Live / MacTeX / MiKTeX", file=sys.stderr)
+        found = installed_engine(args.engine)
+        if found:
+            print(f"error: {args.engine} is installed at {found.parent} but that "
+                  "folder is not on PATH — add it to PATH, or open a new "
+                  "terminal or agent session after installing TeX",
+                  file=sys.stderr)
+        else:
+            print(f"error: {args.engine} not found on PATH or in the usual TeX "
+                  "folders — install TeX Live, MacTeX, TinyTeX or MiKTeX",
+                  file=sys.stderr)
         return 1
 
     build = (args.build_dir or tex.parent / "build").resolve()
@@ -355,5 +401,17 @@ def main() -> int:
     return 0 if result["ok"] else 1
 
 
+def run() -> int:
+    """Run main(), keeping a crash (exit 3) apart from a failed compile (1)."""
+    try:
+        return main()
+    except Exception as exc:  # noqa: BLE001  (report, never pass as a result)
+        import traceback
+        traceback.print_exc()
+        print(f"error: compile_deck.py crashed ({type(exc).__name__}: {exc}); "
+              "exit 3 means the helper failed, not the deck.", file=sys.stderr)
+        return 3
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(run())

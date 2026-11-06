@@ -801,6 +801,19 @@ print("OK" if not any("appendix frame has no Q&A block" in f
 [ "$MISSING_QA" = "OK" ] && ok "Q&A may cover selected high-probability backups" \
                              || bad "optional Q&A regression"
 
+if python3 - <<'PY'
+from scripts.compile_deck import find_error
+figure = find_error("! LaTeX Error: File `figures/fig2' not found.\n\nl.3 \\includegraphics")
+package = find_error("! LaTeX Error: File `needspacezz.sty' not found.\n\nl.2 \\usepackage")
+assert "tlmgr" not in figure[1] and "path" in figure[1]
+assert "tlmgr search --global --file /needspacezz.sty" in package[1]
+PY
+then
+  ok "a missing figure gets a path hint and a missing .sty a tlmgr search hint"
+else
+  bad "missing-file triage hints"
+fi
+
 if python3 skills/econ-slides/scripts/check_script.py tests/script-sync/good-script.tex \
      --deck tests/script-sync/mini-deck.tex --slot-minutes 2 --wpm 0 >/dev/null 2>&1; then
   bad "nonpositive script timing input"
