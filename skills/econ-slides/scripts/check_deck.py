@@ -48,6 +48,17 @@ blockers still fail. Undefined citations and references are never waived:
 a [?] or ?? on screen fails every deck, inherited or not. Review prompts and
 visual inspection remain necessary.
 
+Without --tex the source checks (dead links, arrow bullets, the question
+label, conclusion links, pause chains, exhibit readings, and the other source
+prompts) do not run; without --log the overfull-box and log-based
+undefined-reference checks do not run. Such a run is partial: it lists the
+skipped checks, and its verdict is "incomplete" instead of "ship".
+
+Exit status: 0 = ship (full check, no blocker); 1 = the deck is not ready
+(must fix, fix recommended, or incomplete); 2 = the check could not run (bad
+arguments, a missing or unreadable input, or no PyMuPDF); 3 = the checker
+itself crashed. Only 0 and 1 carry a verdict.
+
 Requires PyMuPDF (requirements.txt). If this Python lacks it, use a venv
 or ``uv run --with pymupdf python ...`` rather than ``pip install --user``.
 """
@@ -79,7 +90,7 @@ except ImportError:  # pragma: no cover
               "    ~/.venvs/econ-slides/bin/python <this script> ...\n"
               "  or: uv run --with pymupdf python <this script> ...",
               file=sys.stderr)
-        sys.exit(1)
+        sys.exit(2)
 
 # NOTE: en/em dashes are deliberately NOT markers — they appear as empty
 # table cells ("---") and would false-positive the bullet checks.
@@ -106,6 +117,13 @@ HARD_BLOCKERS = {"edge-overflow", "overfull", "nav-footer-overlap",
 # Blockers that a --baseline-json comparison never treats as inherited: an
 # unresolved [?] or ?? is visible to the audience whoever introduced it.
 NON_WAIVABLE_BLOCKERS = {"undefined-ref"}
+# Checks that need an input the PDF alone cannot supply.
+TEX_ONLY_CHECKS = ("dead-link", "arrow-bullet", "question-label",
+                   "question-subtitle", "roadmap-emphasis", "exhibit-reading",
+                   "conclusion-link", "conclusion-density", "pause-chain",
+                   "emphasis-overuse", "prose-columns")
+LOG_ONLY_CHECKS = ("overfull", "undefined-ref (log warnings)")
+EXIT_SHIP, EXIT_NOT_READY, EXIT_CANNOT_RUN, EXIT_CRASH = 0, 1, 2, 3
 # What LaTeX, natbib, and the standard styles print for an unresolved key:
 # [?] or [?, ?] (\cite), (?) (natbib), and a bold ?? (\ref). ``What??`` in
 # prose is not matched because the marker must stand alone.
@@ -717,11 +735,16 @@ def load_baseline(path: Path) -> dict:
     return result
 
 
-def verdict_for(score: int, blockers: list[str]) -> str:
-    """Apply the normal ship/fix thresholds to a score and blocker set."""
-    return ("must fix" if blockers else
-            "ship" if score >= 90 else
-            "fix recommended" if score >= 80 else "must fix")
+def verdict_for(score: int, blockers: list[str], complete: bool = True) -> str:
+    """Apply the normal ship/fix thresholds to a score and blocker set.
+
+    A run without --tex or --log never ships: it is "incomplete" unless it
+    already found something to fix.
+    """
+    verdict = ("must fix" if blockers else
+               "ship" if score >= 90 else
+               "fix recommended" if score >= 80 else "must fix")
+    return "incomplete" if verdict == "ship" and not complete else verdict
 
 
 def main() -> int:
@@ -744,7 +767,7 @@ def main() -> int:
                         ("baseline JSON", args.baseline_json)):
         if path is not None and not path.exists():
             print(f"error: supplied {label} {path} does not exist", file=sys.stderr)
-            return 2
+            return EXIT_CANNOT_RUN
     baseline_result = None
     if args.baseline_json is not None:
         try:
@@ -795,6 +818,9 @@ def main() -> int:
             out = args.render_dir / f"page-{pno + 1:02d}.png"
             doc.load_page(pno).get_pixmap(matrix=mat).save(out)
 
+    skipped_checks = ([] if args.tex else list(TEX_ONLY_CHECKS)) \
+        + ([] if args.log else list(LOG_ONLY_CHECKS))
+    complete = not skipped_checks
     score = score_findings(findings)
     all_blockers = sorted({f["check"] for f in findings
                            if f["check"] in HARD_BLOCKERS})
@@ -815,10 +841,10 @@ def main() -> int:
         ] + new_blockers
         regression_score = score_findings(regression_findings)
         blockers = sorted({f["check"] for f in new_blockers})
-        verdict = verdict_for(regression_score, blockers)
+        verdict = verdict_for(regression_score, blockers, complete)
     else:
         blockers = all_blockers
-        verdict = verdict_for(score, blockers)
+        verdict = verdict_for(score, blockers, complete)
 
     baseline_meta = None
     if baseline_result is not None:
@@ -834,6 +860,8 @@ def main() -> int:
               "pages": doc.page_count, "score": score,
               "regression_score": regression_score,
               "verdict": verdict,
+              "complete": complete,
+              "skipped_checks": skipped_checks,
               "blockers": blockers,
               "all_blockers": all_blockers,
               "baseline": baseline_meta,
@@ -852,6 +880,12 @@ def main() -> int:
             score_label += f", regression score {regression_score}"
         print(f"{args.pdf.name}: {doc.page_count} pages, "
               f"{score_label} — {verdict}")
+        if skipped_checks:
+            missing = " and ".join(flag for flag, given in
+                                   (("--tex", args.tex), ("--log", args.log))
+                                   if not given)
+            print(f"  partial check: pass {missing} to run "
+                  f"{', '.join(skipped_checks)}; a partial run never ships")
         if baseline_result is not None:
             print("  baseline comparison: "
                   f"{len(inherited_blockers)} inherited, "
@@ -864,8 +898,21 @@ def main() -> int:
             print("  no findings from static checks")
         print("  reminder: static checks cannot see box-interior overflow or a"
               " \\toprule merged into a title bar — always view the renders.")
-    return 0 if verdict == "ship" else 1
+    return EXIT_SHIP if verdict == "ship" else EXIT_NOT_READY
+
+
+def run() -> int:
+    """Run main(), keeping a crash (exit 3) apart from a failing deck (exit 1)."""
+    try:
+        return main()
+    except Exception as exc:  # noqa: BLE001  (report, never pass as a verdict)
+        import traceback
+        traceback.print_exc()
+        print(f"error: check_deck.py crashed ({type(exc).__name__}: {exc}). "
+              "No verdict was produced; exit 3 means the checker failed, not "
+              "the deck.", file=sys.stderr)
+        return EXIT_CRASH
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(run())

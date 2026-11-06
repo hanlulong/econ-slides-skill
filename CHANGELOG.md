@@ -48,6 +48,15 @@ that the v0.1.1 notes described.
   source folder, so `\bibliography{../refs}` resolves as it does in an
   in-place build, and a prebuilt `.bbl` beside the source (an arXiv or
   Overleaf export) is kept when the database is missing.
+- `check_deck.py` exit codes: 0 ship, 1 not ready (must fix, fix
+  recommended, or incomplete), 2 the check could not run (bad arguments, a
+  missing input, or no PyMuPDF; this was 1 before), 3 the checker crashed. A
+  crash used to exit 1 like "must fix", so the documented baseline command
+  accepted it and saved an empty baseline; it now stops, and the command also
+  runs `test -s` on the saved JSON. `check_script.py` exits 3 on a crash too.
+- A `check_deck.py` run without `--tex` or `--log` now lists the checks it
+  skipped (`skipped_checks`, `complete: false` in the JSON) and reports
+  "incomplete" instead of "ship".
 - `compile_deck.py --timeout` (default 600 s). A timed-out run now returns the
   usual JSON with `ok: false` instead of a traceback.
 - `requirements.txt` (PyMuPDF) and a `tlmgr install` line for BasicTeX, TinyTeX

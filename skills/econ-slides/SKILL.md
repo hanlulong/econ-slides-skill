@@ -323,6 +323,12 @@ python3 <skill-dir>/scripts/check_deck.py build/talk.pdf \
     --tex talk.tex --log build/talk.log --render-dir build/pages
 ```
 
+Always pass both `--tex` and `--log`: without them the checker skips the
+source and log checks, says so, and reports "incomplete" rather than "ship".
+Exit status 0 means ship, 1 means the deck is not ready, 2 means the check
+could not run, and 3 means the checker crashed; treat 2 and 3 as a broken
+check, never as a verdict.
+
 Then **look at every rendered page** in `build/pages/`. The static checks
 cannot see box-interior overflow, a `\toprule` merged into a title bar,
 TikZ label collisions, or an ugly slide. Fix, recompile, re-check. Use the

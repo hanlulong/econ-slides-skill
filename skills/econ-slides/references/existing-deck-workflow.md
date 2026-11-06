@@ -398,11 +398,14 @@ untouched source before changing it:
 python3 <skill-dir>/scripts/check_deck.py path/to/baseline/talk.pdf \
   --tex path/to/talk.tex --log path/to/baseline/talk.log --json \
   > path/to/baseline/check-deck.json || [ "$?" -eq 1 ]
+test -s path/to/baseline/check-deck.json
 ```
 
 Exit status 1 is expected when the untouched deck already has an objective
-blocker; status 2 still stops the command. Open the JSON and confirm that its
-page count and findings describe the actual untouched build. Do not reuse a
+blocker. Status 2 (the check could not run) and status 3 (the checker crashed)
+still stop the command, and `test -s` catches an empty file. Open the JSON
+and confirm that its page count and findings describe the actual untouched
+build. Do not reuse a
 baseline from another venue cut, an older source state, or a stale PDF.
 
 After the edit, compare the new build to that saved result:

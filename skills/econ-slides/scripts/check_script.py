@@ -726,5 +726,18 @@ def main() -> int:
     return 0 if not findings else 1
 
 
+def run() -> int:
+    """Run main(), keeping a crash (exit 3) apart from script findings (exit 1)."""
+    try:
+        return main()
+    except Exception as exc:  # noqa: BLE001  (report, never pass as a verdict)
+        import traceback
+        traceback.print_exc()
+        print(f"error: check_script.py crashed ({type(exc).__name__}: {exc}). "
+              "No verdict was produced; exit 3 means the checker failed, not "
+              "the script.", file=sys.stderr)
+        return 3
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(run())

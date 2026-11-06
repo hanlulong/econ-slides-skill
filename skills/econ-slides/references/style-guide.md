@@ -151,8 +151,10 @@ python3 <skill-dir>/scripts/check_deck.py talk/build/sed-2026.pdf \
   Objective failures—compilation errors, missing assets, edge overflow,
   serious overfull boxes, collisions, broken links, undefined citations or
   references, and unreadable content—
-  block delivery. Always pass `--log`: biblatex prints a missing key as the
-  key itself, which only the log reveals. Wrapped text, density, columns, emphasis, and sparse-layout
+  block delivery. Always pass `--tex` and `--log`: biblatex prints a missing
+  key as the key itself, which only the log reveals, and a run without either
+  flag lists the checks it skipped and reports "incomplete", never "ship".
+  Exit 0 = ship, 1 = not ready, 2 = could not run, 3 = checker crash. Wrapped text, density, columns, emphasis, and sparse-layout
   findings require visual and editorial review against the target deck, not
   automatic padding or a forced rewrite:
   merge a redundant frame or keep intentional whitespace; never add filler.

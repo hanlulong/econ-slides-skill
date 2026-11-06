@@ -449,6 +449,43 @@ else
   ok "explicitly missing checker input is rejected"
 fi
 
+# Without --tex/--log the run is partial: it never ships, and says why.
+python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/interface-test.pdf \
+  --json > tests/build-suite/partial.json 2>/dev/null
+PARTIAL_STATUS=$?
+PARTIAL_TEXT=$(python3 skills/econ-slides/scripts/check_deck.py \
+  tests/build-suite/interface-test.pdf --log tests/build-suite/interface-test.log 2>/dev/null)
+if python3 - "$PARTIAL_STATUS" "$PARTIAL_TEXT" <<'PY'
+import json, sys
+status, text = int(sys.argv[1]), sys.argv[2]
+r = json.load(open("tests/build-suite/partial.json"))
+assert status == 1 and r["verdict"] == "incomplete" and r["complete"] is False
+assert "dead-link" in r["skipped_checks"] and "overfull" in r["skipped_checks"]
+assert "— incomplete" in text and "ship" not in text.splitlines()[0]
+assert "partial check: pass --tex" in text and "overfull" not in text.split("partial check")[1].split(";")[0]
+PY
+then
+  ok "a run without --tex or --log is reported as incomplete, never ship"
+else
+  bad "partial checker run verdict"
+fi
+
+# A crash exits 3, so `|| [ "$?" -eq 1 ]` cannot mistake it for "must fix".
+python3 - >/dev/null 2>&1 <<'PY'
+import runpy, sys
+import pymupdf
+def boom(*args, **kwargs):
+    raise RuntimeError("simulated PyMuPDF failure")
+pymupdf.Page.get_text = boom
+sys.argv = ["check_deck.py", "tests/build-suite/interface-test.pdf",
+            "--tex", "tests/interface-test.tex",
+            "--log", "tests/build-suite/interface-test.log", "--json"]
+runpy.run_path("skills/econ-slides/scripts/check_deck.py", run_name="__main__")
+PY
+CRASH_STATUS=$?
+[ "$CRASH_STATUS" = "3" ] && ok "a checker crash exits 3, apart from must-fix (1)" \
+                          || bad "checker crash exit status is $CRASH_STATUS (want 3)"
+
 # PyMuPDF 1.26.5 (the newest release for Python 3.9) has no Rect.get_area.
 if python3 - >/dev/null 2>&1 <<'PY'
 import runpy, sys
