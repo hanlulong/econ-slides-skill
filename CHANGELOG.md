@@ -51,7 +51,9 @@ that the v0.1.1 notes described.
   reports `undefined_refs` in its JSON and OK line. The tool runs from the
   source folder, so `\bibliography{../refs}` resolves as it does in an
   in-place build, and a prebuilt `.bbl` beside the source (an arXiv or
-  Overleaf export) is kept when the database is missing.
+  Overleaf export) is kept when the database is missing. With biblatex's
+  `backend=bibtex`, the build folder is on BibTeX's search path too, so the
+  `-blx.bib` file biblatex writes there is found.
 - `check_deck.py` exit codes: 0 ship, 1 not ready (must fix, fix
   recommended, or incomplete), 2 the check could not run (bad arguments, a
   missing input, or no PyMuPDF; this was 1 before), 3 the checker crashed. A

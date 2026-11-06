@@ -260,6 +260,10 @@ def run_bibliography(tool: str, tex: Path, build: Path, env: dict,
         # file, so lifting the check for this one call is safe.
         cmd = [tool, str(build / tex.stem)]
         run_env["openout_any"] = "a"
+        # biblatex's backend=bibtex writes <stem>-blx.bib next to the .aux,
+        # so a separate build folder must be on BibTeX's search path too.
+        if not in_place:
+            run_env["BIBINPUTS"] = f"{build}{os.pathsep}" + run_env.get("BIBINPUTS", "")
     try:
         proc = subprocess.run(cmd, cwd=tex.parent, env=run_env,
                               capture_output=True, text=True, timeout=timeout)

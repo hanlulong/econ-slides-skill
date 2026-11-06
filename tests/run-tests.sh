@@ -1102,7 +1102,9 @@ raise SystemExit(0 if r["ok"] and r["undefined_refs"]==0
 for case in "tests/bib-subdir/bib-parent-test.tex tests/bib-subdir/build" \
             "tests/bib-subdir/bib-parent-test.tex tests/build-suite/relative" \
             "tests/bib-subdir/bib-parent-test.tex tests/build-suite/.hidden-build" \
-            "tests/bbl-only/bbl-only-test.tex tests/build-suite/bbl-only"; do
+            "tests/bbl-only/bbl-only-test.tex tests/build-suite/bbl-only" \
+            "tests/bib-subdir/biblatex-bibtex-test.tex tests/bib-subdir/build" \
+            "tests/bib-subdir/biblatex-bibtex-test.tex tests/build-suite/biblatex-bibtex"; do
   read -r src build <<<"$case"
   stem=$(basename "$src" .tex)
   args=(--build-dir "$build")
