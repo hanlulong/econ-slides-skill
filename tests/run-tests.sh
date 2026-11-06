@@ -4,6 +4,10 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 PASS=0; FAIL=0
+# Generated sources live beside their originals so relative \input paths
+# resolve; remove them even when the run is interrupted.
+cleanup() { rm -f templates/_swap-*.tex tests/_*.tex; }
+trap cleanup EXIT
 ok()  { echo "  PASS  $1"; PASS=$((PASS+1)); }
 bad() { echo "  FAIL  $1"; FAIL=$((FAIL+1)); }
 

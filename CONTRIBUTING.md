@@ -10,7 +10,7 @@ Bug reports and improvements are welcome.
 - **Behavior changes** (workflow steps, references, themes, checkers): open an
   issue first so the design can be agreed — the reference files encode
   deliberate craft rules, and a well-meaning change can break them silently.
-- Run `tests/run-tests.sh` before a pull request that touches `scripts/` or
+- Run `bash tests/run-tests.sh` before a pull request that touches `scripts/` or
   `themes/`.
 
 By contributing you agree that your contribution is licensed under the
