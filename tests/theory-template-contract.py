@@ -6,13 +6,14 @@ import re
 import sys
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
+SKILL_DIR = ROOT / "skills" / "econ-slides"
+sys.path.insert(0, str(SKILL_DIR))
 
 from scripts.check_script import deck_frames, script_blocks, tex_tree  # noqa: E402
 
 
-DECK = ROOT / "templates" / "theory-talk.tex"
-SCRIPT = ROOT / "templates" / "theory-script.tex"
+DECK = SKILL_DIR / "templates" / "theory-talk.tex"
+SCRIPT = SKILL_DIR / "templates" / "theory-script.tex"
 
 deck_text = DECK.read_text(encoding="utf-8")
 script_text = SCRIPT.read_text(encoding="utf-8")

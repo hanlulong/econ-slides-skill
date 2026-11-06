@@ -210,32 +210,37 @@ Starting a new deck with a stock theme? `\usetheme{Madrid}` followed by
 `\usepackage{econ-slides-compat}` keeps that look and adds the semantic
 interface. Editing an institutional or personal deck? Keep its existing
 preamble, engine, macros, spacing, and visual language. See
-[themes/README.md](themes/README.md).
+[skills/econ-slides/themes/README.md](skills/econ-slides/themes/README.md).
 
 ## What's inside
 
 ```
-SKILL.md                 the workflow: intake → read → plan → draft → verify → deliver
-references/
-  talk-structures.md     adaptable audience paths and 15–90 minute budgets
-  discussant.md          the discussion genre: skeleton, time budgets, tone rules
-  slide-rules.md         rendered layout guidance: titles, spacing, math, color
-  beamer-layout-mechanics.md
-                         how source edits reflow the compiled frame
-  existing-deck-workflow.md
-                         add, polish, discuss, or retarget without restyling
-  exhibit-surgery.md     regression table → slide table; figures; number provenance
-  source-integrity.md    claim↔evidence ledger; identification, model, and policy checks
-  speaker-script.md      timing, oral craft, click sync, Q&A, and printable QA
-  style-guide.md         themes, file engineering, build and delivery conventions
-themes/                  three bundled looks + stock-theme compatibility adapter
-templates/               optional empirical, theory, discussion, and script starters
-scripts/
-  compile_deck.py        XeLaTeX compile loop with error triage
-  check_deck.py          rendered geometry audit with hard blockers + score
-  check_script.py        deck/script sync, timing, oral-style, and click audit
-  crop_figure.py         crop a source figure when no standalone asset exists
-tests/                   cross-theme renders + negative deck/script fixtures
+.claude-plugin/plugin.json   Claude Code plugin manifest
+.codex-plugin/plugin.json    Codex plugin manifest
+skills/econ-slides/          the skill itself (link this folder for a manual install)
+  SKILL.md                   the workflow: intake → read → plan → draft → verify → deliver
+  references/
+    talk-structures.md       adaptable audience paths and 15–90 minute budgets
+    discussant.md            the discussion genre: skeleton, time budgets, tone rules
+    slide-rules.md           rendered layout guidance: titles, spacing, math, color
+    beamer-layout-mechanics.md
+                             how source edits reflow the compiled frame
+    existing-deck-workflow.md
+                             add, polish, discuss, or retarget without restyling
+    exhibit-surgery.md       regression table → slide table; figures; number provenance
+    source-integrity.md      claim↔evidence ledger; identification, model, and policy checks
+    speaker-script.md        timing, oral craft, click sync, Q&A, and printable QA
+    style-guide.md           themes, file engineering, build and delivery conventions
+  themes/                    three bundled looks + stock-theme compatibility adapter
+  templates/                 optional empirical, theory, discussion, and script starters
+  scripts/
+    compile_deck.py          XeLaTeX compile loop: BibTeX/Biber, error triage
+    check_deck.py            rendered geometry audit with hard blockers + score
+    check_script.py          deck/script sync, timing, oral-style, and click audit
+    crop_figure.py           crop a source figure when no standalone asset exists
+tests/                       cross-theme renders + negative deck/script fixtures
+docs/sample-talk/            the staggered-rollout benchmark deck and script
+requirements.txt             PyMuPDF for the scripts
 ```
 
 ## What it does not do

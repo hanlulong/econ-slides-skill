@@ -3,17 +3,21 @@
 #   bash tests/run-tests.sh
 set -uo pipefail
 cd "$(dirname "$0")/.."
+# The skill (SKILL.md, references, scripts, templates, themes) lives here;
+# Python snippets below import its helpers as ``scripts.*``.
+SKILL_DIR=skills/econ-slides
+export PYTHONPATH="$PWD/$SKILL_DIR${PYTHONPATH:+:$PYTHONPATH}"
 PASS=0; FAIL=0
 # Generated sources live beside their originals so relative \input paths
 # resolve; remove them even when the run is interrupted.
-cleanup() { rm -f templates/_swap-*.tex tests/_*.tex; }
+cleanup() { rm -f skills/econ-slides/templates/_swap-*.tex tests/_*.tex; }
 trap cleanup EXIT
 ok()  { echo "  PASS  $1"; PASS=$((PASS+1)); }
 bad() { echo "  FAIL  $1"; FAIL=$((FAIL+1)); }
 
 compile_clean() {
   local output
-  output=$(python3 scripts/compile_deck.py "$@" --json 2>/dev/null) || return 1
+  output=$(python3 skills/econ-slides/scripts/compile_deck.py "$@" --json 2>/dev/null) || return 1
   python3 -c 'import json,sys
 r=json.load(sys.stdin)
 raise SystemExit(0 if r.get("ok") and r.get("overfull")==0 and isinstance(r.get("pages"),int) else 1)' \
@@ -22,7 +26,7 @@ raise SystemExit(0 if r.get("ok") and r.get("overfull")==0 and isinstance(r.get(
 
 ship_clean() {
   local output
-  output=$(python3 scripts/check_deck.py "$1" --tex "$2" --log "$3" --json 2>/dev/null) || return 1
+  output=$(python3 skills/econ-slides/scripts/check_deck.py "$1" --tex "$2" --log "$3" --json 2>/dev/null) || return 1
   python3 -c 'import json,sys
 r=json.load(sys.stdin)
 raise SystemExit(0 if r.get("verdict")=="ship" and not r.get("blockers") else 1)' \
@@ -109,9 +113,9 @@ done
 echo "== templates embody the rendered standard under every theme =="
 for tpl in paper-talk discussion; do
   for theme in econ-slides-house econ-slides-clean econ-slides-boxed; do
-    src="templates/_swap-$tpl-$theme.tex"
+    src="skills/econ-slides/templates/_swap-$tpl-$theme.tex"
     sed "s/\\\\usepackage{econ-slides-[a-z]*}/\\\\usepackage{$theme}/" \
-        "templates/$tpl.tex" > "$src"
+        "skills/econ-slides/templates/$tpl.tex" > "$src"
     stem="_swap-$tpl-$theme"
     if compile_clean "$src" --build-dir tests/build-suite \
         && ship_clean "tests/build-suite/$stem.pdf" "$src" "tests/build-suite/$stem.log"; then
@@ -123,7 +127,7 @@ for tpl in paper-talk discussion; do
   done
 done
 
-if compile_clean templates/script.tex --build-dir tests/build-suite; then
+if compile_clean skills/econ-slides/templates/script.tex --build-dir tests/build-suite; then
   ok "speaker-script template compiles cleanly"
 else
   bad "speaker-script template compile"
@@ -160,13 +164,13 @@ expected_script_pages = int(sys.argv[5])
 expected_qa = int(sys.argv[6])
 
 deck = json.loads(subprocess.check_output([
-    sys.executable, "scripts/check_deck.py",
+    sys.executable, "skills/econ-slides/scripts/check_deck.py",
     str(build / "conference-30min.pdf"),
     "--tex", str(source / "conference-30min.tex"),
     "--log", str(build / "conference-30min.log"), "--json",
 ], text=True))
 script = json.loads(subprocess.check_output([
-    sys.executable, "scripts/check_script.py", str(source / "script.tex"),
+    sys.executable, "skills/econ-slides/scripts/check_script.py", str(source / "script.tex"),
     "--deck", str(source / "conference-30min.tex"),
     "--slot-minutes", "30", "--json",
 ], text=True))
@@ -199,8 +203,8 @@ fi
 if python3 - <<'PY'
 from pathlib import Path
 from scripts.check_script import deck_frames, script_blocks, tex_tree
-frames = deck_frames(tex_tree(Path("templates/paper-talk.tex")))
-_opening, blocks = script_blocks(tex_tree(Path("templates/script.tex")))
+frames = deck_frames(tex_tree(Path("skills/econ-slides/templates/paper-talk.tex")))
+_opening, blocks = script_blocks(tex_tree(Path("skills/econ-slides/templates/script.tex")))
 main = [frame["title"] for frame in frames if not frame["appendix"]]
 appendix = [frame["title"] for frame in frames if frame["appendix"]]
 scripted = [block["title"] for block in blocks if block["kind"] == "main"]
@@ -217,16 +221,16 @@ fi
 if python3 - <<'PY'
 from pathlib import Path
 
-paper = Path("templates/paper-talk.tex").read_text()
-discussion = Path("templates/discussion.tex").read_text()
-script = Path("templates/script.tex").read_text()
-results = Path("templates/results.tex").read_text()
+paper = Path("skills/econ-slides/templates/paper-talk.tex").read_text()
+discussion = Path("skills/econ-slides/templates/discussion.tex").read_text()
+script = Path("skills/econ-slides/templates/script.tex").read_text()
+results = Path("skills/econ-slides/templates/results.tex").read_text()
 main = paper.split(r"\AppendixStart", 1)[0]
 themes = [Path(path).read_text() for path in (
-    "themes/econ-slides-house.sty",
-    "themes/econ-slides-clean.sty",
-    "themes/econ-slides-boxed.sty",
-    "themes/econ-slides-compat.sty",
+    "skills/econ-slides/themes/econ-slides-house.sty",
+    "skills/econ-slides/themes/econ-slides-clean.sty",
+    "skills/econ-slides/themes/econ-slides-boxed.sty",
+    "skills/econ-slides/themes/econ-slides-compat.sty",
 )]
 interface = Path("tests/interface-test.tex").read_text()
 
@@ -298,7 +302,7 @@ fi
 if python3 - <<'PY'
 from pathlib import Path
 
-skill = Path("SKILL.md").read_text()
+skill = Path("skills/econ-slides/SKILL.md").read_text()
 assert "For a **mixed paper**" in skill
 mixed = skill.split("For a **mixed paper**", 1)[1].split("### Phase 2", 1)[0]
 for concept in ("dependency", "mechanism", "disciplines or identifies",
@@ -313,14 +317,14 @@ fi
 
 echo "== deck checker positive and negative gates =="
 compile_clean tests/interface-test.tex --build-dir tests/build-suite >/dev/null
-SCORE=$(python3 scripts/check_deck.py tests/build-suite/interface-test.pdf \
+SCORE=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/interface-test.pdf \
     --tex tests/interface-test.tex --log tests/build-suite/interface-test.log \
     --json 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin)['score'])")
 [ "$SCORE" = "100" ] && ok "clean deck score is 100" \
                          || bad "clean deck score is $SCORE (want 100)"
 
 compile_clean tests/violations-test.tex --build-dir tests/build-suite >/dev/null
-CHECKS=$(python3 scripts/check_deck.py tests/build-suite/violations-test.pdf \
+CHECKS=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/violations-test.pdf \
     --tex tests/violations-test.tex --log tests/build-suite/violations-test.log \
     --json 2>/dev/null | python3 -c '
 import json, sys
@@ -362,7 +366,7 @@ else
 fi
 
 compile_clean tests/static-footer-test.tex --build-dir tests/build-suite >/dev/null
-STATIC=$(python3 scripts/check_deck.py tests/build-suite/static-footer-test.pdf \
+STATIC=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/static-footer-test.pdf \
   --tex tests/static-footer-test.tex --log tests/build-suite/static-footer-test.log \
   --json 2>/dev/null | python3 -c '
 import json,sys
@@ -373,7 +377,7 @@ print("OK" if any(f["check"]=="density" and f["page"]==1 for f in r["findings"])
                           || bad "static-footer grouping regression"
 
 compile_clean tests/repeated-counter-test.tex --build-dir tests/build-suite >/dev/null
-REPEATED=$(python3 scripts/check_deck.py tests/build-suite/repeated-counter-test.pdf \
+REPEATED=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/repeated-counter-test.pdf \
   --tex tests/repeated-counter-test.tex --log tests/build-suite/repeated-counter-test.log \
   --json 2>/dev/null | python3 -c '
 import json,sys
@@ -384,7 +388,7 @@ print("OK" if any(f["check"]=="density" and f["page"]==1 for f in r["findings"])
                               || bad "noframenumbering grouping regression"
 
 compile_clean tests/sparse-test.tex --build-dir tests/build-suite >/dev/null
-SPARSE=$(python3 scripts/check_deck.py tests/build-suite/sparse-test.pdf \
+SPARSE=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/sparse-test.pdf \
   --tex tests/sparse-test.tex --log tests/build-suite/sparse-test.log \
   --json 2>/dev/null | python3 -c '
 import json,sys
@@ -395,7 +399,7 @@ print("OK" if {1,3} <= pages and r["verdict"]=="ship" else "MISSED")')
                           || bad "sparse-frame regression"
 
 compile_clean tests/nav-overlap-test.tex --build-dir tests/build-suite >/dev/null
-NAV_OVERLAP=$(python3 scripts/check_deck.py tests/build-suite/nav-overlap-test.pdf \
+NAV_OVERLAP=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/nav-overlap-test.pdf \
   --tex tests/nav-overlap-test.tex --log tests/build-suite/nav-overlap-test.log \
   --json 2>/dev/null | python3 -c '
 import json,sys
@@ -429,7 +433,7 @@ else
   bad "question-label scope regression"
 fi
 
-if python3 scripts/check_deck.py tests/build-suite/interface-test.pdf \
+if python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/interface-test.pdf \
      --tex tests/does-not-exist.tex >/dev/null 2>&1; then
   bad "explicitly missing checker input is rejected"
 else
@@ -439,18 +443,18 @@ fi
 echo "== existing-deck baseline comparison separates inherited regressions =="
 BASELINE_FIXTURES_OK=1
 for fixture in baseline-regression-base baseline-regression-shifted baseline-regression-new; do
-  python3 scripts/compile_deck.py "tests/$fixture.tex" \
+  python3 skills/econ-slides/scripts/compile_deck.py "tests/$fixture.tex" \
     --build-dir tests/build-suite >/dev/null 2>&1 || BASELINE_FIXTURES_OK=0
 done
 if [ "$BASELINE_FIXTURES_OK" = "1" ]; then
-  python3 scripts/check_deck.py \
+  python3 skills/econ-slides/scripts/check_deck.py \
     tests/build-suite/baseline-regression-base.pdf \
     --tex tests/baseline-regression-base.tex \
     --log tests/build-suite/baseline-regression-base.log \
     --json > tests/build-suite/baseline-regression.json 2>/dev/null
   BASELINE_STATUS=$?
 
-  python3 scripts/check_deck.py \
+  python3 skills/econ-slides/scripts/check_deck.py \
     tests/build-suite/baseline-regression-shifted.pdf \
     --tex tests/baseline-regression-shifted.tex \
     --log tests/build-suite/baseline-regression-shifted.log \
@@ -458,7 +462,7 @@ if [ "$BASELINE_FIXTURES_OK" = "1" ]; then
     --json > tests/build-suite/baseline-regression-shifted.json 2>/dev/null
   SHIFTED_STATUS=$?
 
-  python3 scripts/check_deck.py \
+  python3 skills/econ-slides/scripts/check_deck.py \
     tests/build-suite/baseline-regression-new.pdf \
     --tex tests/baseline-regression-new.tex \
     --log tests/build-suite/baseline-regression-new.log \
@@ -530,7 +534,7 @@ else
   bad "new-blocker baseline fixture compile"
 fi
 
-CROP_ERR=$(python3 scripts/crop_figure.py tests/build-suite/interface-test.pdf \
+CROP_ERR=$(python3 skills/econ-slides/scripts/crop_figure.py tests/build-suite/interface-test.pdf \
   --page 1 --bbox bad,input --out tests/build-suite/invalid.png 2>&1)
 CROP_STATUS=$?
 if [ "$CROP_STATUS" != "0" ] && [[ "$CROP_ERR" != *Traceback* ]]; then
@@ -540,7 +544,7 @@ else
 fi
 
 echo "== script checker counts opening/main, excludes Q&A, and syncs builds =="
-SCHECKS=$(python3 scripts/check_script.py tests/script-sync/mini-script.tex \
+SCHECKS=$(python3 skills/econ-slides/scripts/check_script.py tests/script-sync/mini-script.tex \
     --deck tests/script-sync/mini-deck.tex --slot-minutes 15 --json 2>/dev/null | python3 -c '
 import json, sys
 result=json.load(sys.stdin)
@@ -551,7 +555,7 @@ print("OK" if want <= found else "MISSING:"+",".join(sorted(want-found)))')
 [ "$SCHECKS" = "OK" ] && ok "script negative fixture" \
                          || bad "script checks: $SCHECKS"
 
-GOOD=$(python3 scripts/check_script.py tests/script-sync/good-script.tex \
+GOOD=$(python3 skills/econ-slides/scripts/check_script.py tests/script-sync/good-script.tex \
     --deck tests/script-sync/mini-deck.tex --slot-minutes 2 --json 2>/dev/null)
 GOOD_STATUS=$?
 GOOD_FIELDS=$(python3 -c '
@@ -564,7 +568,7 @@ print("OK" if r["main_blocks"]==2 and r["qa_blocks"]==1 and r["qa_words"]>0
   && ok "script positive fixture separates planned speech from Q&A" \
   || bad "script positive fixture"
 
-REPEATED_TITLES=$(python3 scripts/check_script.py \
+REPEATED_TITLES=$(python3 skills/econ-slides/scripts/check_script.py \
     tests/script-sync/repeated-title-script.tex \
     --deck tests/script-sync/repeated-title-deck.tex \
     --speaking-minutes 2 --json 2>/dev/null)
@@ -610,7 +614,7 @@ with tempfile.TemporaryDirectory() as directory:
 \end{document}
 """ % (opening, main))
     result = json.loads(subprocess.check_output([
-        sys.executable, "scripts/check_script.py", str(script),
+        sys.executable, "skills/econ-slides/scripts/check_script.py", str(script),
         "--deck", str(deck), "--speaking-minutes", "3", "--json",
     ], text=True))
 
@@ -628,7 +632,7 @@ else
   bad "time-aware main-block delivery regression"
 fi
 
-if python3 scripts/check_script.py tests/script-sync/good-script.tex \
+if python3 skills/econ-slides/scripts/check_script.py tests/script-sync/good-script.tex \
      --deck tests/script-sync/mini-deck.tex --speaking-minutes 1 \
      >/dev/null 2>&1; then
   bad "explicit speaking allocation overrun"
@@ -671,7 +675,7 @@ fi
 
 sed -E 's/\\Click\{[0-9]+\}//g' tests/script-sync/good-script.tex \
   > tests/_missing-click-script.tex
-MISSING_CLICK=$(python3 scripts/check_script.py tests/_missing-click-script.tex \
+MISSING_CLICK=$(python3 skills/econ-slides/scripts/check_script.py tests/_missing-click-script.tex \
     --deck tests/script-sync/mini-deck.tex --slot-minutes 3 --json 2>/dev/null | python3 -c '
 import json,sys
 r=json.load(sys.stdin)
@@ -681,7 +685,7 @@ rm -f tests/_missing-click-script.tex
 [ "$MISSING_CLICK" = "OK" ] && ok "semantic build requires ordered click markers" \
                                 || bad "missing-click regression"
 
-MISSING_QA=$(python3 scripts/check_script.py tests/script-sync/missing-qa-script.tex \
+MISSING_QA=$(python3 skills/econ-slides/scripts/check_script.py tests/script-sync/missing-qa-script.tex \
     --deck tests/script-sync/mini-deck.tex --slot-minutes 3 --json 2>/dev/null | python3 -c '
 import json,sys
 r=json.load(sys.stdin)
@@ -691,14 +695,14 @@ print("OK" if not any("appendix frame has no Q&A block" in f
 [ "$MISSING_QA" = "OK" ] && ok "Q&A may cover selected high-probability backups" \
                              || bad "optional Q&A regression"
 
-if python3 scripts/check_script.py tests/script-sync/good-script.tex \
+if python3 skills/econ-slides/scripts/check_script.py tests/script-sync/good-script.tex \
      --deck tests/script-sync/mini-deck.tex --slot-minutes 2 --wpm 0 >/dev/null 2>&1; then
   bad "nonpositive script timing input"
 else
   ok "nonpositive script timing input is rejected"
 fi
 
-if python3 scripts/compile_deck.py tests/interface-test.tex --passes 0 \
+if python3 skills/econ-slides/scripts/compile_deck.py tests/interface-test.tex --passes 0 \
      >/dev/null 2>&1; then
   bad "nonpositive compile pass count"
 else
@@ -717,7 +721,7 @@ else
 fi
 
 echo "== undefined citations and references never ship =="
-UNDEF_COMPILE=$(python3 scripts/compile_deck.py tests/undefined-ref-test.tex \
+UNDEF_COMPILE=$(python3 skills/econ-slides/scripts/compile_deck.py tests/undefined-ref-test.tex \
     --build-dir tests/build-suite --json 2>/dev/null)
 if python3 -c '
 import json,sys
@@ -731,14 +735,14 @@ else
   bad "compile undefined-reference report"
 fi
 
-python3 scripts/check_deck.py tests/build-suite/undefined-ref-test.pdf \
+python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/undefined-ref-test.pdf \
   --tex tests/undefined-ref-test.tex --log tests/build-suite/undefined-ref-test.log \
   --json > tests/build-suite/undefined-ref.json 2>/dev/null
 UNDEF_STATUS=$?
-python3 scripts/check_deck.py tests/build-suite/undefined-ref-test.pdf \
+python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/undefined-ref-test.pdf \
   --json > tests/build-suite/undefined-ref-pdf-only.json 2>/dev/null
 UNDEF_PDF_STATUS=$?
-python3 scripts/check_deck.py tests/build-suite/undefined-ref-test.pdf \
+python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/undefined-ref-test.pdf \
   --tex tests/undefined-ref-test.tex --log tests/build-suite/undefined-ref-test.log \
   --baseline-json tests/build-suite/undefined-ref.json \
   --json > tests/build-suite/undefined-ref-baseline.json 2>/dev/null
@@ -802,7 +806,7 @@ else
   bad "undefined-reference parser regression"
 fi
 
-BIB_COMPILE=$(python3 scripts/compile_deck.py tests/bib-test.tex \
+BIB_COMPILE=$(python3 skills/econ-slides/scripts/compile_deck.py tests/bib-test.tex \
     --build-dir tests/build-suite --json 2>/dev/null)
 if python3 -c '
 import json,sys
@@ -823,7 +827,7 @@ fi
 
 printf '%s\n' '\documentclass{article}' '\begin{document}' \
   '\def\loopforever{\loopforever}\loopforever' '\end{document}' > tests/_loop.tex
-LOOP_OUT=$(python3 scripts/compile_deck.py tests/_loop.tex --timeout 2 \
+LOOP_OUT=$(python3 skills/econ-slides/scripts/compile_deck.py tests/_loop.tex --timeout 2 \
     --build-dir tests/build-suite --json 2>&1)
 LOOP_STATUS=$?
 if [ "$LOOP_STATUS" = "1" ] && [[ "$LOOP_OUT" != *Traceback* ]] \
@@ -838,7 +842,7 @@ else
 fi
 rm -f tests/_loop.tex
 
-if python3 scripts/compile_deck.py tests/interface-test.tex --timeout 0 \
+if python3 skills/econ-slides/scripts/compile_deck.py tests/interface-test.tex --timeout 0 \
      >/dev/null 2>&1; then
   bad "nonpositive compile timeout"
 else

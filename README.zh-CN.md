@@ -143,32 +143,37 @@ to my existing deck without restyling it.
 | `econ-slides-boxed` | 深蓝标题栏、结构化区块 | 论文评论、政策场合 |
 | `econ-slides-compat` | **你喜欢的任何 Beamer 标准主题** | Madrid、metropolis、CambridgeUS、机构主题 |
 
-想用标准主题新建幻灯片？先 `\usetheme{Madrid}` 再 `\usepackage{econ-slides-compat}`，即可保留原有外观并获得语义接口。修改机构或个人的现有幻灯片？保留其原有导言区、编译引擎、宏、间距和视觉语言。详见 [themes/README.md](themes/README.md)。
+想用标准主题新建幻灯片？先 `\usetheme{Madrid}` 再 `\usepackage{econ-slides-compat}`，即可保留原有外观并获得语义接口。修改机构或个人的现有幻灯片？保留其原有导言区、编译引擎、宏、间距和视觉语言。详见 [skills/econ-slides/themes/README.md](skills/econ-slides/themes/README.md)。
 
 ## 仓库结构
 
 ```
-SKILL.md                 工作流：接收 → 精读 → 规划 → 起草 → 验证 → 交付
-references/
-  talk-structures.md     可调整的听众路径与 15–90 分钟时间预算
-  discussant.md          论文评论体裁：骨架、时间预算、语气规则
-  slide-rules.md         渲染版面规范：标题、间距、数学、颜色
-  beamer-layout-mechanics.md
-                         源码修改如何改变编译后的版面
-  existing-deck-workflow.md
-                         在不改变风格的前提下增补、打磨、评论或改编
-  exhibit-surgery.md     回归表 → 幻灯片表格；图形；数值溯源
-  source-integrity.md    论断↔证据台账；识别策略、模型与政策核查
-  speaker-script.md      计时、口语表达、点击同步、问答与可打印质检
-  style-guide.md         主题、文件工程、构建与交付规范
-themes/                  三套内置外观 + 标准主题兼容适配器
-templates/               可选的实证、理论、评论与讲稿起点模板
-scripts/
-  compile_deck.py        XeLaTeX 编译循环与错误分诊
-  check_deck.py          渲染版面审核：硬性拦截项 + 评分
-  check_script.py        幻灯片/讲稿同步、计时、口语风格与点击审核
-  crop_figure.py         无独立图形文件时裁剪原文图形
-tests/                   跨主题渲染 + 缺陷幻灯片/讲稿反例
+.claude-plugin/plugin.json   Claude Code 插件清单
+.codex-plugin/plugin.json    Codex 插件清单
+skills/econ-slides/          技能本体（手动安装时链接这个文件夹）
+  SKILL.md                   工作流：接收 → 精读 → 规划 → 起草 → 验证 → 交付
+  references/
+    talk-structures.md       可调整的听众路径与 15–90 分钟时间预算
+    discussant.md            论文评论体裁：骨架、时间预算、语气规则
+    slide-rules.md           渲染版面规范：标题、间距、数学、颜色
+    beamer-layout-mechanics.md
+                             源码修改如何改变编译后的版面
+    existing-deck-workflow.md
+                             在不改变风格的前提下增补、打磨、评论或改编
+    exhibit-surgery.md       回归表 → 幻灯片表格；图形；数值溯源
+    source-integrity.md      论断↔证据台账；识别策略、模型与政策核查
+    speaker-script.md        计时、口语表达、点击同步、问答与可打印质检
+    style-guide.md           主题、文件工程、构建与交付规范
+  themes/                    三套内置外观 + 标准主题兼容适配器
+  templates/                 可选的实证、理论、评论与讲稿起点模板
+  scripts/
+    compile_deck.py          XeLaTeX 编译循环：BibTeX/Biber 与错误分诊
+    check_deck.py            渲染版面审核：硬性拦截项 + 评分
+    check_script.py          幻灯片/讲稿同步、计时、口语风格与点击审核
+    crop_figure.py           无独立图形文件时裁剪原文图形
+tests/                       跨主题渲染 + 缺陷幻灯片/讲稿反例
+docs/sample-talk/            交错推行示例：幻灯片与讲稿
+requirements.txt             脚本所需的 PyMuPDF
 ```
 
 ## 它不做什么

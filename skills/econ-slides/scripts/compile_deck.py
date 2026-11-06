@@ -32,6 +32,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_script import tex_tree  # noqa: E402  (no PyMuPDF dependency)
 
+# scripts/ and themes/ ship side by side in the skill folder
+# (skills/econ-slides/ in the repository). resolve() follows a symlinked or
+# junctioned install back to the real folder.
+SKILL_DIR = Path(__file__).resolve().parent.parent
+BUNDLED_THEMES = SKILL_DIR / "themes"
+
 TRIAGE = [
     (r"! LaTeX Error: File `([^']+)' not found",
      "Missing package or file: {0}. Install it (tlmgr install <pkg>) or fix the path."),
@@ -170,7 +176,12 @@ def main() -> int:
     env = os.environ.copy()
     # Resolve before changing cwd to the deck directory. A caller may pass a
     # relative --themes-dir from the repository root.
-    themes = (args.themes_dir or Path(__file__).resolve().parent.parent / "themes").resolve()
+    themes = (args.themes_dir or BUNDLED_THEMES).resolve()
+    if not themes.is_dir():
+        print(f"error: themes directory {themes} not found — the skill's "
+              "scripts/ and themes/ must stay together in one skill folder, "
+              "or pass --themes-dir", file=sys.stderr)
+        return 1
     # os.pathsep: ':' on Unix, ';' on Windows (TeX Live/MiKTeX expect it)
     sep = os.pathsep
     env["TEXINPUTS"] = f".{sep}{themes}{sep}" + env.get("TEXINPUTS", "")
