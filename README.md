@@ -155,6 +155,39 @@ clone carries plugin manifests.
 </details>
 
 <details>
+<summary>Update or uninstall</summary>
+
+Start a new agent session after any of these steps.
+
+Plugin install:
+
+```bash
+# Claude Code (or /plugin in a session)
+claude plugin marketplace update openeconai
+claude plugin update econ-slides@openeconai
+claude plugin uninstall econ-slides@openeconai
+
+# Codex
+codex plugin marketplace upgrade openeconai
+codex plugin remove econ-slides@openeconai
+```
+
+Manual or paste-in install (the links point into your clone, so keep the clone
+where it is):
+
+```bash
+git -C /path/to/econ-slides-skill pull                      # update
+rm ~/.claude/skills/econ-slides ~/.agents/skills/econ-slides # uninstall: removes the links only
+rm -rf /path/to/econ-slides-skill ~/.venvs/econ-slides       # optional: the clone and the venv
+```
+
+On Windows, `cmd /c rmdir "$env:USERPROFILE\.claude\skills\econ-slides"` (and the
+same for `.agents\skills\econ-slides`) removes a junction without touching the
+clone; avoid `Remove-Item -Recurse` on a junction.
+
+</details>
+
+<details>
 <summary>Manual installation</summary>
 
 Clone into a stable location: the links below point at the clone, so

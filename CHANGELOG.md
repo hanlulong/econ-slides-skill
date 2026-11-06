@@ -96,8 +96,8 @@ that the v0.1.1 notes described.
 ### Changed
 
 - The skill description is scoped to LaTeX/Beamer talks. It drops the bare
-  "slides", "discussion" and "presentation" triggers in favour of Beamer or
-  LaTeX slides, talks and discussant slides for an economics paper; says it is
+  "slides" and "discussion" triggers and keeps "talk", "presentation" and
+  "deck" only for Beamer or LaTeX slides on an economics paper; says it is
   not for PowerPoint, Keynote or Google Slides; and routes paper writing to
   econ-write and referee reports to econ-review. The plugin manifests say the
   same in short.
@@ -130,6 +130,13 @@ that the v0.1.1 notes described.
   - a missing PyMuPDF now gets a message that names the interpreter and the
     venv route.
 - Codex manual installs use `~/.agents/skills` (changed on `main` after v0.1.1).
+- Both READMEs say how to update and uninstall a plugin, manual or paste-in
+  install.
+- `compile_deck.py` hints: a missing figure or `\input` file gets a path hint
+  instead of "tlmgr install"; a missing `.sty` or `.cls` gets `tlmgr search
+  --global --file` and the sudo note for MacTeX. When the engine is installed
+  (for example in `/Library/TeX/texbin`) but not on PATH, the error says so
+  instead of telling the user to install TeX. A crash exits 3.
 - `tests/run-tests.sh` is executable and removes generated sources on exit,
   even after an interrupt.
 

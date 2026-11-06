@@ -92,6 +92,36 @@ codex plugin add econ-slides@openeconai
 </details>
 
 <details>
+<summary>更新或卸载</summary>
+
+完成以下任一步骤后，请开启新的智能体会话。
+
+插件安装：
+
+```bash
+# Claude Code（或在会话中使用 /plugin）
+claude plugin marketplace update openeconai
+claude plugin update econ-slides@openeconai
+claude plugin uninstall econ-slides@openeconai
+
+# Codex
+codex plugin marketplace upgrade openeconai
+codex plugin remove econ-slides@openeconai
+```
+
+手动安装或粘贴提示安装（链接指向你的克隆目录，所以请勿移动克隆目录）：
+
+```bash
+git -C /path/to/econ-slides-skill pull                      # 更新
+rm ~/.claude/skills/econ-slides ~/.agents/skills/econ-slides # 卸载：只删除链接
+rm -rf /path/to/econ-slides-skill ~/.venvs/econ-slides       # 可选：删除克隆目录和虚拟环境
+```
+
+在 Windows 上，`cmd /c rmdir "$env:USERPROFILE\.claude\skills\econ-slides"`（`.agents\skills\econ-slides` 同理）只删除目录联接，不会动到克隆目录；不要对目录联接使用 `Remove-Item -Recurse`。
+
+</details>
+
+<details>
 <summary>手动安装</summary>
 
 请克隆到一个固定位置：下面的链接指向这个克隆目录，移动或删除它会使安装失效。
