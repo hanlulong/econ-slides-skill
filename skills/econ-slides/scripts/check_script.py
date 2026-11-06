@@ -4,17 +4,28 @@
 Usage:
     python3 scripts/check_script.py script.tex --deck talk.tex
         (--slot-minutes TOTAL | --speaking-minutes ALLOCATION)
-        [--wpm 135] [--json]
+        [--genre conference|seminar|job-talk|discussant] [--wpm 135] [--json]
 
 Planned speech is the opening plus main-deck blocks. Conditional Q&A is
-reported separately. With ``--slot-minutes``, planned speech must occupy
-75--80 percent of the total session, reserving 20--25 percent for questions.
-With ``--speaking-minutes``, the stated allocation is a ceiling for prepared
-speech and the question period is outside this check. Exit 1 on sync, timing
-overrun, missing-opening, or click failures. Per-block word ranges,
-minute-label discrepancies, and sentence-shape notices are review warnings
-rather than fill targets. Q&A blocks may cover a selected subset of
-high-probability backups.
+reported separately. With ``--slot-minutes``, planned speech is compared with
+a genre window of the total session:
+
+  conference   75--80 percent (20--25 percent for questions)
+  seminar,     60--70 percent (30--40 percent for interruptions and
+  job-talk     questions; Piazzesi plans to talk 1 hour of a 1.5-hour slot)
+  discussant   at most 80 percent, with no floor
+
+Only an overrun fails. A script below the window gets a warning: a scope
+decision, never filler. With ``--speaking-minutes``, the stated allocation is
+a ceiling for prepared speech and the question period is outside this check.
+``--wpm`` (default 135) is the speaking pace; time a rehearsal and pass the
+speaker's own rate, which is often slower in a second language.
+
+Exit 1 on sync, timing overrun, missing-opening, or click failures; exit 2
+when an input is missing; exit 3 if the checker crashes. Per-block word
+ranges, minute-label discrepancies, an underrun, and sentence-shape notices
+are review warnings rather than fill targets. Q&A blocks may cover a selected
+subset of high-probability backups.
 """
 
 from __future__ import annotations
@@ -46,6 +57,16 @@ OPENING_HARD_MIN, OPENING_HARD_MAX = 35, 100
 OPENING_PREFERRED_LO, OPENING_PREFERRED_HI = 40, 70
 QA_HARD_MIN, QA_HARD_MAX = 25, 120
 QA_PREFERRED_LO, QA_PREFERRED_HI = 40, 90
+# Planned speech as a share of a total session, by genre: (floor, ceiling).
+# Conference slots keep 20--25% for questions. Seminars and job talks expect
+# interruptions: Piazzesi plans 60 of 90 minutes; Startz says to leave time for
+# them. A discussant has a ceiling only; shorter discussions are common.
+SPEECH_SHARE = {
+    "conference": (0.75, 0.80),
+    "seminar": (0.60, 0.70),
+    "job-talk": (0.60, 0.70),
+    "discussant": (0.0, 0.80),
+}
 
 
 def strip_comments(src: str) -> str:
@@ -437,7 +458,15 @@ def main() -> int:
     clock.add_argument(
         "--speaking-minutes", type=float,
         help="explicit prepared-speaking allocation; Q&A is outside this clock")
-    ap.add_argument("--wpm", type=float, default=135.0)
+    ap.add_argument(
+        "--genre", choices=sorted(SPEECH_SHARE), default="conference",
+        help=("talk genre for a --slot-minutes clock: conference 75-80%% "
+              "speech, seminar/job-talk 60-70%%, discussant at most 80%% "
+              "(default conference)"))
+    ap.add_argument(
+        "--wpm", type=float, default=135.0,
+        help="speaking pace in words per minute (default 135); use the "
+             "speaker's timed rehearsal rate")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
     if args.slot_minutes is not None and args.slot_minutes <= 0:
@@ -628,15 +657,26 @@ def main() -> int:
     talking_minutes = planned_words / args.wpm
     if args.slot_minutes is not None:
         timing_mode = "total-session"
-        target_minutes = args.slot_minutes * 0.775
-        lower, upper = args.slot_minutes * 0.75, args.slot_minutes * 0.80
-        qa_lower, qa_upper = args.slot_minutes * 0.20, args.slot_minutes * 0.25
-        if talking_minutes < lower or talking_minutes > upper:
+        share_lo, share_hi = SPEECH_SHARE[args.genre]
+        lower, upper = args.slot_minutes * share_lo, args.slot_minutes * share_hi
+        target_minutes = (lower + upper) / 2 if share_lo else upper
+        qa_lower = args.slot_minutes - upper
+        qa_upper = args.slot_minutes - lower
+        window = (f"{lower:.1f}--{upper:.1f}" if share_lo
+                  else f"at most {upper:.1f}")
+        if talking_minutes > upper:
             findings.append(
-                f"[total-time] {talking_minutes:.1f} min of planned speech for a "
-                f"{args.slot_minutes:g}-min total session; target about "
-                f"{target_minutes:.1f} (required {lower:.1f}--{upper:.1f}, leaving "
-                f"{qa_lower:.1f}--{qa_upper:.1f} min for questions)")
+                f"[total-time] {talking_minutes:.1f} min of planned speech at "
+                f"{args.wpm:g} wpm overruns the {args.genre} window for a "
+                f"{args.slot_minutes:g}-min total session ({window} min, "
+                f"leaving at least {qa_lower:.1f} min for questions); cut "
+                "scope, never speed up")
+        elif talking_minutes < lower:
+            warnings.append(
+                f"[total-time] {talking_minutes:.1f} min of planned speech at "
+                f"{args.wpm:g} wpm is under the {args.genre} window "
+                f"({window} min of {args.slot_minutes:g}); ending early is "
+                "fine, so decide on scope rather than add filler")
     else:
         timing_mode = "speaking-time"
         target_minutes = args.speaking_minutes
@@ -683,9 +723,14 @@ def main() -> int:
         "talking_minutes": round(talking_minutes, 1),
         "declared_minutes": round(hinted_total, 1),
         "timing_mode": timing_mode,
+        "genre": args.genre if args.slot_minutes is not None else None,
+        "wpm": args.wpm,
+        "speech_window_minutes": ([round(lower, 1), round(upper, 1)]
+                                  if args.slot_minutes is not None else None),
         "slot_minutes": args.slot_minutes,
         "speaking_minutes": args.speaking_minutes,
-        "qa_minutes": ([round(qa_lower, 1), round(qa_upper, 1)]
+        "qa_minutes": ([round(qa_lower, 1),
+                        round(qa_upper, 1) if lower else None]
                        if qa_lower is not None else None),
         "unused_speaking_minutes": (
             round(max(0.0, args.speaking_minutes - talking_minutes), 1)
@@ -698,16 +743,19 @@ def main() -> int:
         print(json.dumps(result, indent=2))
     else:
         if args.slot_minutes is not None:
+            reserve = (f"{qa_lower:.1f}--{qa_upper:.1f}" if lower
+                       else f"at least {qa_lower:.1f}")
             clock_summary = (
-                f"Q&A reserve {qa_lower:.1f}--{qa_upper:.1f} min of the "
-                f"{args.slot_minutes:g}-min session")
+                f"{args.genre} window {window} min, Q&A reserve "
+                f"{reserve} min of the {args.slot_minutes:g}-min session")
         else:
             clock_summary = (
                 f"explicit speaking allocation {args.speaking_minutes:g} min; "
                 "Q&A outside this clock")
         print(
             f"{args.script.name}: opening + {len(main_blocks)} main blocks, "
-            f"{planned_words} words = {talking_minutes:.1f} min; "
+            f"{planned_words} words = {talking_minutes:.1f} min at "
+            f"{args.wpm:g} wpm; "
             f"{clock_summary}; {len(qa_blocks)} conditional blocks / "
             f"{qa_words} words")
         for item in block_report:
@@ -720,7 +768,7 @@ def main() -> int:
             print(f"  {finding}")
         if not findings:
             if args.slot_minutes is not None:
-                print("  in sync and within the total-session timing window")
+                print("  in sync and within the total-session timing ceiling")
             else:
                 print("  in sync and within the explicit speaking allocation")
     return 0 if not findings else 1

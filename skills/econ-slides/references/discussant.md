@@ -2,18 +2,30 @@
 
 A discussion is its own genre with two jobs (Dallas Fed): help the audience
 understand the paper, and help the author improve it. Every slide serves one
-of the two. Sources: Dallas Fed "Tips on Being a Good Discussant", ASHEcon
-"How to Be a Good Discussant".
+of the two. Sources: Dallas Fed
+["Tips on Being a Good Discussant"](https://www.dallasfed.org/~/media/documents/educate/events/esp/tipsdiscussant.pdf),
+ASHEcon ["How to Be a Good Discussant"](https://ashecon.org/activities/news/how-to-be-a-good-discussant)
+(Burton, Willage and Zanwar, Newsletter 2024:1).
 
 ## Time and size discipline
 
 First determine what the clock means. An organizer's “10-minute discussion”
 normally states the discussant's speaking allocation; do not reserve another
-question share from it. If the user instead gives a total session owned by the
-discussant, plan 75–80% for prepared remarks and reserve 20–25% for questions,
-as in any other presentation. Build the frame count from the strength and
-depth of the comments rather than a quota. Run slightly *under* the speaking
-allocation. Discussant decks are normally static so the room can inspect the
+question share from it, and check it with `check_script.py
+--speaking-minutes`. Typical allocations:
+
+| Setting | Discussant's speaking time | Source |
+|---|---|---|
+| 15-minute paper presentation | usually 5–7 minutes, often less | ASHEcon (Burton) |
+| Conference session, one discussant per paper | about 7 minutes per paper (15 for two papers) | ASHEcon (Willage; participant guidelines) |
+| Dallas Fed format | 10 minutes, a firm limit | Dallas Fed |
+
+These are norms, not targets: the organizer's number wins, and "often you can
+do a good discussion in even less time" (ASHEcon). Only when the user gives a
+total session that the discussant owns do you convert it, with a ceiling of
+about 80% for prepared remarks and no floor (`--genre discussant`). Build the
+frame count from the strength and depth of the comments rather than a quota.
+Run slightly *under* the speaking allocation. Discussant decks are normally static so the room can inspect the
 paper and proposed revision without waiting for decorative reveals.
 
 ## An adaptable discussant path

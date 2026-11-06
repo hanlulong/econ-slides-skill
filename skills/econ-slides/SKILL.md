@@ -184,10 +184,13 @@ graph or an existing deck gives a better answer.
     has no Data slide unless data, calibration, or estimation is part of the
     paper.
 18. **Protect question time.** Treat the user's clock as the total session
-    unless they explicitly call it speaking time. Reserve 20--25% of the total
-    session for questions and plan 75--80% for prepared speech. Record both
-    numbers in the structure plan and script; never label a 12-minute script a
-    20-minute presentation. This rule scales from 15- to 90-minute sessions.
+    unless they explicitly call it speaking time. Size the question reserve to
+    the genre: a conference talk plans 75--80% for prepared speech (20--25%
+    for questions); a department seminar or job talk plans about 60--70%,
+    because interruptions are expected; a discussion has a ceiling only.
+    Record both numbers in the structure plan and script; never label a
+    12-minute script a 20-minute presentation. Ending a little early is fine;
+    running over is not.
 19. **Do not introduce arrows as bullet markers.** Avoid `\item[$\Rightarrow$]` and
     `\item[$\rightarrow$]`; they turn every subpoint into a conclusion and make
     the visual hierarchy mechanical. Use an ordinary nested bullet, a neutral
@@ -205,7 +208,9 @@ graph or an existing deck gives a better answer.
 
 Establish before writing anything: **stance** (author / neutral summary /
 discussant), **genre** (conference talk / seminar / job talk / discussion),
-**total session clock**, whether the user instead stated **speaking time**, the
+**total session clock**, whether the user instead stated **speaking time**,
+whether a discussant or a pooled question period sits outside the clock, the
+speaker's **pace** (words per minute, from a timed read if unknown), the
 **planned speaking window** and **question reserve**, **audience** (field experts /
 generalists / policy), **theme**, title metadata (including author-to-
 affiliation mapping and any institutional disclaimer), and **materials** (paper PDF and/or
@@ -217,9 +222,9 @@ institutional theme) — their `\usetheme{...}` followed by
 without changing their theme's look. Ask only if the user signals a
 preference exists. Ask about anything ambiguous that changes the deck;
 assume sensible defaults otherwise and say what you assumed. When only a total
-session length is given, derive prepared speech as 75--80% of that clock and
-reserve 20--25% for questions. Support the entire 15--90 minute range; do not
-silently impose a 20-minute conference default.
+session length is given, derive prepared speech from the genre share in gate
+18 and `references/talk-structures.md`. Support the entire 15--90 minute
+range; do not silently impose a 20-minute conference default.
 
 ### Phase 1 — Read the paper
 
@@ -373,17 +378,19 @@ the deck's provenance, a Q&A appendix keyed to backup slides. Verify:
 
 ```bash
 python3 <skill-dir>/scripts/check_script.py script.tex --deck talk.tex \
-    --slot-minutes <total-session-minutes>
+    --slot-minutes <total-session-minutes> --genre <conference|seminar|job-talk|discussant> \
+    --wpm <speaker-pace, default 135>
 # If the user explicitly supplied presentation time rather than a total slot:
 python3 <skill-dir>/scripts/check_script.py script.tex --deck talk.tex \
-    --speaking-minutes <prepared-speaking-allocation>
+    --speaking-minutes <prepared-speaking-allocation> --wpm <speaker-pace>
 ```
 
-With a total-session clock, the checker requires planned speech to occupy
-75--80% of the session, leaving 20--25% for questions. With an explicit
-speaking allocation, it treats that number as a ceiling and leaves Q&A outside
-the check. Title drift, a timing overrun, and phantom clicks fail; block word
-ranges remain review prompts so they never induce filler. Compile
+With a total-session clock, the checker compares planned speech with the
+genre's window (conference 75--80% of the session, seminar and job talk
+60--70%, discussion at most 80%). With an explicit speaking allocation, it
+treats that number as a ceiling and leaves Q&A outside the check. Title drift,
+a timing overrun, and phantom clicks fail; an underrun and block word ranges
+are warnings, so they never induce filler. Compile
 and inspect the script PDF too: no orphan headings, broken Q\&A labels, or
 nearly empty final page.
 

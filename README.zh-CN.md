@@ -24,7 +24,7 @@
 ## 它能做什么
 
 - **论文 → 演讲。** 给它一份稿件和一个 15 到 90 分钟的总时长，它会构建一条带领听众走完全程的最短路径：问题、答案、必要的实证或理论铺垫、证据或命题、解读、含义。顺序和每页的结构始终取决于论文本身。
-- **演讲讲稿。** 生成可打印的排练讲稿：逐页对应幻灯片标题、从开场到正文全程计时、与真实的视觉分步展示同步，并附有备用的问答应对模块。默认为提问保留总时长的 20–25%，绝不为凑时长注水。
+- **演讲讲稿。** 生成可打印的排练讲稿：逐页对应幻灯片标题、从开场到正文全程计时、与真实的视觉分步展示同步，并附有备用的问答应对模块。提问时间按体裁预留（会议报告为总时长的 20–25%，研讨会和求职报告为 30–40%），只有超时才判为不通过，绝不为凑时长注水。
 - **评论人（discussant）幻灯片。** 作为一等公民对待、而非附带功能：一份面向听众校准的论文摘要，加上最有分量的几条点评（每条自带标题），每条都落在具体建议上——遵循达拉斯联储与 ASHEcon 的评论人规范。
 - **修改现有幻灯片。** 增加主题页、附录、讨论内容或整体打磨，同时把已编译的目标幻灯片当作设计契约：工作流会逆向识别并保留其 Beamer 风格，而不是套用本技能自带的主题。
 - **改编演讲场合。** 同一篇论文的 15 分钟版和 90 分钟版是两场不同的演讲，不是同一套幻灯片讲快讲慢。本技能以完整的论证单元为单位进行保留、压缩、移动、删减或深化，而不是把每页等比缩放。
@@ -152,7 +152,8 @@ Use the econ-slides skill to prepare exactly 20 minutes of speaking; the
 organizer schedules questions separately.
 Use the econ-slides skill to make a 60-minute pure-theory seminar talk.
 Use the econ-slides skill to make the talk and a printable speaker script.
-Use the econ-slides skill to build my discussion of the attached paper for a 15-minute total session.
+Use the econ-slides skill to build my discussion of the attached paper for a
+7-minute discussant slot.
 Use the econ-slides skill to turn my 90-minute seminar deck into a 30-minute
 total-session version for SED while preserving its Beamer style.
 Use the econ-slides skill to add slides on the mechanism and a linked appendix
@@ -182,8 +183,8 @@ to my existing deck without restyling it.
 skills/econ-slides/          技能本体（手动安装时链接这个文件夹）
   SKILL.md                   工作流：接收 → 精读 → 规划 → 起草 → 验证 → 交付
   references/
-    talk-structures.md       可调整的听众路径与 15–90 分钟时间预算
-    discussant.md            论文评论体裁：骨架、时间预算、语气规则
+    talk-structures.md       可调整的听众路径与按体裁区分的 15–90 分钟时间预算
+    discussant.md            论文评论体裁：骨架、常见发言时长、语气规则
     slide-rules.md           渲染版面规范：标题、间距、数学、颜色
     beamer-layout-mechanics.md
                              源码修改如何改变编译后的版面

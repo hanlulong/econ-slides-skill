@@ -707,6 +707,45 @@ else
   ok "explicit speaking allocation blocks overruns"
 fi
 
+# The speech window depends on genre and fails only on overruns.
+if python3 - <<'PY'
+import json, subprocess, sys
+def run(*extra):
+    proc = subprocess.run(
+        [sys.executable, "skills/econ-slides/scripts/check_script.py",
+         "docs/sample-talk/script.tex", "--deck",
+         "docs/sample-talk/conference-30min.tex", "--json", *extra],
+        capture_output=True, text=True)
+    return proc.returncode, json.loads(proc.stdout)
+def timing(result, bucket):
+    return [x for x in result[bucket] if x.startswith("[total-time]")]
+# 22.5 min of speech. Under the 32-min conference window: a warning only.
+status, r = run("--slot-minutes", "32")
+assert status == 0 and timing(r, "warnings") and not timing(r, "findings")
+assert r["genre"] == "conference" and r["wpm"] == 135
+# Over the 28-min conference ceiling (22.4): a finding.
+status, r = run("--slot-minutes", "28")
+assert status == 1 and timing(r, "findings")
+# Two thirds of a 34-min seminar slot fits the 60--70% seminar window.
+status, r = run("--slot-minutes", "34", "--genre", "seminar")
+assert status == 0 and not timing(r, "warnings") + timing(r, "findings")
+assert r["speech_window_minutes"] == [20.4, 23.8]
+# The same script overruns a 30-min seminar slot (at most 21 min).
+status, r = run("--slot-minutes", "30", "--genre", "job-talk")
+assert status == 1 and timing(r, "findings")
+# A discussant has a ceiling and no floor.
+status, r = run("--slot-minutes", "60", "--genre", "discussant")
+assert status == 0 and not timing(r, "warnings") and r["qa_minutes"][1] is None
+# A slower speaker turns a fitting script into an overrun.
+status, r = run("--slot-minutes", "30", "--wpm", "115")
+assert status == 1 and "115 wpm" in timing(r, "findings")[0]
+PY
+then
+  ok "speech windows follow the genre, and only overruns fail"
+else
+  bad "genre-aware speech window"
+fi
+
 if python3 - <<'PY'
 from scripts.check_script import (
     clean_title, has_semantic_build, overlay_max, overlay_specs, spoken_text,

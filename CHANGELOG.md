@@ -60,6 +60,15 @@ that the v0.1.1 notes described.
 - A `check_deck.py` run without `--tex` or `--log` now lists the checks it
   skipped (`skipped_checks`, `complete: false` in the JSON) and reports
   "incomplete" instead of "ship".
+- `check_script.py --genre conference|seminar|job-talk|discussant` sets the
+  speech window for a `--slot-minutes` clock. Only an overrun fails; a script
+  under the window gets a warning, as the docs already said. The summary line
+  and JSON now show the assumed speaking pace (`--wpm`, default 135), which
+  SKILL.md and speaker-script.md now tell the agent to ask for.
+- `discussant.md` lists typical discussant allocations (ASHEcon: usually 5–7
+  minutes for a 15-minute paper; Dallas Fed: 10 minutes), and the README's
+  discussant example uses a 7-minute slot instead of a 15-minute total
+  session.
 - `compile_deck.py --timeout` (default 600 s). A timed-out run now returns the
   usual JSON with `ok: false` instead of a traceback.
 - `requirements.txt` (PyMuPDF) and a `tlmgr install` line for BasicTeX, TinyTeX
@@ -90,8 +99,11 @@ that the v0.1.1 notes described.
     (`question-label` hard blocker).
   - The conclusion carries no navigation buttons or appendix links
     (`conclusion-link` hard blocker).
-  - Clocks are total sessions unless stated as speaking time: plan 75–80% for
-    prepared speech and reserve 20–25% for questions.
+  - Clocks are total sessions unless stated as speaking time. The prepared-
+    speech share now depends on the genre: 75–80% for a conference talk,
+    60–70% for a department seminar or job talk (following Piazzesi's 60 of 90
+    minutes and Startz's advice to leave time for interruptions), and at most
+    80% for a discussion.
 - The checker now separates hard blockers (edge overflow, serious overfull
   boxes, navigation collisions, dead links, undefined references, and the house
   rules above) from review prompts. Wrapped titles and bullets, density, sparse

@@ -32,8 +32,9 @@ at every page before delivery.
   paper-dependent.
 - **Speaker scripts.** Add a printable rehearsal script keyed to exact frame
   titles, timed from the opening through the main deck, synchronized to real
-  visual builds, and backed by conditional Q\&A blocks. The default reserves
-  20–25% of the total session for questions and never pads prose to fill time.
+  visual builds, and backed by conditional Q\&A blocks. The question reserve
+  follows the genre (20–25% of a conference session, 30–40% of a seminar or job
+  talk), only an overrun fails, and prose is never padded to fill time.
 - **Discussant decks.** A first-class genre, not an afterthought: an
   audience-calibrated summary and the strongest titled comments, each ending
   in a concrete suggestion—built to the Dallas Fed / ASHEcon discussant norms.
@@ -222,7 +223,8 @@ Use the econ-slides skill to prepare exactly 20 minutes of speaking; the
 organizer schedules questions separately.
 Use the econ-slides skill to make a 60-minute pure-theory seminar talk.
 Use the econ-slides skill to make the talk and a printable speaker script.
-Use the econ-slides skill to build my discussion of the attached paper for a 15-minute total session.
+Use the econ-slides skill to build my discussion of the attached paper for a
+7-minute discussant slot.
 Use the econ-slides skill to turn my 90-minute seminar deck into a 30-minute
 total-session version for SED while preserving its Beamer style.
 Use the econ-slides skill to add slides on the mechanism and a linked appendix
@@ -258,8 +260,8 @@ preamble, engine, macros, spacing, and visual language. See
 skills/econ-slides/          the skill itself (link this folder for a manual install)
   SKILL.md                   the workflow: intake → read → plan → draft → verify → deliver
   references/
-    talk-structures.md       adaptable audience paths and 15–90 minute budgets
-    discussant.md            the discussion genre: skeleton, time budgets, tone rules
+    talk-structures.md       adaptable audience paths and genre-aware 15–90 minute budgets
+    discussant.md            the discussion genre: skeleton, typical speaking allocations, tone rules
     slide-rules.md           rendered layout guidance: titles, spacing, math, color
     beamer-layout-mechanics.md
                              how source edits reflow the compiled frame

@@ -68,14 +68,22 @@ Block skeleton:
 ## Timing and budgets
 
 - Treat the clock as the **total session** unless the user explicitly gives
-  speaking time. Plan **75--80%** for prepared speech and reserve **20--25%**
-  for questions. A 30-minute session therefore carries 22.5--24 minutes of
-  prepared speech. Planned time is the opening plus main-deck blocks;
-  conditional Q\&A is reported separately and never pads the talk.
+  speaking time. The prepared-speech share depends on the genre
+  (`talk-structures.md` §Slide budget): **75--80%** for a conference talk,
+  about **60--70%** for a department seminar or job talk, where interruptions
+  are expected, and at most 80% for a discussion. A 30-minute conference
+  session therefore carries 22.5--24 minutes of prepared speech. Planned time
+  is the opening plus main-deck blocks; conditional Q\&A is reported
+  separately and never pads the talk. Check it with `--slot-minutes` and
+  `--genre conference|seminar|job-talk|discussant`; only an overrun fails.
 - When the user explicitly gives a **speaking-time allocation**, honor that
-  number directly; do not apply the 75--80% conversion again. Check it with
+  number directly; do not apply the conversion again. Check it with
   `--speaking-minutes`, which treats the allocation as a ceiling and keeps any
   separately managed question period outside the clock.
+- Minutes come from words at **135 words per minute** unless you pass
+  `--wpm`. Ask for the speaker's pace, or have them read one block aloud
+  against a clock, and pass that rate; a slower speaker needs fewer words for
+  the same slot.
 - Substantive blocks commonly fall near **80--280 spoken words**, but that is a
   descriptive range, not a ceiling. A load-bearing exhibit or proposition may
   need more when its declared minutes and source-supported reasoning warrant
@@ -96,9 +104,9 @@ Block skeleton:
   script is short, deepen only motivation, exhibit orientation, economic
   intuition, transparent reasoning, meaningful benchmarks, evidence-supported
   interpretation, or transitions the audience actually needs. For a total
-  session, a script materially below the 75--80% prepared-speech window calls
-  for a scope decision or user input, not filler; finishing near the low end of
-  that window is fine. For an explicit speaking-time ceiling, a shorter script
+  session, a script materially below the genre's prepared-speech window calls
+  for a scope decision or user input, not filler; the checker only warns, and
+  finishing a little early is fine. For an explicit speaking-time ceiling, a shorter script
   may be appropriate when the requested content is complete.
 - Over budget ⇒ cut content, never plan to talk faster.
 

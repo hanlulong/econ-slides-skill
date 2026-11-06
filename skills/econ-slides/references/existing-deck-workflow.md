@@ -351,8 +351,9 @@ source edit
 ### Retarget the deck to a new length or venue
 
 1. Establish venue, audience, total session clock, and whether the user instead
-   stated speaking time. When only total session time is given, plan about
-   75--80% for prepared speech and reserve 20--25% for questions. When the
+   stated speaking time. When only total session time is given, plan the
+   genre's prepared-speech share (`talk-structures.md` §Slide budget: about
+   75--80% for a conference talk, 60--70% for a seminar or job talk). When the
    user explicitly gives speaking time, preserve that allocation directly and
    validate it with `check_script.py --speaking-minutes`; do not discount it a
    second time.

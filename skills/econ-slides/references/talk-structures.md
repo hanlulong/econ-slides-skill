@@ -15,28 +15,50 @@ still consumes some presentation time.
 
 ## Slide budget
 
-First distinguish the **total session** from **planned speech**. Unless the
-organizer states otherwise, reserve 20--25% of the total session for questions
-and plan 75--80% for prepared speech. Plan roughly 1.5--2 minutes per content
+First distinguish the **total session** from **planned speech**, then set the
+speech share by genre unless the organizer states otherwise:
+
+- **Conference talk:** plan 75--80% for prepared speech and reserve 20--25%
+  for questions.
+- **Department seminar or job talk:** plan about 60--70% and keep 30--40% for
+  interruptions and questions. Piazzesi: "For a 1 ½ hour presentation, plan to
+  talk for 1 hour and prepare 30 slides." Startz: "You are going to be
+  interrupted. Hopefully, a fair amount. Leave time for that."
+- **Discussion:** see `discussant.md`; the organizer's number is usually a
+  speaking allocation.
+- When the organizer's per-paper number is a **presentation time**, with the
+  discussant and pooled questions outside it, treat it as speaking time
+  (`check_script.py --speaking-minutes`). ASHEcon, for example, asks for
+  presentations of no more than 18 minutes, gives discussants about 7 minutes
+  per paper, and keeps a full 15 minutes for audience questions.
+
+Running a little short is fine ("There's nothing wrong with ending early!",
+Cochrane); Piazzesi's limit is ending no more than 10 minutes early. The
+checker therefore fails only an overrun. Plan roughly 1.5--2 minutes per content
 slide, slower for a load-bearing exhibit or proposition. Verify by rehearsal
 logic, not arithmetic: a key table may take 3 minutes to land; a section
-divider takes 10 seconds. Never plan one slide per minute (Cochrane,
-Piazzesi) -- the audience needs time to digest the slide.
+divider takes 10 seconds. Never plan one slide per minute (Cochrane) -- the
+audience needs time to digest the slide.
 
-| Total session | Planned speech | Questions | Content slides | Appendix |
-|---|---|---|---|---|
-| 15 min | 11.25--12 min | 3--3.75 min | 6--8 | 5--12 |
-| 20 min | 15--16 min | 4--5 min | 8--10 | 8--15 |
-| 30 min | 22.5--24 min | 6--7.5 min | 10--14 | 10--20 |
-| 45 min | 33.75--36 min | 9--11.25 min | 15--20 | 12--25 |
-| 60 min | 45--48 min | 12--15 min | 20--26 | 15--30 |
-| 75 min | 56.25--60 min | 15--18.75 min | 24--32 | 20--35 |
-| 90 min | 67.5--72 min | 18--22.5 min | 28--38 | 20--40 |
+| Total session | Genre | Planned speech | Questions and interruptions | Content slides | Appendix |
+|---|---|---|---|---|---|
+| 15 min | conference | 11.25--12 min | 3--3.75 min | 6--8 | 5--12 |
+| 20 min | conference | 15--16 min | 4--5 min | 8--10 | 8--15 |
+| 30 min | conference | 22.5--24 min | 6--7.5 min | 10--14 | 10--20 |
+| 45 min | conference | 33.75--36 min | 9--11.25 min | 15--20 | 12--25 |
+| 60 min | seminar | 36--42 min | 18--24 min | 16--22 | 15--30 |
+| 75 min | seminar / job talk | 45--52.5 min | 22.5--30 min | 20--28 | 20--35 |
+| 90 min | seminar / job talk | 54--63 min | 27--36 min | 24--32 | 20--40 |
+
+A 60--90 minute slot run as a conference session (questions only at the end)
+keeps the 75--80% conference share; pass `--genre conference`.
 
 These are starting ranges, not fill quotas. Theory talks often hold a hard
 proposition or example longer; empirical talks may move faster through a
-familiar design. The final budget comes from a spoken rehearsal, and the
-question reserve is never recovered by padding slides or accelerating speech.
+familiar design. The final budget comes from a spoken rehearsal at the
+speaker's own pace (`check_script.py --wpm`, default 135 words per minute), and
+the question reserve is never recovered by padding slides or accelerating
+speech.
 
 The appendix is the length-and-detail dial (Bellemare's "Magic Appendix
 Trick"): a lean main line plus linked backups lets the same deck absorb
