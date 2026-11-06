@@ -48,6 +48,8 @@ that the v0.1.1 notes described.
 - `requirements.txt` (PyMuPDF) and a `tlmgr install` line for BasicTeX, TinyTeX
   and other minimal TeX installs.
 - A Contents list in each reference file over 100 lines.
+- Trigger evals for `claude plugin eval` (`evals/`): three requests the skill
+  should take and three it should leave alone.
 - Unreleased work from `main` since v0.1.1:
   - speaker scripts (`check_script.py`, `references/speaker-script.md`, and
     the empirical and theory script templates);

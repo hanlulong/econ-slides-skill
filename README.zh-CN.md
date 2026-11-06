@@ -200,6 +200,7 @@ skills/econ-slides/          技能本体（手动安装时链接这个文件夹
     check_script.py          幻灯片/讲稿同步、计时、口语风格与点击审核
     crop_figure.py           无独立图形文件时裁剪原文图形
 tests/                       跨主题渲染 + 缺陷幻灯片/讲稿反例
+evals/                       claude plugin eval 的触发测试用例
 docs/sample-talk/            交错推行示例：幻灯片与讲稿
 requirements.txt             脚本所需的 PyMuPDF
 ```

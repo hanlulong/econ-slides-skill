@@ -276,6 +276,7 @@ skills/econ-slides/          the skill itself (link this folder for a manual ins
     check_script.py          deck/script sync, timing, oral-style, and click audit
     crop_figure.py           crop a source figure when no standalone asset exists
 tests/                       cross-theme renders + negative deck/script fixtures
+evals/                       trigger cases for claude plugin eval
 docs/sample-talk/            the staggered-rollout benchmark deck and script
 requirements.txt             PyMuPDF for the scripts
 ```
