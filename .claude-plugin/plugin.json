@@ -1,7 +1,7 @@
 {
   "name": "econ-slides",
   "version": "0.2.0",
-  "description": "Build economics research talks in LaTeX/Beamer: paper-to-talk decks, discussant slides, timed speaker scripts, and edits to existing decks, each compiled and checked before delivery.",
+  "description": "Build economics research talks in LaTeX/Beamer: paper-to-talk decks, discussant slides, timed speaker scripts, and edits to existing Beamer decks, each compiled and checked before delivery. Not for PowerPoint or Google Slides.",
   "author": {
     "name": "Lu Han",
     "url": "https://openecon.ai"

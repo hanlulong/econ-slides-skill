@@ -1,7 +1,7 @@
 {
   "name": "econ-slides",
   "version": "0.2.0",
-  "description": "Build economics research talks in LaTeX/Beamer: paper-to-talk decks, discussant slides, timed speaker scripts, and edits to existing decks, each compiled and checked before delivery.",
+  "description": "Build economics research talks in LaTeX/Beamer: paper-to-talk decks, discussant slides, timed speaker scripts, and edits to existing Beamer decks, each compiled and checked before delivery. Not for PowerPoint or Google Slides.",
   "author": {
     "name": "Lu Han",
     "url": "https://openecon.ai"
@@ -31,7 +31,7 @@
     "websiteURL": "https://openecon.ai",
     "defaultPrompt": [
       "Use econ-slides to turn this economics paper into a 30-minute Beamer conference talk with a speaker script.",
-      "Use econ-slides to build discussant slides on the attached paper for a 15-minute session.",
+      "Use econ-slides to build discussant slides on the attached paper for a 7-minute discussant slot.",
       "Use econ-slides to add mechanism slides and a linked appendix to my existing Beamer deck without restyling it."
     ],
     "brandColor": "#2F6F68",

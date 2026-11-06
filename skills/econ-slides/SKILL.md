@@ -1,6 +1,6 @@
 ---
 name: econ-slides
-description: "Build professional academic economics slide decks in LaTeX/Beamer: turn a paper into a conference, seminar, or job-market talk; build discussant slides; polish or shorten an existing deck. Use when the user mentions slides, presentation, talk, deck, beamer, seminar, conference, job talk, job market presentation, discussion, or discussant in an economics or social-science research context."
+description: "Builds economics research talks in LaTeX/Beamer: turns a paper into a conference, seminar, or job-market talk; builds discussant slides; writes a timed speaker script; polishes, shortens, or retargets an existing Beamer deck, compiling and checking every slide. Use when the user wants Beamer or LaTeX slides, a talk, presentation, deck, seminar or job-talk slides, or discussant slides for an economics or social-science paper. Not for PowerPoint, Keynote, or Google Slides decks. For writing or editing the paper itself, use econ-write; for a referee report or paper review, use econ-review."
 license: MIT
 metadata:
   version: "0.2.0"

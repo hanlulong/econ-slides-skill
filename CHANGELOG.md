@@ -79,7 +79,8 @@ that the v0.1.1 notes described.
   shift-share, synthetic control, randomized experiments and multiple testing
   (what the slide must show, the usual overclaim, canonical references).
 - Trigger evals for `claude plugin eval` (`evals/`): three requests the skill
-  should take and three it should leave alone.
+  should take and four it should leave alone (a paper's discussion section, a
+  PowerPoint deck, editing an introduction, a referee report).
 - Unreleased work from `main` since v0.1.1:
   - speaker scripts (`check_script.py`, `references/speaker-script.md`, and
     the empirical and theory script templates);
@@ -94,6 +95,12 @@ that the v0.1.1 notes described.
 
 ### Changed
 
+- The skill description is scoped to LaTeX/Beamer talks. It drops the bare
+  "slides", "discussion" and "presentation" triggers in favour of Beamer or
+  LaTeX slides, talks and discussant slides for an economics paper; says it is
+  not for PowerPoint, Keynote or Google Slides; and routes paper writing to
+  econ-write and referee reports to econ-review. The plugin manifests say the
+  same in short.
 - Rules that changed since the v0.1.1 notes:
   - Arrows are no longer bullet markers. v0.1.1 suggested "arrow intuition
     lines"; `\item[$\Rightarrow$]` and `\item[$\rightarrow$]` are now the
