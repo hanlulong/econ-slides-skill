@@ -36,13 +36,18 @@ that the v0.1.1 notes described.
   (Claude Code) or `codex plugin add econ-slides@openeconai` (Codex) once the
   catalog lists it (resolves #1).
 - `undefined-ref` hard blocker in `check_deck.py`. It reads LaTeX, natbib and
-  biblatex warnings in the log, and `[?]`, `(?)` and `??` markers in the PDF
-  text, so it works even without `--log`. A `--baseline-json` comparison never
+  biblatex warnings in the log, and the standard `[?]`, `(?)` and `??`
+  placeholders in the PDF text. The PDF scan alone misses biblatex, which
+  prints a missing key as the key itself, and natbib's `\citet`, which prints
+  a bare `?`, so always pass `--log`. A `--baseline-json` comparison never
   waives it, so a deck that shows an unresolved key can no longer score
   "ship".
 - Bibliography-aware compile. `compile_deck.py` runs BibTeX or Biber between
   passes when the source tree uses `\bibliography` or `\addbibresource`, and
-  reports `undefined_refs` in its JSON and OK line.
+  reports `undefined_refs` in its JSON and OK line. The tool runs from the
+  source folder, so `\bibliography{../refs}` resolves as it does in an
+  in-place build, and a prebuilt `.bbl` beside the source (an arXiv or
+  Overleaf export) is kept when the database is missing.
 - `compile_deck.py --timeout` (default 600 s). A timed-out run now returns the
   usual JSON with `ok: false` instead of a traceback.
 - `requirements.txt` (PyMuPDF) and a `tlmgr install` line for BasicTeX, TinyTeX

@@ -14,7 +14,9 @@ Checks (geometry measured from the PDF itself, not guessed from source):
   density         more than MAX_BULLETS top-level bullets on one slide
   overfull        Overfull \\hbox/\\vbox warnings parsed from the .log
   undefined-ref   an undefined citation or cross-reference: LaTeX/natbib/biblatex
-                  warnings in the .log, or a [?], (?) or ?? marker in the PDF text
+                  warnings in the .log, or a [?], (?) or ?? marker in the PDF
+                  text (biblatex prints a missing key itself and natbib's
+                  \\citet a bare ?, so only --log catches those)
   pause-chain     3+ \\pause in one frame (overlay used as decoration)
   dead-link       a navigation target is absent from the TeX source
   arrow-bullet    a right arrow is used as a list marker
