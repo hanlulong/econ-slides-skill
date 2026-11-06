@@ -433,6 +433,14 @@ already had them). If they predate the edit and fixing them is outside the
 request, report the keys to the user rather than silently rewriting the
 bibliography.
 
+A `??`, `(?)`, `[?]` or `[?, ?]` that the deck shows on purpose (a reproduced
+questionnaire code, a quiz slide) is not an unresolved key. Declare it once in
+the source, `% econ-slides: allow-literal-marker (?) ??`, or pass
+`--allow-literal-marker '(?)'`. The checker then waives that marker only when
+`--log` is given and the log reports no undefined citation or reference; a
+real missing key still blocks. Never add the comment to silence a marker you
+have not traced to intended text.
+
 This mode is a scope-control aid, not a waiver of visual QA. It cannot prove
 that an old-looking defect is physically the same object after a wholesale
 rewrite, and it cannot see an ugly crop, reflow inside a box, misleading

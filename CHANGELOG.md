@@ -41,7 +41,10 @@ that the v0.1.1 notes described.
   prints a missing key as the key itself, and natbib's `\citet`, which prints
   a bare `?`, so always pass `--log`. A `--baseline-json` comparison never
   waives it, so a deck that shows an unresolved key can no longer score
-  "ship".
+  "ship". A deck that shows `??`, `(?)` or `[?]` as literal text declares it
+  with a source comment, `% econ-slides: allow-literal-marker (?) ??`, or with
+  `--allow-literal-marker`; the marker is then waived only when `--log` is
+  given and reports no undefined citation or reference.
 - Bibliography-aware compile. `compile_deck.py` runs BibTeX or Biber between
   passes when the source tree uses `\bibliography` or `\addbibresource`, and
   reports `undefined_refs` in its JSON and OK line. The tool runs from the

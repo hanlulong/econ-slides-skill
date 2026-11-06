@@ -16,7 +16,11 @@ Checks (geometry measured from the PDF itself, not guessed from source):
   undefined-ref   an undefined citation or cross-reference: LaTeX/natbib/biblatex
                   warnings in the .log, or a [?], (?) or ?? marker in the PDF
                   text (biblatex prints a missing key itself and natbib's
-                  \\citet a bare ?, so only --log catches those)
+                  \\citet a bare ?, so only --log catches those). A deck
+                  that shows such a marker as literal text declares it with
+                  a source comment ``% econ-slides: allow-literal-marker ??``
+                  (or --allow-literal-marker '??'); the marker is then waived
+                  only when --log is given and reports no undefined key
   pause-chain     3+ \\pause in one frame (overlay used as decoration)
   dead-link       a navigation target is absent from the TeX source
   arrow-bullet    a right arrow is used as a list marker
@@ -129,6 +133,29 @@ EXIT_SHIP, EXIT_NOT_READY, EXIT_CANNOT_RUN, EXIT_CRASH = 0, 1, 2, 3
 # prose is not matched because the marker must stand alone.
 UNRESOLVED_MARKER_RE = re.compile(
     r"\[\?(?:\s*,\s*\?)*\]|\(\?(?:\s*[,;]\s*\?)*\)|(?<![\w?])\?\?(?![\w?])")
+# A deck that shows one of those markers as literal text (a quiz slide, a
+# "(?)" in a reproduced questionnaire) declares it in its source:
+#   % econ-slides: allow-literal-marker (?) ??
+ALLOW_MARKER_RE = re.compile(r"%\s*econ-slides:\s*allow-literal-marker\b([^\n]*)")
+
+
+def normalize_marker(marker: str) -> str:
+    """Collapse whitespace so ``[?,?]`` and ``[?, ?]`` compare equal."""
+    return re.sub(r"\s*([,;])\s*", r"\1 ", re.sub(r"\s+", " ", marker.strip()))
+
+
+def parse_allowed_markers(values: list[str]) -> set[str]:
+    """Validate literal-marker allowances; raise ValueError on anything else."""
+    allowed = set()
+    for value in values:
+        leftover = UNRESOLVED_MARKER_RE.sub(" ", value).strip()
+        markers = UNRESOLVED_MARKER_RE.findall(value)
+        if leftover or not markers:
+            raise ValueError(
+                f"allow-literal-marker {value.strip()!r} is not a list of "
+                "unresolved-key markers; use ??, (?), [?] or [?, ?]")
+        allowed.update(normalize_marker(marker) for marker in markers)
+    return allowed
 
 
 MATH_FONT_RE = re.compile(r"CMMI|CMSY|CMEX|MSBM|MSAM|Math|rsfs", re.I)
@@ -399,16 +426,34 @@ def check_nav_overlap(page: fitz.Page, pno: int) -> list[dict]:
     return findings
 
 
-def check_unresolved_markers(page: fitz.Page, pno: int) -> list[dict]:
-    """Flag the rendered placeholders of undefined citations and references."""
-    markers = UNRESOLVED_MARKER_RE.findall(page.get_text())
-    if not markers:
-        return []
-    shown = ", ".join(sorted({re.sub(r"\s+", " ", m) for m in markers}))
-    return [{"check": "undefined-ref", "page": pno,
-             "detail": f"unresolved citation/reference marker {shown} "
-                       f"x{len(markers)} in the PDF text — define the key, "
-                       "run BibTeX/Biber (compile_deck.py does), or remove it"}]
+def check_unresolved_markers(page: fitz.Page, pno: int,
+                             allowed: set[str] | frozenset[str] = frozenset(),
+                             ) -> list[dict]:
+    """Flag the rendered placeholders of undefined citations and references.
+
+    Markers the deck declares as literal text come back flagged
+    ``allowed_literal``; main() waives them only when the log is clean.
+    """
+    markers = [normalize_marker(m)
+               for m in UNRESOLVED_MARKER_RE.findall(page.get_text())]
+    findings = []
+    blocked = [m for m in markers if m not in allowed]
+    permitted = [m for m in markers if m in allowed]
+    if blocked:
+        shown = ", ".join(sorted(set(blocked)))
+        findings.append({
+            "check": "undefined-ref", "page": pno,
+            "detail": f"unresolved citation/reference marker {shown} "
+                      f"x{len(blocked)} in the PDF text — define the key, "
+                      "run BibTeX/Biber (compile_deck.py does), or remove it"})
+    if permitted:
+        shown = ", ".join(sorted(set(permitted)))
+        findings.append({
+            "check": "undefined-ref", "page": pno, "allowed_literal": True,
+            "detail": f"marker {shown} x{len(permitted)} is declared literal "
+                      "text (allow-literal-marker); pass --log so a clean log "
+                      "can waive it"})
+    return findings
 
 
 def check_log(log_path: Path) -> list[dict]:
@@ -435,7 +480,8 @@ def check_log(log_path: Path) -> list[dict]:
     return findings
 
 
-def tex_tree(tex_path: Path, seen: set[Path] | None = None) -> str:
+def tex_tree(tex_path: Path, seen: set[Path] | None = None,
+             strip_comments: bool = True) -> str:
     """Read a TeX source plus local \\input/\\include files for static checks."""
     seen = seen or set()
     path = tex_path.resolve()
@@ -443,7 +489,8 @@ def tex_tree(tex_path: Path, seen: set[Path] | None = None) -> str:
         return ""
     seen.add(path)
     src = path.read_text(encoding="utf-8", errors="replace")
-    src = re.sub(r"(?<!\\)%[^\n]*", "", src)
+    if strip_comments:
+        src = re.sub(r"(?<!\\)%[^\n]*", "", src)
 
     def expand(match: re.Match) -> str:
         child = Path(match.group(1).strip())
@@ -451,7 +498,7 @@ def tex_tree(tex_path: Path, seen: set[Path] | None = None) -> str:
             child = child.with_suffix(".tex")
         if not child.is_absolute():
             child = path.parent / child
-        return tex_tree(child, seen)
+        return tex_tree(child, seen, strip_comments)
 
     return re.sub(r"\\(?:input|include)\s*\{([^{}]+)\}", expand, src)
 
@@ -760,6 +807,12 @@ def main() -> int:
               "regression check; inherited objective blockers remain visible "
               "but only new blockers fail"),
     )
+    ap.add_argument(
+        "--allow-literal-marker", action="append", default=[], metavar="MARKER",
+        help=("a ??, (?), [?] or [?, ?] that the deck shows as literal text; "
+              "repeatable. Same as a source comment "
+              "'%% econ-slides: allow-literal-marker MARKER'. Waived only "
+              "when --log reports no undefined citation or reference"))
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
@@ -790,6 +843,15 @@ def main() -> int:
     if doc.page_count == 0:
         print(f"error: {args.pdf} has no pages", file=sys.stderr)
         return 2
+    try:
+        declared = list(args.allow_literal_marker)
+        if args.tex:
+            declared += [m.group(1) for m in ALLOW_MARKER_RE.finditer(
+                tex_tree(args.tex, strip_comments=False))]
+        allowed_markers = parse_allowed_markers(declared)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
     findings: list[dict] = []
     keys = [footer_key(doc.load_page(p)) for p in range(doc.page_count)]
     titles = [frame_title_key(doc.load_page(p)) for p in range(doc.page_count)]
@@ -803,9 +865,24 @@ def main() -> int:
         findings += check_page(doc.load_page(pno), pno + 1, final=final)
         if final:
             findings += check_nav_overlap(doc.load_page(pno), pno + 1)
-            findings += check_unresolved_markers(doc.load_page(pno), pno + 1)
+            findings += check_unresolved_markers(doc.load_page(pno), pno + 1,
+                                                 allowed_markers)
     if args.log:
         findings += check_log(args.log)
+    # A declared literal marker is waived only when the log shows that no
+    # citation or reference is actually undefined.
+    log_clean = args.log is not None and not any(
+        f["check"] == "undefined-ref" and f["page"] is None for f in findings)
+    waived_markers = [f for f in findings if f.get("allowed_literal")] \
+        if log_clean else []
+    if waived_markers:
+        findings = [f for f in findings if not f.get("allowed_literal")]
+    elif args.log is not None:
+        for f in findings:
+            if f.get("allowed_literal"):
+                f["detail"] = f["detail"].split(";", 1)[0] + (
+                    "; it still blocks because the log reports an undefined "
+                    "citation or reference")
     if args.tex:
         findings += check_tex(args.tex)
 
@@ -870,6 +947,9 @@ def main() -> int:
               "resolved_blockers": resolved_blockers,
               "undefined_refs": sum(f["check"] == "undefined-ref"
                                     for f in findings),
+              "allowed_literal_markers": [
+                  {"page": f["page"], "detail": f["detail"]}
+                  for f in waived_markers],
               "findings": findings,
               "rendered": str(args.render_dir) if args.render_dir else None}
     if args.json:
@@ -894,6 +974,9 @@ def main() -> int:
         for f in findings:
             loc = f"p{f['page']}" if f["page"] else "log/tex"
             print(f"  [{f['check']}] {loc}: {f['detail']}")
+        for f in waived_markers:
+            print(f"  note p{f['page']}: literal marker waived — the deck "
+                  "declares it and the log has no undefined key")
         if not findings:
             print("  no findings from static checks")
         print("  reminder: static checks cannot see box-interior overflow or a"

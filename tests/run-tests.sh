@@ -844,6 +844,51 @@ else
   bad "undefined-reference blocker"
 fi
 
+# A deck may declare literal ?? / (?) text; a clean log is still required.
+LIT_OK=1
+compile_clean tests/literal-marker-test.tex --build-dir tests/build-suite || LIT_OK=0
+lit() { python3 skills/econ-slides/scripts/check_deck.py "$@" --json 2>/dev/null; }
+LIT_DECLARED=$(lit tests/build-suite/literal-marker-test.pdf \
+  --tex tests/literal-marker-test.tex --log tests/build-suite/literal-marker-test.log)
+LIT_DECLARED_STATUS=$?
+LIT_UNDECLARED=$(lit tests/build-suite/literal-marker-test.pdf \
+  --log tests/build-suite/literal-marker-test.log)
+LIT_FLAG=$(lit tests/build-suite/literal-marker-test.pdf \
+  --log tests/build-suite/literal-marker-test.log \
+  --allow-literal-marker '(?)' --allow-literal-marker '??')
+LIT_NOLOG=$(lit tests/build-suite/literal-marker-test.pdf --tex tests/literal-marker-test.tex)
+LIT_REAL=$(lit tests/build-suite/undefined-ref-test.pdf \
+  --tex tests/undefined-ref-test.tex --log tests/build-suite/undefined-ref-test.log \
+  --allow-literal-marker '[?] ??')
+python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/literal-marker-test.pdf \
+  --allow-literal-marker 'x' >/dev/null 2>&1
+LIT_BAD_STATUS=$?
+if [ "$LIT_OK" = "1" ] && python3 - "$LIT_DECLARED" "$LIT_DECLARED_STATUS" "$LIT_UNDECLARED" \
+     "$LIT_FLAG" "$LIT_NOLOG" "$LIT_REAL" "$LIT_BAD_STATUS" <<'PY'
+import json, sys
+declared, declared_status, undeclared, flag, nolog, real, bad_status = sys.argv[1:]
+declared, undeclared, flag, nolog, real = map(
+    json.loads, (declared, undeclared, flag, nolog, real))
+# Declared in the source and the log is clean: waived, and the deck ships.
+assert declared_status == "0" and declared["verdict"] == "ship"
+assert declared["allowed_literal_markers"] and declared["undefined_refs"] == 0
+# Not declared: the literal markers still block.
+assert "undefined-ref" in undeclared["blockers"]
+# The CLI flag does the same as the source comment.
+assert "undefined-ref" not in flag["blockers"] and flag["allowed_literal_markers"]
+# Without --log nothing is waived.
+assert "undefined-ref" in nolog["blockers"]
+# A real undefined key in the log keeps even declared markers blocking.
+assert "undefined-ref" in real["blockers"] and not real["allowed_literal_markers"]
+assert any(f.get("allowed_literal") for f in real["findings"])
+assert bad_status == "2"
+PY
+then
+  ok "declared literal ?? and (?) are waived only with a clean log"
+else
+  bad "literal-marker allowance"
+fi
+
 if python3 - <<'PY'
 from scripts.check_deck import UNRESOLVED_MARKER_RE
 from scripts.compile_deck import undefined_references, undefined_count

@@ -154,6 +154,9 @@ python3 <skill-dir>/scripts/check_deck.py talk/build/sed-2026.pdf \
   block delivery. Always pass `--tex` and `--log`: biblatex prints a missing
   key as the key itself, which only the log reveals, and a run without either
   flag lists the checks it skipped and reports "incomplete", never "ship".
+  A `??` or `(?)` that is intended text is declared in the source with
+  `% econ-slides: allow-literal-marker (?) ??` (or `--allow-literal-marker`)
+  and waived only when the log has no undefined key.
   Exit 0 = ship, 1 = not ready, 2 = could not run, 3 = checker crash. Wrapped text, density, columns, emphasis, and sparse-layout
   findings require visual and editorial review against the target deck, not
   automatic padding or a forced rewrite:

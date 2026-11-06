@@ -342,7 +342,9 @@ overflow, unresolved links, undefined citations or cross-references (`[?]`,
 `??`), serious overfull boxes, collisions, and unreadable content are
 blockers. `compile_deck.py` runs BibTeX or Biber when the deck has a
 bibliography and reports `undefined_refs`; the checker fails any deck that
-still shows one, inherited or not. A wrapped title, bullet, or dense frame
+still shows one, inherited or not. If a `??` or `(?)` is intended literal
+text, declare it with `% econ-slides: allow-literal-marker ??` in the source;
+a clean `--log` is then required to waive it. A wrapped title, bullet, or dense frame
 triggers an editorial and visual review; an intentional readable wrap in the target style
 is not itself a failure. A sparse
 layout is a human-review signal, not permission to add filler. On every
