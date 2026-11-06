@@ -60,6 +60,10 @@ def missing_file_hint(name: str) -> str:
 
 TRIAGE = [
     (r"! LaTeX Error: File `([^']+)' not found", missing_file_hint),
+    # A figure named with its extension: XeTeX, then the pdfTeX/LuaTeX drivers.
+    (r"! Unable to load picture or PDF file '([^']+)'", missing_file_hint),
+    (r"! Package (?:pdftex|luatex|xetex|dvipdfmx)\.def Error: File `([^']+)' "
+     r"not found", missing_file_hint),
     (r"! Undefined control sequence",
      "Undefined command — usually a macro used without its package, or a typo."),
     (r"! Missing \$ inserted",
@@ -99,7 +103,11 @@ def installed_engine(engine: str) -> Path | None:
 
 
 def find_error(log_text: str) -> tuple[str, str] | None:
-    """Return (error_line, hint) for the first hard error in the log."""
+    """Return (error_line, hint) for the first hard error in the log.
+
+    The log is unwrapped first, so an error line is reported whole.
+    """
+    log_text = unwrap_log(log_text)
     for pattern, hint in TRIAGE:
         m = re.search(pattern, log_text)
         if m:
@@ -159,6 +167,11 @@ def unwrap_log(log_text: str, width: int = MAX_PRINT_LINE) -> str:
 UNDEFINED_RE = re.compile(
     r"(?:LaTeX|Package natbib) Warning: (Citation|Reference) [`']"
     r"([^'\s]+(?:\n[^'\s]+)?)'\s+on\s+page\s+(\d+)\s+undefined")
+# hyperref's \\hyperref[key]{text} with no such label: the text still
+# prints, but the link goes nowhere (a dead link, not a [?] or ??).
+HYPER_UNDEFINED_RE = re.compile(
+    r"LaTeX Warning: Hyper reference [`']([^'\s]+(?:\n[^'\s]+)?)'\s+on\s+"
+    r"page\s+(\d+)\s+undefined")
 UNDEFINED_SUMMARY_RE = re.compile(
     r"LaTeX Warning: There were undefined references"
     r"|Package natbib Warning: There were undefined citations")
@@ -170,11 +183,13 @@ BIBLATEX_RE = re.compile(r"\\addbibresource\s*(?:\[[^]]*\])?\s*\{")
 def undefined_references(log_text: str) -> dict:
     """Summarize unresolved citations and cross-references in a final log.
 
-    Returns ``{"items": [{"kind", "key", "page"}...], "summary": bool,
-    "biber_rerun": bool}``. Items are unique by kind and key (first page
-    kept). ``summary`` records LaTeX's or natbib's end-of-run notice, which
-    can appear without per-key lines; ``biber_rerun`` records biblatex's
-    request for a Biber run, whose citations are then unresolved.
+    Returns ``{"items": [{"kind", "key", "page"}...], "hyper": [...],
+    "summary": bool, "biber_rerun": bool}``. Items are unique by kind and key
+    (first page kept). ``hyper`` lists ``\\hyperref[key]`` targets that do
+    not exist (dead links; nothing renders as ??). ``summary`` records
+    LaTeX's or natbib's end-of-run notice, which can appear without per-key
+    lines; ``biber_rerun`` records biblatex's request for a Biber run, whose
+    citations are then unresolved.
     """
     log_text = unwrap_log(log_text)
     items: list[dict] = []
@@ -186,14 +201,25 @@ def undefined_references(log_text: str) -> dict:
             continue
         seen.add((kind, key))
         items.append({"kind": kind, "key": key, "page": int(match.group(3))})
-    return {"items": items,
+    hyper: list[dict] = []
+    for match in HYPER_UNDEFINED_RE.finditer(log_text):
+        key = match.group(1).replace("\n", "").strip()
+        if key not in {item["key"] for item in hyper}:
+            hyper.append({"kind": "hyper reference", "key": key,
+                          "page": int(match.group(2))})
+    return {"items": items, "hyper": hyper,
             "summary": bool(UNDEFINED_SUMMARY_RE.search(log_text)),
             "biber_rerun": bool(BIBER_RERUN_RE.search(log_text))}
 
 
 def undefined_count(info: dict) -> int:
-    """Count unresolved items; a bare summary or Biber request counts once."""
-    return len(info["items"]) or int(info["summary"] or info["biber_rerun"])
+    """Count unresolved items; a bare summary or Biber request counts once.
+
+    LaTeX's summary also follows a dead \\hyperref target alone; that is
+    reported separately and does not count here.
+    """
+    unexplained = info["summary"] and not info.get("hyper")
+    return len(info["items"]) or int(unexplained or info["biber_rerun"])
 
 
 # A missing input leaves the tool's .bbl empty or useless: BibTeX's
@@ -292,22 +318,30 @@ def main() -> int:
     if args.timeout <= 0:
         ap.error("--timeout must be positive")
 
-    tex = args.texfile.resolve()
-    if not tex.exists():
-        print(f"error: {tex} not found", file=sys.stderr)
+    def fail_early(error: str, hint: str) -> int:
+        """Report a failure before any engine run, as JSON with --json."""
+        if args.json:
+            print(json.dumps({"ok": False, "error": error, "hint": hint},
+                             indent=2))
+        else:
+            print(f"error: {error} — {hint}", file=sys.stderr)
         return 1
+
+    tex = args.texfile.resolve()
+    if not tex.is_file():
+        return fail_early(f"{tex} not found",
+                          "pass the path of the deck's .tex file")
     if shutil.which(args.engine) is None:
         found = installed_engine(args.engine)
         if found:
-            print(f"error: {args.engine} is installed at {found.parent} but that "
-                  "folder is not on PATH — add it to PATH, or open a new "
-                  "terminal or agent session after installing TeX",
-                  file=sys.stderr)
-        else:
-            print(f"error: {args.engine} not found on PATH or in the usual TeX "
-                  "folders — install TeX Live, MacTeX, TinyTeX or MiKTeX",
-                  file=sys.stderr)
-        return 1
+            return fail_early(
+                f"{args.engine} is installed at {found.parent} but that "
+                "folder is not on PATH",
+                "add it to PATH, or open a new terminal or agent session "
+                "after installing TeX")
+        return fail_early(f"{args.engine} not found on PATH or in the usual "
+                          "TeX folders",
+                          "install TeX Live, MacTeX, TinyTeX or MiKTeX")
 
     build = (args.build_dir or tex.parent / "build").resolve()
     build.mkdir(parents=True, exist_ok=True)
@@ -320,9 +354,7 @@ def main() -> int:
         reason = ("--themes-dir does not exist" if args.themes_dir else
                   "the skill's scripts/ and themes/ must stay together in one "
                   "skill folder, or pass --themes-dir")
-        print(f"error: themes directory {themes} not found — {reason}",
-              file=sys.stderr)
-        return 1
+        return fail_early(f"themes directory {themes} not found", reason)
     # os.pathsep: ':' on Unix, ';' on Windows (TeX Live/MiKTeX expect it)
     sep = os.pathsep
     env["TEXINPUTS"] = f".{sep}{themes}{sep}" + env.get("TEXINPUTS", "")
@@ -372,6 +404,7 @@ def main() -> int:
         undefined = undefined_references(log_text)
         result["undefined_refs"] = undefined_count(undefined)
         result["undefined"] = undefined["items"]
+        result["dead_hyperrefs"] = [item["key"] for item in undefined["hyper"]]
     elif timed_out:
         result["error"] = timed_out
         result["hint"] = ("The engine did not finish. Look for an infinite loop "
@@ -392,6 +425,10 @@ def main() -> int:
             print("warning: unresolved citations or references render as [?] or ??"
                   + (f": {keys}" if keys else "")
                   + " — check_deck.py blocks delivery until they are fixed")
+        if result["dead_hyperrefs"]:
+            print("warning: \\hyperref targets with no \\label (dead links): "
+                  + ", ".join(result["dead_hyperrefs"][:8])
+                  + " — check_deck.py blocks delivery until they are fixed")
         if bib is not None and bib.get("warning"):
             print(f"warning: {bib['warning']}")
     else:
@@ -403,6 +440,11 @@ def main() -> int:
 
 def run() -> int:
     """Run main(), keeping a crash (exit 3) apart from a failed compile (1)."""
+    for stream in (sys.stdout, sys.stderr):  # Windows ANSI code pages
+        try:
+            stream.reconfigure(errors="backslashreplace")
+        except (AttributeError, ValueError):
+            pass
     try:
         return main()
     except Exception as exc:  # noqa: BLE001  (report, never pass as a result)

@@ -1,0 +1,14 @@
+% Negative fixture: a \hyperref to a label that does not exist. The text
+% prints, so nothing renders as ??; the link goes nowhere (a dead link).
+\documentclass[11pt,aspectratio=169]{beamer}
+\usepackage{econ-slides-house}
+
+\begin{document}
+
+\begin{frame}{A link to a missing backup}
+  \begin{itemize}
+    \item Details are in the \hyperref[sec:nosuchbackup]{robustness backup}
+  \end{itemize}
+\end{frame}
+
+\end{document}

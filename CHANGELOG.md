@@ -60,13 +60,25 @@ that the v0.1.1 notes described.
 - A `check_deck.py` run without `--tex` or `--log` now lists the checks it
   skipped (`skipped_checks`, `complete: false` in the JSON) and reports
   "incomplete" instead of "ship".
+- `compile-error` hard blocker in `check_deck.py`: a TeX error (a `! ...`
+  line) in the log blocks delivery. A halted build, a `nonstopmode` build that
+  wrote every page despite an undefined macro, and a missing figure used to
+  score 100 and ship. A `--baseline-json` comparison can treat an inherited
+  error as inherited, so an Overleaf deck that compiles despite errors can
+  still take a scoped edit.
+- `check_deck.py --log` must be the log of the build that made the PDF: a TeX
+  engine banner, and an `Output written on` line with the PDF's stem and page
+  count. An empty file, `/dev/null`, the `.tex` itself or another deck's log
+  now stops the check (exit 2) instead of counting as a clean log that could
+  waive a literal `??`. A log much older than the PDF gets a note.
 - `check_script.py --genre conference|seminar|job-talk|discussant` sets the
   speech window for a `--slot-minutes` clock. Only an overrun fails; a script
   under the window gets a warning, as the docs already said. The summary line
   and JSON now show the assumed speaking pace (`--wpm`, default 135), which
   SKILL.md and speaker-script.md now tell the agent to ask for.
 - `discussant.md` lists typical discussant allocations (ASHEcon: usually 5–7
-  minutes for a 15-minute paper; Dallas Fed: 10 minutes), and the README's
+  minutes for a 15-minute paper; the Dallas Fed's undergraduate Economic
+  Scholars Program: 10 minutes), and the README's
   discussant example uses a 7-minute slot instead of a 15-minute total
   session.
 - `compile_deck.py --timeout` (default 600 s). A timed-out run now returns the
@@ -133,10 +145,17 @@ that the v0.1.1 notes described.
 - Both READMEs say how to update and uninstall a plugin, manual or paste-in
   install.
 - `compile_deck.py` hints: a missing figure or `\input` file gets a path hint
-  instead of "tlmgr install"; a missing `.sty` or `.cls` gets `tlmgr search
-  --global --file` and the sudo note for MacTeX. When the engine is installed
-  (for example in `/Library/TeX/texbin`) but not on PATH, the error says so
-  instead of telling the user to install TeX. A crash exits 3.
+  instead of "tlmgr install", whether the figure is named with its extension
+  (XeTeX's "Unable to load picture", the pdfTeX and LuaTeX driver errors) or
+  without; a missing `.sty` or `.cls` gets `tlmgr search --global --file` and
+  the sudo note for MacTeX. Error lines are read from the unwrapped log, so
+  they are no longer cut at 79 columns. When the engine is installed (for
+  example in `/Library/TeX/texbin`) but not on PATH, the error says so
+  instead of telling the user to install TeX. With `--json`, these early
+  failures are JSON too. A crash exits 3.
+- A `\hyperref[key]{...}` to a missing label is reported as a dead link with
+  its key (`dead-link`, which a baseline can treat as inherited), not as an
+  unexplained undefined reference; nothing renders as `??` for it.
 - `tests/run-tests.sh` is executable and removes generated sources on exit,
   even after an interrupt.
 
@@ -174,6 +193,14 @@ that the v0.1.1 notes described.
   link the Startz, Piazzesi, Meager, Dallas Fed and ASHEcon guides.
 - `compile_deck.py` reports a missing themes folder clearly instead of
   failing inside TeX.
+- A nested `\input` is resolved from the main file's folder, as TeX does, so
+  an `allow-literal-marker` comment or a `\bibliography` two levels down in a
+  modular deck is no longer missed.
+- An unreadable `--tex`, `--log` or PDF, a folder passed as a file, an
+  unwritable `--render-dir`, and a `scripts/` folder missing a sibling script
+  exit 2 ("could not run") instead of 3 or 1. All three scripts write
+  characters the console code page lacks as escapes instead of crashing
+  (Windows ANSI code pages).
 - `check_deck.py` crashed with `AttributeError: 'Rect' object has no attribute
   'get_area'` on PyMuPDF 1.26.5, the release that `pip` picks for Python 3.9
   (such as Apple's bundled `python3`). It now computes areas with `abs(rect)`,

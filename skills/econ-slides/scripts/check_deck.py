@@ -13,6 +13,8 @@ Checks (geometry measured from the PDF itself, not guessed from source):
   wrapped-bullet  a bullet whose text wraps to further lines
   density         more than MAX_BULLETS top-level bullets on one slide
   overfull        Overfull \\hbox/\\vbox warnings parsed from the .log
+  compile-error   a TeX error (a ``! ...`` line) in the .log: a halted or
+                  ``nonstopmode`` build, a missing figure, an undefined macro
   undefined-ref   an undefined citation or cross-reference: LaTeX/natbib/biblatex
                   warnings in the .log, or a [?], (?) or ?? marker in the PDF
                   text (biblatex prints a missing key itself and natbib's
@@ -22,7 +24,8 @@ Checks (geometry measured from the PDF itself, not guessed from source):
                   (or --allow-literal-marker '??'); the marker is then waived
                   only when --log is given and reports no undefined key
   pause-chain     3+ \\pause in one frame (overlay used as decoration)
-  dead-link       a navigation target is absent from the TeX source
+  dead-link       a navigation target is absent from the TeX source, or a
+                  \\hyperref[key] target the .log reports as undefined
   arrow-bullet    a right arrow is used as a list marker
   question-label  an opening object is called "economic question"
   question-subtitle a concise question is hidden in a generic frame subtitle
@@ -32,8 +35,8 @@ Checks (geometry measured from the PDF itself, not guessed from source):
   conclusion-density a conclusion carries more than three bullet items
 
 Score starts at 100 and deducts only for objective or strongly actionable
-findings. Edge overflow, serious overfull boxes, navigation collisions, dead
-links, undefined citations or references, prohibited arrow markers, the
+findings. TeX errors in the log, edge overflow, serious overfull boxes,
+navigation collisions, dead links, undefined citations or references, prohibited arrow markers, the
 disallowed question label, and conclusion links are hard blockers. Wrapped
 text, density, sparse layout, prose columns, emphasis, exhibit readings, and
 conclusion density are review prompts: judge
@@ -52,10 +55,15 @@ blockers still fail. Undefined citations and references are never waived:
 a [?] or ?? on screen fails every deck, inherited or not. Review prompts and
 visual inspection remain necessary.
 
+--log must be the log of the build that made the PDF: its first line is a TeX
+engine banner, and its ``Output written on`` line names a file with the PDF's
+stem and the PDF's page count. Any other file (an empty log, another deck's
+log, the .tex itself) stops the check with exit 2 instead of passing as clean.
+
 Without --tex the source checks (dead links, arrow bullets, the question
 label, conclusion links, pause chains, exhibit readings, and the other source
-prompts) do not run; without --log the overfull-box and log-based
-undefined-reference checks do not run. Such a run is partial: it lists the
+prompts) do not run; without --log the compile-error, overfull-box and
+log-based undefined-reference checks do not run. Such a run is partial: it lists the
 skipped checks, and its verdict is "incomplete" instead of "ship".
 
 Exit status: 0 = ship (full check, no blocker); 1 = the deck is not ready
@@ -72,13 +80,21 @@ from __future__ import annotations
 import argparse
 from collections import defaultdict, deque
 import json
+import os
 import re
 import sys
 from pathlib import Path
 
-# Sibling helper imported by path so the script runs from any directory.
+# Sibling helpers imported by path so the script runs from any directory.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from compile_deck import undefined_references  # noqa: E402  (no PyMuPDF)
+try:
+    from compile_deck import (  # noqa: E402  (no PyMuPDF)
+        undefined_references, unwrap_log)
+except ImportError as exc:  # pragma: no cover
+    print(f"error: check_deck.py cannot import its sibling scripts ({exc}). "
+          "Keep check_deck.py, compile_deck.py and check_script.py together "
+          "in the skill's scripts/ folder.", file=sys.stderr)
+    sys.exit(2)
 
 try:
     import pymupdf as fitz  # PyMuPDF >= 1.24 (``fitz`` is deprecated in 2.x)
@@ -114,10 +130,11 @@ DEDUCT = {"edge-overflow": 15, "wrapped-title": 0, "wrapped-bullet": 0,
           "question-label": 5, "question-subtitle": 0,
           "roadmap-emphasis": 0,
           "exhibit-reading": 0, "conclusion-link": 10,
-          "conclusion-density": 0, "undefined-ref": 10}
+          "conclusion-density": 0, "undefined-ref": 10,
+          "compile-error": 15}
 HARD_BLOCKERS = {"edge-overflow", "overfull", "nav-footer-overlap",
                  "dead-link", "arrow-bullet", "question-label",
-                 "conclusion-link", "undefined-ref"}
+                 "conclusion-link", "undefined-ref", "compile-error"}
 # Blockers that a --baseline-json comparison never treats as inherited: an
 # unresolved [?] or ?? is visible to the audience whoever introduced it.
 NON_WAIVABLE_BLOCKERS = {"undefined-ref"}
@@ -126,7 +143,7 @@ TEX_ONLY_CHECKS = ("dead-link", "arrow-bullet", "question-label",
                    "question-subtitle", "roadmap-emphasis", "exhibit-reading",
                    "conclusion-link", "conclusion-density", "pause-chain",
                    "emphasis-overuse", "prose-columns")
-LOG_ONLY_CHECKS = ("overfull", "undefined-ref (log warnings)")
+LOG_ONLY_CHECKS = ("compile-error", "overfull", "undefined-ref (log warnings)")
 EXIT_SHIP, EXIT_NOT_READY, EXIT_CANNOT_RUN, EXIT_CRASH = 0, 1, 2, 3
 # What LaTeX, natbib, and the standard styles print for an unresolved key:
 # [?] or [?, ?] (\cite), (?) (natbib), and a bold ?? (\ref). ``What??`` in
@@ -137,6 +154,18 @@ UNRESOLVED_MARKER_RE = re.compile(
 # "(?)" in a reproduced questionnaire) declares it in its source:
 #   % econ-slides: allow-literal-marker (?) ??
 ALLOW_MARKER_RE = re.compile(r"%\s*econ-slides:\s*allow-literal-marker\b([^\n]*)")
+# A log is trusted only if it is a TeX log for this PDF: an engine banner
+# ("This is pdfTeX", "This is XeTeX", "This is LuaHBTeX", MiKTeX's pdfTeX ...)
+# and an "Output written on <stem>.pdf|.xdv|.dvi (N pages" line.
+TEX_BANNER_RE = re.compile(r"This is [\w.\u03b5-]*TeX\b")
+OUTPUT_WRITTEN_RE = re.compile(
+    r"Output written on\s+(.+?)\s+\(\s*([\d\s]+?)\s*pages?\b", re.S)
+# TeX errors start a line with "!" ("! Undefined control sequence.",
+# "!pdfTeX error: ..."). The fatal-error and emergency-stop lines only
+# restate an earlier error, so they are reported only when nothing else is.
+TEX_ERROR_RE = re.compile(r"^!\s?(\S.*)$", re.M)
+TEX_ERROR_ECHO_RE = re.compile(r"^(?:\s*==> Fatal error occurred|Emergency stop)")
+MAX_COMPILE_ERRORS = 10
 
 
 def normalize_marker(marker: str) -> str:
@@ -456,9 +485,75 @@ def check_unresolved_markers(page: fitz.Page, pno: int,
     return findings
 
 
-def check_log(log_path: Path) -> list[dict]:
-    findings = []
+def read_log(log_path: Path, pdf_path: Path, pdf_pages: int) -> tuple[str, list[str]]:
+    """Return the text of a log that belongs to this PDF, plus notes.
+
+    Raises ValueError when the file is not a TeX log, records no output, or
+    names a different file or page count than the PDF, so that an empty or
+    foreign log can never stand in for a clean one.
+    """
     text = log_path.read_text(encoding="utf-8", errors="replace")
+    head = [line.strip() for line in text.lstrip("\ufeff").splitlines()[:3]]
+    if not any(TEX_BANNER_RE.match(line) for line in head):
+        raise ValueError(
+            f"{log_path} is not a TeX log (its first line has no "
+            "'This is ...TeX' banner); pass the .log written by the build "
+            f"that made {pdf_path.name}")
+    flat = unwrap_log(text)
+    outputs = OUTPUT_WRITTEN_RE.findall(flat)
+    if not outputs:
+        error = TEX_ERROR_RE.search(flat)
+        reason = f" (it stops at {error.group(0).strip()!r})" if error else ""
+        raise ValueError(
+            f"{log_path} records no output{reason}, so {pdf_path.name} comes "
+            "from an earlier build; fix the error, recompile, and pass the "
+            "new log")
+    name, pages = outputs[-1]
+    written = re.split(r"[\\/]", name.strip().strip('"'))[-1]
+    written_stem = written.rsplit(".", 1)[0] if "." in written else written
+    pages = int(re.sub(r"\s+", "", pages))
+    if written_stem != pdf_path.stem:
+        raise ValueError(
+            f"{log_path} was written for {written}, not {pdf_path.name}; pass "
+            "the log from the build that made this PDF")
+    if pages != pdf_pages:
+        raise ValueError(
+            f"{log_path} records {pages} page(s) but {pdf_path.name} has "
+            f"{pdf_pages}; the log is from another build, so recompile and "
+            "pass its log")
+    notes = []
+    age = pdf_path.stat().st_mtime - log_path.stat().st_mtime
+    if age > 120:
+        notes.append(
+            f"{log_path.name} is {age / 60:.0f} min older than {pdf_path.name}; "
+            "make sure it comes from the build that made this PDF")
+    return text, notes
+
+
+def compile_errors(text: str) -> list[dict]:
+    """Report the TeX errors (``! ...`` lines) recorded in a log."""
+    flat = unwrap_log(text)
+    matches = list(TEX_ERROR_RE.finditer(flat))
+    errors = []
+    for index, m in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(flat)
+        line_m = re.search(r"^l\.(\d+)", flat[m.end():min(end, m.end() + 2000)],
+                           re.M)
+        errors.append((m.group(0).strip(), line_m.group(1) if line_m else None))
+    real = [e for e in errors if not TEX_ERROR_ECHO_RE.match(e[0].lstrip("! "))]
+    findings = []
+    for message, line in (real or errors)[:MAX_COMPILE_ERRORS]:
+        where = f" (source line {line})" if line else ""
+        findings.append({
+            "check": "compile-error", "page": None,
+            "detail": f"TeX error {message!r}{where} — the build did not "
+                      "finish cleanly; fix it and recompile "
+                      "(compile_deck.py prints a hint)"})
+    return findings
+
+
+def check_log(text: str) -> list[dict]:
+    findings = compile_errors(text)
     for m in re.finditer(r"^Overfull \\([hv])box \(([\d.]+)pt too \w+\)", text, re.M):
         if float(m.group(2)) > 2.0:
             findings.append({"check": "overfull", "page": None,
@@ -469,11 +564,16 @@ def check_log(log_path: Path) -> list[dict]:
                          "detail": f"undefined {item['kind']} {item['key']!r} "
                                    f"(log, TeX page {item['page']}) — renders as "
                                    "[?] or ??"})
+    for item in undefined["hyper"]:
+        findings.append({"check": "dead-link", "page": None,
+                         "detail": f"navigation target {item['key']!r} is not "
+                                   "defined"})
     if not undefined["items"] and undefined["biber_rerun"]:
         findings.append({"check": "undefined-ref", "page": None,
                          "detail": "biblatex asks for a Biber run — citations are "
                                    "unresolved; compile with compile_deck.py"})
-    elif not undefined["items"] and undefined["summary"]:
+    elif not undefined["items"] and not undefined["hyper"] \
+            and undefined["summary"]:
         findings.append({"check": "undefined-ref", "page": None,
                          "detail": "the log reports undefined references — rerun "
                                    "LaTeX or fix the missing keys"})
@@ -481,14 +581,23 @@ def check_log(log_path: Path) -> list[dict]:
 
 
 def tex_tree(tex_path: Path, seen: set[Path] | None = None,
-             strip_comments: bool = True) -> str:
-    """Read a TeX source plus local \\input/\\include files for static checks."""
+             strip_comments: bool = True, root: Path | None = None) -> str:
+    """Read a TeX source plus local \\input/\\include files for static checks.
+
+    TeX resolves a nested \\input relative to the main file's folder (where
+    the build runs), not the including file's, so the root folder is tried
+    first and the including file's folder second.
+    """
     seen = seen or set()
     path = tex_path.resolve()
-    if path in seen or not path.exists():
+    if path in seen or not path.is_file():
         return ""
     seen.add(path)
-    src = path.read_text(encoding="utf-8", errors="replace")
+    root = root or path.parent
+    try:
+        src = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
     if strip_comments:
         src = re.sub(r"(?<!\\)%[^\n]*", "", src)
 
@@ -497,8 +606,9 @@ def tex_tree(tex_path: Path, seen: set[Path] | None = None,
         if child.suffix == "":
             child = child.with_suffix(".tex")
         if not child.is_absolute():
-            child = path.parent / child
-        return tex_tree(child, seen, strip_comments)
+            child = next((folder / child for folder in (root, path.parent)
+                          if (folder / child).is_file()), root / child)
+        return tex_tree(child, seen, strip_comments, root)
 
     return re.sub(r"\\(?:input|include)\s*\{([^{}]+)\}", expand, src)
 
@@ -707,6 +817,9 @@ def finding_signature(finding: dict) -> str:
         context = detail.split(" — ", 1)[0]
     elif check == "conclusion-link":
         context = "conclusion navigation"
+    elif check == "compile-error":
+        # Keep the error message; the source line moves with nearby edits.
+        context = re.sub(r" \(source line \d+\)", "", detail.split(" — ", 1)[0])
     elif check == "undefined-ref":
         # Key the log findings by kind and key; PDF markers by marker text.
         context = re.sub(r" \(log, TeX page \d+\)", "", detail.split(" — ", 1)[0])
@@ -782,6 +895,17 @@ def load_baseline(path: Path) -> dict:
     return result
 
 
+def input_problem(path: Path) -> str | None:
+    """Say why an input file cannot be read, or return None."""
+    if not path.exists():
+        return "does not exist"
+    if not path.is_file():
+        return "is not a regular file"
+    if not os.access(path, os.R_OK):
+        return "is not readable"
+    return None
+
+
 def verdict_for(score: int, blockers: list[str], complete: bool = True) -> str:
     """Apply the normal ship/fix thresholds to a score and blocker set.
 
@@ -818,8 +942,9 @@ def main() -> int:
 
     for label, path in (("TeX source", args.tex), ("log", args.log),
                         ("baseline JSON", args.baseline_json)):
-        if path is not None and not path.exists():
-            print(f"error: supplied {label} {path} does not exist", file=sys.stderr)
+        problem = input_problem(path) if path is not None else None
+        if problem:
+            print(f"error: supplied {label} {path} {problem}", file=sys.stderr)
             return EXIT_CANNOT_RUN
     baseline_result = None
     if args.baseline_json is not None:
@@ -832,6 +957,9 @@ def main() -> int:
         print(f"error: {args.pdf} not found — compile the deck first",
               file=sys.stderr)
         return 2
+    if input_problem(args.pdf):
+        print(f"error: {args.pdf} {input_problem(args.pdf)}", file=sys.stderr)
+        return 2
     try:
         doc = fitz.open(args.pdf)
     except Exception as exc:
@@ -843,6 +971,13 @@ def main() -> int:
     if doc.page_count == 0:
         print(f"error: {args.pdf} has no pages", file=sys.stderr)
         return 2
+    log_text, notes = None, []
+    if args.log:
+        try:
+            log_text, notes = read_log(args.log, args.pdf, doc.page_count)
+        except (ValueError, OSError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return EXIT_CANNOT_RUN
     try:
         declared = list(args.allow_literal_marker)
         if args.tex:
@@ -867,8 +1002,8 @@ def main() -> int:
             findings += check_nav_overlap(doc.load_page(pno), pno + 1)
             findings += check_unresolved_markers(doc.load_page(pno), pno + 1,
                                                  allowed_markers)
-    if args.log:
-        findings += check_log(args.log)
+    if log_text is not None:
+        findings += check_log(log_text)
     # A declared literal marker is waived only when the log shows that no
     # citation or reference is actually undefined.
     log_clean = args.log is not None and not any(
@@ -887,13 +1022,18 @@ def main() -> int:
         findings += check_tex(args.tex)
 
     if args.render_dir:
-        args.render_dir.mkdir(parents=True, exist_ok=True)
-        for stale in args.render_dir.glob("page-*.png"):
-            stale.unlink()
-        mat = fitz.Matrix(200 / 72, 200 / 72)
-        for pno in range(doc.page_count):
-            out = args.render_dir / f"page-{pno + 1:02d}.png"
-            doc.load_page(pno).get_pixmap(matrix=mat).save(out)
+        try:
+            args.render_dir.mkdir(parents=True, exist_ok=True)
+            for stale in args.render_dir.glob("page-*.png"):
+                stale.unlink()
+            mat = fitz.Matrix(200 / 72, 200 / 72)
+            for pno in range(doc.page_count):
+                out = args.render_dir / f"page-{pno + 1:02d}.png"
+                doc.load_page(pno).get_pixmap(matrix=mat).save(out)
+        except (OSError, RuntimeError) as exc:
+            print(f"error: cannot write renders to {args.render_dir}: {exc}",
+                  file=sys.stderr)
+            return EXIT_CANNOT_RUN
 
     skipped_checks = ([] if args.tex else list(TEX_ONLY_CHECKS)) \
         + ([] if args.log else list(LOG_ONLY_CHECKS))
@@ -951,6 +1091,7 @@ def main() -> int:
                   {"page": f["page"], "detail": f["detail"]}
                   for f in waived_markers],
               "findings": findings,
+              "notes": notes,
               "rendered": str(args.render_dir) if args.render_dir else None}
     if args.json:
         print(json.dumps(result, indent=2))
@@ -977,6 +1118,8 @@ def main() -> int:
         for f in waived_markers:
             print(f"  note p{f['page']}: literal marker waived — the deck "
                   "declares it and the log has no undefined key")
+        for note in notes:
+            print(f"  note: {note}")
         if not findings:
             print("  no findings from static checks")
         print("  reminder: static checks cannot see box-interior overflow or a"
@@ -984,8 +1127,22 @@ def main() -> int:
     return EXIT_SHIP if verdict == "ship" else EXIT_NOT_READY
 
 
+def safe_output() -> None:
+    """Never crash on a console code page that lacks a character (Windows).
+
+    Python before 3.15 writes redirected output in the ANSI code page there;
+    a bullet or CJK slide text would otherwise raise UnicodeEncodeError.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(errors="backslashreplace")
+        except (AttributeError, ValueError):
+            pass
+
+
 def run() -> int:
     """Run main(), keeping a crash (exit 3) apart from a failing deck (exit 1)."""
+    safe_output()
     try:
         return main()
     except Exception as exc:  # noqa: BLE001  (report, never pass as a verdict)

@@ -807,9 +807,22 @@ figure = find_error("! LaTeX Error: File `figures/fig2' not found.\n\nl.3 \\incl
 package = find_error("! LaTeX Error: File `needspacezz.sty' not found.\n\nl.2 \\usepackage")
 assert "tlmgr" not in figure[1] and "path" in figure[1]
 assert "tlmgr search --global --file /needspacezz.sty" in package[1]
+# A figure named with its extension: XeTeX, pdfTeX and LuaTeX messages. The
+# pdfTeX/LuaTeX lines exceed 79 columns, so TeX wraps them; the error is
+# still read whole and the hint names the file.
+for message in (
+        "! Unable to load picture or PDF file 'figures/missing-plot.png'.\n"
+        "<to be read again>",
+        "! Package pdftex.def Error: File `figures/missing-plot.png' not found: using dr\n"
+        "aft setting.",
+        "! Package luatex.def Error: File `figures/missing-plot.png' not found: using dr\n"
+        "aft setting."):
+    line, hint = find_error(message)
+    assert "Missing file figures/missing-plot.png" in hint and "tlmgr" not in hint, hint
+    assert "using dr\n" not in line, line
 PY
 then
-  ok "a missing figure gets a path hint and a missing .sty a tlmgr search hint"
+  ok "a missing figure (with or without extension) gets a path hint, a .sty a tlmgr hint"
 else
   bad "missing-file triage hints"
 fi
@@ -837,6 +850,69 @@ then
   ok "wrapped multi-digit page counts are parsed"
 else
   bad "wrapped multi-digit page-count regression"
+fi
+
+echo "== a TeX error in the log blocks, and only this PDF's log is trusted =="
+CE_OK=1
+# compile_deck halts at the error; xelatex has still written page 1.
+python3 skills/econ-slides/scripts/compile_deck.py tests/compile-error-test.tex \
+  --build-dir tests/build-suite >/dev/null 2>&1 && CE_OK=0
+ce() { python3 skills/econ-slides/scripts/check_deck.py "$@" --json 2>/dev/null; }
+CE_HALT=$(ce tests/build-suite/compile-error-test.pdf --tex tests/compile-error-test.tex \
+  --log tests/build-suite/compile-error-test.log); CE_HALT_STATUS=$?
+# A nonstopmode build without -halt-on-error writes every page despite the error.
+mkdir -p tests/build-suite/nonstop
+(cd tests && TEXINPUTS=".:$PWD/../$SKILL_DIR/themes:" xelatex -interaction=nonstopmode \
+  -output-directory=build-suite/nonstop compile-error-test.tex >/dev/null 2>&1)
+CE_NONSTOP=$(ce tests/build-suite/nonstop/compile-error-test.pdf \
+  --tex tests/compile-error-test.tex --log tests/build-suite/nonstop/compile-error-test.log)
+CE_NONSTOP_STATUS=$?
+MF_OUT=$(python3 skills/econ-slides/scripts/compile_deck.py tests/missing-figure-test.tex \
+  --build-dir tests/build-suite --json 2>/dev/null)
+compile_clean tests/nested-marker-test.tex --build-dir tests/build-suite || CE_OK=0
+NESTED=$(ce tests/build-suite/nested-marker-test.pdf --tex tests/nested-marker-test.tex \
+  --log tests/build-suite/nested-marker-test.log); NESTED_STATUS=$?
+: > tests/build-suite/empty.log
+LOG_STATUSES=""
+for log in tests/build-suite/empty.log /dev/null tests/nested-marker-test.tex \
+           tests/build-suite/compile-error-test.log; do
+  python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/nested-marker-test.pdf \
+    --tex tests/nested-marker-test.tex --log "$log" >/dev/null 2>&1
+  LOG_STATUSES="$LOG_STATUSES$?"
+done
+python3 skills/econ-slides/scripts/compile_deck.py tests/hyperref-dead-test.tex \
+  --build-dir tests/build-suite >/dev/null 2>&1 || CE_OK=0
+HYPER=$(ce tests/build-suite/hyperref-dead-test.pdf --tex tests/hyperref-dead-test.tex \
+  --log tests/build-suite/hyperref-dead-test.log)
+if [ "$CE_OK" = "1" ] && python3 - "$CE_HALT" "$CE_HALT_STATUS" "$CE_NONSTOP" \
+     "$CE_NONSTOP_STATUS" "$MF_OUT" "$NESTED" "$NESTED_STATUS" "$LOG_STATUSES" \
+     "$HYPER" <<'PY'
+import json, sys
+(halt, halt_status, nonstop, nonstop_status, missing_figure, nested,
+ nested_status, log_statuses, hyper) = sys.argv[1:]
+halt, nonstop, missing_figure, nested, hyper = map(
+    json.loads, (halt, nonstop, missing_figure, nested, hyper))
+for result, status in ((halt, halt_status), (nonstop, nonstop_status)):
+    assert status == "1" and result["verdict"] == "must fix", result["verdict"]
+    assert result["blockers"] == ["compile-error"], result["blockers"]
+    assert any("Undefined control sequence" in f["detail"]
+               for f in result["findings"] if f["check"] == "compile-error")
+assert halt["pages"] == 1 and nonstop["pages"] == 2
+# A figure path with an extension gets the path hint, not "Unrecognized".
+assert not missing_figure["ok"] and "figures/missing-plot.png" in missing_figure["hint"]
+# An allowance two \input levels down, resolved from the main file's folder.
+assert nested_status == "0" and nested["allowed_literal_markers"], nested
+# An empty log, /dev/null, the .tex itself, another deck's log: exit 2.
+assert log_statuses == "2222", log_statuses
+# A dead \hyperref is a dead link with its key, not an unexplained ??.
+assert hyper["blockers"] == ["dead-link"], hyper["blockers"]
+assert any("sec:nosuchbackup" in f["detail"] for f in hyper["findings"])
+assert hyper["undefined_refs"] == 0
+PY
+then
+  ok "compile errors block, foreign logs stop the check, nested inputs and dead hyperrefs resolve"
+else
+  bad "compile-error blocker or log validation"
 fi
 
 echo "== undefined citations and references never ship =="
