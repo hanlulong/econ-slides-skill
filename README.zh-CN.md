@@ -47,7 +47,7 @@
 
 ## 安装
 
-需要装有 PyMuPDF 的 Python 3.10+，以及带 XeLaTeX 的 TeX 发行版（TeX Live / MacTeX / MiKTeX）。如果 `python3 -c "import pymupdf"` 已能运行，Python 一侧无需再装任何东西；否则请把 PyMuPDF 装进一个专用虚拟环境（当 Python 受系统管理限制时，PEP 668 同样会拦截 `pip install --user`），并用该环境的 `python` 运行技能脚本；也可以用 `uv run --with pymupdf python ...`。
+需要装有 PyMuPDF 的 Python 3.10+，以及带 XeLaTeX 的 TeX 发行版（TeX Live / MacTeX / MiKTeX）。如果 `python3 -c "import pymupdf"` 已能运行，Python 一侧无需再装任何东西；否则请把 PyMuPDF 装进一个专用虚拟环境（当 Python 受系统管理限制时，PEP 668 同样会拦截 `pip install --user`），并用该环境的 `python` 运行技能脚本；也可以用 `uv run --with pymupdf python ...`。全新安装的 PyMuPDF 2.x 还会附带 onnxruntime 和 numpy（约 265 MB）；如需更小的虚拟环境，脚本同样支持 `pymupdf>=1.26,<2`。
 
 将以下内容粘贴到 Claude Code 或 Codex（安装指令面向智能体，请保持英文原文）：
 

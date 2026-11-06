@@ -178,7 +178,9 @@ that the v0.1.1 notes described.
   'get_area'` on PyMuPDF 1.26.5, the release that `pip` picks for Python 3.9
   (such as Apple's bundled `python3`). It now computes areas with `abs(rect)`,
   which works on 1.24 through 2.x. The paste-in install prompt also checks for
-  Python 3.10+.
+  Python 3.10+, and `requirements.txt` and both READMEs note the size of a
+  PyMuPDF 2.x install (about 265 MB with onnxruntime and numpy) and the
+  smaller `pymupdf>=1.26,<2` alternative.
 
 ### Documentation
 

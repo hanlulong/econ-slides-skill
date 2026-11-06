@@ -101,7 +101,9 @@ Requires Python 3.10+ with PyMuPDF, and a TeX distribution with XeLaTeX
 there is nothing to install on the Python side. Otherwise, put PyMuPDF in a
 dedicated virtual environment (`pip install --user` is also blocked when your
 Python is externally managed, PEP 668) and run the skill's scripts with that
-environment's `python`; `uv run --with pymupdf python ...` works too.
+environment's `python`; `uv run --with pymupdf python ...` works too. A fresh
+PyMuPDF 2.x install also pulls in onnxruntime and numpy (about 265 MB); the
+scripts work with `pymupdf>=1.26,<2` as well if you want a smaller venv.
 
 Paste this into Claude Code or Codex:
 
