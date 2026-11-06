@@ -7,7 +7,7 @@ of the two. Sources: the Dallas Fed's
 ASHEcon ["How to Be a Good Discussant"](https://ashecon.org/activities/news/how-to-be-a-good-discussant)
 (Burton, Willage and Zanwar, Newsletter 2024:1). The Dallas Fed tips are
 written for the Economic Scholars Program, an undergraduate research
-conference it runs with Austin College; the advice carries over, but its
+conference it ran with Austin College; the advice carries over, but its
 10-minute limit is that conference's rule, not a general norm.
 
 ## Contents
