@@ -47,20 +47,48 @@
 
 ## 安装
 
-需要装有 PyMuPDF 的 Python 3.10+，以及带 XeLaTeX 的 TeX 发行版（TeX Live / MacTeX / MiKTeX）。如果 `python3 -c "import fitz"` 已能运行，Python 一侧无需再装任何东西；否则请把 PyMuPDF 装进一个专用虚拟环境（当 Python 受系统管理限制时，PEP 668 同样会拦截 `pip install --user`），并用该环境的 `python` 运行技能脚本；也可以用 `uv run --with pymupdf python ...`。
+需要装有 PyMuPDF 的 Python 3.10+，以及带 XeLaTeX 的 TeX 发行版（TeX Live / MacTeX / MiKTeX）。如果 `python3 -c "import pymupdf"` 已能运行，Python 一侧无需再装任何东西；否则请把 PyMuPDF 装进一个专用虚拟环境（当 Python 受系统管理限制时，PEP 668 同样会拦截 `pip install --user`），并用该环境的 `python` 运行技能脚本；也可以用 `uv run --with pymupdf python ...`。
 
 将以下内容粘贴到 Claude Code 或 Codex（安装指令面向智能体，请保持英文原文）：
 
 ```text
 Help me install the econ-slides skill from
-https://github.com/hanlulong/econ-slides-skill: clone it, then link the
-folder as an Agent Skill — into ~/.claude/skills/econ-slides for Claude Code
-and ~/.agents/skills/econ-slides for Codex (whichever of the two I use).
-Verify python3 and xelatex are available and that python3 can import fitz
+https://github.com/hanlulong/econ-slides-skill: clone it to a stable location,
+then link its skills/econ-slides folder as an Agent Skill — into
+~/.claude/skills/econ-slides for Claude Code and ~/.agents/skills/econ-slides
+for Codex (whichever of the two I use).
+Verify python3 and xelatex are available and that python3 can import pymupdf
 (PyMuPDF). If it cannot, create ~/.venvs/econ-slides, install the repo's
 requirements.txt there, and tell me to run the skill's scripts with that
 venv's python. Then confirm the skill loads.
 ```
+
+也可以从 [OpenEcon.ai 插件市场](https://github.com/OpenEconAI/plugins)以插件形式安装。
+
+Claude Code：
+
+```text
+/plugin marketplace add OpenEconAI/plugins
+/plugin install econ-slides@openeconai
+```
+
+Claude Code 2.1.275 及以上版本可用 `/plugin install econ-slides --marketplace OpenEconAI/plugins` 一步完成。
+
+Codex：
+
+```bash
+codex plugin marketplace add OpenEconAI/plugins
+codex plugin add econ-slides@openeconai
+```
+
+每个客户端只用一种安装方式：安装插件前请先删除手动创建的链接。插件中的技能带命名空间，因此在 Claude Code 中以 `/econ-slides:econ-slides` 调用；普通请求同样会触发它。
+
+<details>
+<summary>从 0.1.x 升级</summary>
+
+0.2.0 起，技能从仓库根目录移到了 `skills/econ-slides/`。指向克隆根目录的旧链接在 `git pull` 之后仍然可用，但 Claude Code 现在会把它作为插件式文件夹加载（`econ-slides@skills-dir`，以 `/econ-slides:econ-slides` 调用）。如需保留不带前缀的 `/econ-slides`，请把 `~/.claude/skills/econ-slides` 重新链接到 `<clone>/skills/econ-slides`。在 Codex 中，无论链接指向哪个文件夹，手动链接都会显示为 `econ-slides:econ-slides`，因为克隆目录带有插件清单；触发方式与之前相同。
+
+</details>
 
 <details>
 <summary>手动安装</summary>
@@ -72,30 +100,30 @@ macOS / Linux：
 ```bash
 git clone https://github.com/hanlulong/econ-slides-skill.git
 
-# 仅当 `python3 -c "import fitz"` 失败时才需要：把 PyMuPDF 装进专用虚拟环境
+# 仅当 `python3 -c "import pymupdf"` 失败时才需要：把 PyMuPDF 装进专用虚拟环境
 python3 -m venv ~/.venvs/econ-slides
 ~/.venvs/econ-slides/bin/python -m pip install -r econ-slides-skill/requirements.txt
 
 # Claude Code（全局技能目录）
 mkdir -p ~/.claude/skills
-ln -s "$(pwd)/econ-slides-skill" ~/.claude/skills/econ-slides
+ln -s "$(pwd)/econ-slides-skill/skills/econ-slides" ~/.claude/skills/econ-slides
 
 # Codex（共享的 agent-skills 目录）
 mkdir -p ~/.agents/skills
-ln -s "$(pwd)/econ-slides-skill" ~/.agents/skills/econ-slides
+ln -s "$(pwd)/econ-slides-skill/skills/econ-slides" ~/.agents/skills/econ-slides
 ```
 
 Windows（PowerShell——使用 `python` 而非 `python3`）：
 
 ```powershell
 git clone https://github.com/hanlulong/econ-slides-skill.git
-# 仅当 `python -c "import fitz"` 失败时才需要：把 PyMuPDF 装进专用虚拟环境
+# 仅当 `python -c "import pymupdf"` 失败时才需要：把 PyMuPDF 装进专用虚拟环境
 python -m venv "$env:USERPROFILE\.venvs\econ-slides"
 & "$env:USERPROFILE\.venvs\econ-slides\Scripts\python.exe" -m pip install -r econ-slides-skill\requirements.txt
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\skills" | Out-Null
-New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\econ-slides" -Target "$PWD\econ-slides-skill"
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\econ-slides" -Target "$PWD\econ-slides-skill\skills\econ-slides"
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.agents\skills" | Out-Null
-New-Item -ItemType Junction -Path "$env:USERPROFILE\.agents\skills\econ-slides" -Target "$PWD\econ-slides-skill"
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.agents\skills\econ-slides" -Target "$PWD\econ-slides-skill\skills\econ-slides"
 ```
 
 使用虚拟环境时，请以 `~/.venvs/econ-slides/bin/python <skill-dir>/scripts/...` 运行脚本（Windows：`...\Scripts\python.exe`），或告诉智能体哪个解释器装有 PyMuPDF。
@@ -108,7 +136,7 @@ tlmgr install xetex beamer translator pgf xcolor appendixnumberbeamer booktabs \
   microtype mathpazo palatino fontname sansmathaccent koma-script
 ```
 
-两个客户端读取同一份 `SKILL.md`；任何能读取它的智能体都能使用本技能。脚本为纯 Python（全程 pathlib，TeX 路径使用 `os.pathsep`），可在 macOS、Windows 和 Linux 上运行；`tests/run-tests.sh` 需要 bash（Windows 上可用 Git Bash 或 WSL）。
+两个客户端读取同一份 `skills/econ-slides/SKILL.md`；任何能读取它的智能体都能使用本技能。脚本为纯 Python（全程 pathlib，TeX 路径使用 `os.pathsep`），可在 macOS、Windows 和 Linux 上运行；`tests/run-tests.sh` 需要 bash（Windows 上可用 Git Bash 或 WSL）。
 
 </details>
 

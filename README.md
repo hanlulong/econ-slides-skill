@@ -96,7 +96,7 @@ private rather than being shipped with the skill.
 ## Install
 
 Requires Python 3.10+ with PyMuPDF, and a TeX distribution with XeLaTeX
-(TeX Live / MacTeX / MiKTeX). If `python3 -c "import fitz"` already works,
+(TeX Live / MacTeX / MiKTeX). If `python3 -c "import pymupdf"` already works,
 there is nothing to install on the Python side. Otherwise, put PyMuPDF in a
 dedicated virtual environment (`pip install --user` is also blocked when your
 Python is externally managed, PEP 668) and run the skill's scripts with that
@@ -106,14 +106,51 @@ Paste this into Claude Code or Codex:
 
 ```text
 Help me install the econ-slides skill from
-https://github.com/hanlulong/econ-slides-skill: clone it, then link the
-folder as an Agent Skill — into ~/.claude/skills/econ-slides for Claude Code
-and ~/.agents/skills/econ-slides for Codex (whichever of the two I use).
-Verify python3 and xelatex are available and that python3 can import fitz
+https://github.com/hanlulong/econ-slides-skill: clone it to a stable location,
+then link its skills/econ-slides folder as an Agent Skill — into
+~/.claude/skills/econ-slides for Claude Code and ~/.agents/skills/econ-slides
+for Codex (whichever of the two I use).
+Verify python3 and xelatex are available and that python3 can import pymupdf
 (PyMuPDF). If it cannot, create ~/.venvs/econ-slides, install the repo's
 requirements.txt there, and tell me to run the skill's scripts with that
 venv's python. Then confirm the skill loads.
 ```
+
+Or install it as a plugin from the [OpenEcon.ai marketplace](https://github.com/OpenEconAI/plugins).
+
+Claude Code:
+
+```text
+/plugin marketplace add OpenEconAI/plugins
+/plugin install econ-slides@openeconai
+```
+
+On Claude Code 2.1.275 or later, `/plugin install econ-slides --marketplace OpenEconAI/plugins`
+does both in one step.
+
+Codex:
+
+```bash
+codex plugin marketplace add OpenEconAI/plugins
+codex plugin add econ-slides@openeconai
+```
+
+Use one method per client: remove a manual link before installing the plugin.
+Plugin skills are namespaced, so Claude Code invokes this one as
+`/econ-slides:econ-slides`; it also triggers on ordinary requests.
+
+<details>
+<summary>Upgrading from 0.1.x</summary>
+
+In 0.2.0 the skill moved from the repository root into `skills/econ-slides/`.
+An existing link to the clone root keeps working after `git pull`, but Claude
+Code now loads it as a plugin-style folder (`econ-slides@skills-dir`, invoked as
+`/econ-slides:econ-slides`). To keep the bare `/econ-slides`, re-link
+`~/.claude/skills/econ-slides` to `<clone>/skills/econ-slides`. Codex lists a
+manual link to this clone as `econ-slides:econ-slides` either way, because the
+clone carries plugin manifests; it triggers the same as before.
+
+</details>
 
 <details>
 <summary>Manual installation</summary>
@@ -126,30 +163,30 @@ macOS / Linux:
 ```bash
 git clone https://github.com/hanlulong/econ-slides-skill.git
 
-# PyMuPDF, only if `python3 -c "import fitz"` fails: use a dedicated venv
+# PyMuPDF, only if `python3 -c "import pymupdf"` fails: use a dedicated venv
 python3 -m venv ~/.venvs/econ-slides
 ~/.venvs/econ-slides/bin/python -m pip install -r econ-slides-skill/requirements.txt
 
 # Claude Code (global skills directory)
 mkdir -p ~/.claude/skills
-ln -s "$(pwd)/econ-slides-skill" ~/.claude/skills/econ-slides
+ln -s "$(pwd)/econ-slides-skill/skills/econ-slides" ~/.claude/skills/econ-slides
 
 # Codex (shared agent-skills directory)
 mkdir -p ~/.agents/skills
-ln -s "$(pwd)/econ-slides-skill" ~/.agents/skills/econ-slides
+ln -s "$(pwd)/econ-slides-skill/skills/econ-slides" ~/.agents/skills/econ-slides
 ```
 
 Windows (PowerShell — use `python` rather than `python3`):
 
 ```powershell
 git clone https://github.com/hanlulong/econ-slides-skill.git
-# PyMuPDF, only if `python -c "import fitz"` fails: use a dedicated venv
+# PyMuPDF, only if `python -c "import pymupdf"` fails: use a dedicated venv
 python -m venv "$env:USERPROFILE\.venvs\econ-slides"
 & "$env:USERPROFILE\.venvs\econ-slides\Scripts\python.exe" -m pip install -r econ-slides-skill\requirements.txt
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\skills" | Out-Null
-New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\econ-slides" -Target "$PWD\econ-slides-skill"
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\econ-slides" -Target "$PWD\econ-slides-skill\skills\econ-slides"
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.agents\skills" | Out-Null
-New-Item -ItemType Junction -Path "$env:USERPROFILE\.agents\skills\econ-slides" -Target "$PWD\econ-slides-skill"
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.agents\skills\econ-slides" -Target "$PWD\econ-slides-skill\skills\econ-slides"
 ```
 
 With a venv, run the scripts as `~/.venvs/econ-slides/bin/python
@@ -166,10 +203,10 @@ tlmgr install xetex beamer translator pgf xcolor appendixnumberbeamer booktabs \
   microtype mathpazo palatino fontname sansmathaccent koma-script
 ```
 
-Both clients read the same `SKILL.md`; any agent that can read it can use
-the skill. The scripts are plain Python (pathlib throughout, `os.pathsep`
-for TeX paths) and run on macOS, Windows, and Linux; `tests/run-tests.sh`
-needs bash (Git Bash or WSL on Windows).
+Both clients read the same `skills/econ-slides/SKILL.md`; any agent that can
+read it can use the skill. The scripts are plain Python (pathlib throughout,
+`os.pathsep` for TeX paths) and run on macOS, Windows, and Linux;
+`tests/run-tests.sh` needs bash (Git Bash or WSL on Windows).
 
 </details>
 
