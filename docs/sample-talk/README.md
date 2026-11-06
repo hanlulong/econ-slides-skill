@@ -22,6 +22,12 @@ The only substantive input was the fictional demonstration manuscript
 Its country, program, authors, and data are fictional, and the manuscript
 contains deliberate inconsistencies.
 
+The three figure crops in `figures-slides/` and the paper metadata and
+source-traced results in `results.tex` derive from that manuscript, which
+econ-paper-review-skill distributes under the
+[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0);
+both repositories have the same author.
+
 This is still an **author talk**, not a disguised referee report. The positive
 result appears on `This paper` and is supported by the main table and
 heterogeneity evidence. A short `Roadmap` follows the introduction, and a
