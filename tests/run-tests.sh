@@ -788,12 +788,26 @@ wrapped = (
     "e2024abc' on page 1 undefined on input line 6.\n"
     "LaTeX Warning: Citation 'blkey' on page 2 undefined on input line 7.\n"
     "LaTeX Warning: Citation 'blkey' on page 3 undefined on input line 9.\n"
+    # Captured from pdflatex/natbib logs: a 40-48 character key moves TeX's
+    # 79-column break into "on page N undefined" itself.
+    "LaTeX Warning: Citation `angristPischke2009mostlyHarmlessEconometrics' on page \n"
+    "1 undefined on input line 3.\n"
+    "LaTeX Warning: Citation `chettyFriedmanRockoff2014teacherValueAddedBiasAb' on p\n"
+    "age 1 undefined on input line 4.\n"
+    "LaTeX Warning: Reference `imbensRubin2015causalInferenceStatistics' on page 1 u\n"
+    "ndefined on input line 5.\n"
+    "Package natbib Warning: Citation `chettyFriedmanRockoff2014teacherValueAddedBia\n"
+    "sAb' on page 1 undefined on input line 5.\n"
 )
 info = undefined_references(wrapped)
 keys = [item["key"] for item in info["items"]]
 assert keys == ["missingkey",
                 "thisisaveryveryveryveryverylongcitationkeyname2024abc",
-                "blkey"], keys
+                "blkey",
+                "angristPischke2009mostlyHarmlessEconometrics",
+                "chettyFriedmanRockoff2014teacherValueAddedBiasAb",
+                "imbensRubin2015causalInferenceStatistics"], keys
+assert [item["kind"] for item in info["items"]][-1] == "reference"
 assert undefined_count(undefined_references(
     "Package biblatex Warning: Please (re)run Biber on the file:")) == 1
 assert undefined_count(undefined_references("No warnings here.")) == 0

@@ -93,9 +93,32 @@ def page_count(log_text: str) -> int | None:
     return int(digits) if digits else None
 
 
+# TeX hard-wraps log lines at max_print_line (79 columns by default).
+MAX_PRINT_LINE = 79
+
+
+def unwrap_log(log_text: str, width: int = MAX_PRINT_LINE) -> str:
+    """Rejoin log lines that TeX hard-wrapped at ``width`` columns.
+
+    A line of exactly ``width`` characters continues on the next one, so a
+    warning such as ``Citation `key' on p`` / ``age 1 undefined`` is read
+    whole wherever the break fell.
+    """
+    lines: list[str] = []
+    pending = ""
+    for line in log_text.split("\n"):
+        pending += line
+        if len(line) != width:
+            lines.append(pending)
+            pending = ""
+    if pending:
+        lines.append(pending)
+    return "\n".join(lines)
+
+
 # ``Citation `key' on page 3 undefined`` from LaTeX and natbib; biblatex uses
-# straight quotes. TeX hard-wraps log lines at 79 columns, so a long key or the
-# page clause may continue on the next line.
+# straight quotes. The log is unwrapped first; the optional newline inside the
+# key still covers a log written with a different line width.
 UNDEFINED_RE = re.compile(
     r"(?:LaTeX|Package natbib) Warning: (Citation|Reference) [`']"
     r"([^'\s]+(?:\n[^'\s]+)?)'\s+on\s+page\s+(\d+)\s+undefined")
@@ -116,6 +139,7 @@ def undefined_references(log_text: str) -> dict:
     can appear without per-key lines; ``biber_rerun`` records biblatex's
     request for a Biber run, whose citations are then unresolved.
     """
+    log_text = unwrap_log(log_text)
     items: list[dict] = []
     seen: set[tuple[str, str]] = set()
     for match in UNDEFINED_RE.finditer(log_text):
