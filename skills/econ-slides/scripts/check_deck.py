@@ -322,7 +322,7 @@ def check_page(page: fitz.Page, pno: int, footer_zone: float = 0.93,
         bottom = max(l["bbox"].y1 for l in content)
         for info in page.get_image_info():
             rect = fitz.Rect(info["bbox"])
-            area_share = rect.get_area() / max(1, W * H)
+            area_share = abs(rect) / max(1, W * H)
             is_picture_slide = area_share >= 0.65 and not marker_lines \
                 and len(content) <= 3
             if 0.005 < area_share < 0.65 or is_picture_slide:
@@ -331,7 +331,7 @@ def check_page(page: fitz.Page, pno: int, footer_zone: float = 0.93,
         # Count substantial diagrams, but ignore tiny rules and backgrounds.
         for drawing in page.get_drawings():
             rect = fitz.Rect(drawing["rect"])
-            area_share = rect.get_area() / max(1, W * H)
+            area_share = abs(rect) / max(1, W * H)
             if (rect.width > 20 and rect.height > 20
                     and 0.003 < area_share < 0.65
                     and rect.y0 > H * TITLE_ZONE and rect.y1 < H * 0.88):
@@ -370,7 +370,7 @@ def check_nav_overlap(page: fitz.Page, pno: int) -> list[dict]:
             if inter.is_empty:
                 continue
             # a button's own label sits fully inside the link rect — skip it
-            if inter.get_area() > 0.8 * fl["bbox"].get_area():
+            if abs(inter) > 0.8 * abs(fl["bbox"]):
                 continue
             if inter.width > 1 and inter.height > 0.5:
                 findings.append({"check": "nav-footer-overlap", "page": pno,

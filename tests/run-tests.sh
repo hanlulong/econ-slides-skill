@@ -449,6 +449,27 @@ else
   ok "explicitly missing checker input is rejected"
 fi
 
+# PyMuPDF 1.26.5 (the newest release for Python 3.9) has no Rect.get_area.
+if python3 - >/dev/null 2>&1 <<'PY'
+import runpy, sys
+import pymupdf
+for name in ("get_area", "getArea"):
+    if hasattr(pymupdf.Rect, name):
+        delattr(pymupdf.Rect, name)
+sys.argv = ["check_deck.py", "tests/build-suite/sparse-test.pdf",
+            "--tex", "tests/sparse-test.tex",
+            "--log", "tests/build-suite/sparse-test.log", "--json"]
+try:
+    runpy.run_path("skills/econ-slides/scripts/check_deck.py", run_name="__main__")
+except SystemExit as exc:
+    raise SystemExit(0 if exc.code in (0, 1) else 1)
+PY
+then
+  ok "checker runs on a PyMuPDF without Rect.get_area"
+else
+  bad "checker depends on Rect.get_area"
+fi
+
 echo "== existing-deck baseline comparison separates inherited regressions =="
 BASELINE_FIXTURES_OK=1
 for fixture in baseline-regression-base baseline-regression-shifted baseline-regression-new; do

@@ -57,10 +57,11 @@ https://github.com/hanlulong/econ-slides-skill: clone it to a stable location,
 then link its skills/econ-slides folder as an Agent Skill — into
 ~/.claude/skills/econ-slides for Claude Code and ~/.agents/skills/econ-slides
 for Codex (whichever of the two I use).
-Verify python3 and xelatex are available and that python3 can import pymupdf
-(PyMuPDF). If it cannot, create ~/.venvs/econ-slides, install the repo's
-requirements.txt there, and tell me to run the skill's scripts with that
-venv's python. Then confirm the skill loads.
+Verify that xelatex is available, that `python3 --version` is 3.10 or newer,
+and that python3 can import pymupdf (PyMuPDF). If either check fails, create
+~/.venvs/econ-slides with a Python 3.10+ (for example `uv venv -p 3.12`),
+install the repo's requirements.txt there, and tell me to run the skill's
+scripts with that venv's python. Then confirm the skill loads.
 ```
 
 也可以从 [OpenEcon.ai 插件市场](https://github.com/OpenEconAI/plugins)以插件形式安装。

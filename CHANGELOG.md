@@ -105,6 +105,11 @@ that the v0.1.1 notes described.
   presentation tips.
 - `compile_deck.py` reports a missing themes folder clearly instead of
   failing inside TeX.
+- `check_deck.py` crashed with `AttributeError: 'Rect' object has no attribute
+  'get_area'` on PyMuPDF 1.26.5, the release that `pip` picks for Python 3.9
+  (such as Apple's bundled `python3`). It now computes areas with `abs(rect)`,
+  which works on 1.24 through 2.x. The paste-in install prompt also checks for
+  Python 3.10+.
 
 ### Documentation
 
