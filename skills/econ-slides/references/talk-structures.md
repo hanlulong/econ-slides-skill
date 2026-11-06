@@ -200,8 +200,12 @@ merely to match this list.
     branch.
 
 Preview-of-results dispute, resolved: preview the *bottom line* as one crisp
-sentence on the "This paper" slide (Shapiro, Startz, Evans), but do not
-pre-run the results tables (Cochrane's objection is to the long preview).
+sentence on the "This paper" slide (Shapiro: "Assume the audience is about to
+leave"; Startz's two-sentence takeaway), but do not pre-run the results
+tables. Cochrane goes further and rejects any preview ("Don't 'preview'
+results. It wastes time"), opening instead with the main result, as in Fama's
+"Look at table 1." The one-sentence compromise is this skill's choice, not
+Cochrane's.
 
 ## Per-role frame anatomy (different sections have different structures)
 
@@ -324,8 +328,10 @@ contact sheet alone.
 - The talk's job is the job: engineer the **two-sentence takeaway** —
   (a) the exciting thing they learned, (b) the clever thing you did
   (Startz) — and land both in the first five minutes.
-- Pitch to smart generalists ("JEP, not Econometrica"): most of the room
-  has not read past your abstract.
+- Pitch to smart generalists ("Think Journal of Economic Perspectives not
+  Econometrica", Tabarrok as quoted by Startz, who adds that the advice
+  "might not apply" to an Econometrica-type paper): most of the room has not
+  read past your abstract.
 - Three-act structure: accessible opening → one controlled technical dive
   that proves mastery → resurface to implications everyone follows.
 - If a boundary is needed to prevent overreading, state it credibly and
@@ -379,6 +385,8 @@ anti-pattern). Procedure:
 4. Update `\date`, venue line, and the slide budget; recompile and re-run
    the checks; visually re-inspect (cuts orphan `\hyperlink` targets —
    `check_deck` and the compile log catch dead references).
-5. Same paper, shorter clock ⇒ re-choose emphasis (Shapiro's scaling rule):
+5. Same paper, shorter clock ⇒ re-choose emphasis (Shapiro, crediting
+   Matthew Rabin: "A 30 minute talk is not a 90 minute talk where you talk
+   three times faster"):
    a 15-minute cut is a different talk about the same paper, not the
    90-minute deck played fast.

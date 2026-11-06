@@ -129,8 +129,9 @@ a later slide. A qualification stays subordinate to the claim it qualifies.
 - On a single-bullet frame, tighten the indent only if the target style does
   so and the rendered line otherwise looks unnecessarily displaced.
 - Nothing on the slide you will not say out loud; screen space = emphasis
-  (Shapiro). If attention lapsed for 30 seconds, the slide alone should let
-  a listener catch back up (Meager).
+  (Shapiro). "While you are talking, some people are not listening. Instead
+  they are looking at your slides" (Shapiro), so the slide alone should let a
+  listener whose attention lapsed catch back up.
 - More than about 15 extracted text lines on a non-exhibit slide prompts a
   density review; the PDF decides whether the material is actually readable.
 
@@ -257,8 +258,10 @@ need separate aliases when that distinction drives the argument.
 ## Math
 
 - One to three display equations is a useful starting range. Introduce each in
-  words and explain each key symbol *on that slide* — no one remembers notation across slides
-  (Piazzesi). Prefer words to symbols where words are exact.
+  words and explain each key symbol *on that slide*: "Explain every symbol on
+  your slides" (Piazzesi), because "People don't remember equations from one
+  slide to the next" (Cochrane); Startz suggests repeating a definition on
+  each slide that needs it. Prefer words to symbols where words are exact.
 - Build the estimating equation in stages (baseline → add the interaction
   → add fixed effects), not as a wall. The full system, derivations, and
   proofs live in the appendix behind a button.

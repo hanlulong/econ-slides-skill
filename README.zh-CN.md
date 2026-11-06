@@ -209,7 +209,7 @@ requirements.txt             脚本所需的 PyMuPDF
 
 ## 它不做什么
 
-它不会代写论文内容，不会编造材料中不存在的数值，不会承诺论文没有的结果。它也不会把文献综述放上幻灯片——所有演讲方法论文献在这一点上意见一致。
+它不会代写论文内容，不会编造材料中不存在的数值，不会承诺论文没有的结果。它也不会在演讲主线中安排文献综述部分：各指南在这一点上一致（Cochrane：“You don't need any literature review or motivation in a seminar”），本技能改为说明相对最接近文献的边际贡献（Piazzesi）。
 
 ## 相关项目
 
@@ -219,7 +219,7 @@ requirements.txt             脚本所需的 PyMuPDF
 
 ## 致谢
 
-演讲方法规则综合了以下公开指南：[Jesse Shapiro](https://shapiro.scholars.harvard.edu/notes-and-lectures)、Rachael Meager、[Paul Goldsmith-Pinkham](https://paulgp.com/beamer_tips.pdf)、[John Cochrane](https://faculty.wcas.northwestern.edu/mdo738/teaching/cochrane.pdf)、Dick Startz、[Marc Bellemare](https://marcfbellemare.com/wordpress/10053)、Monika Piazzesi、Alex Tabarrok、David Evans、Darren Lubotsky、Donald Davis、Keith Head，以及达拉斯联储和 ASHEcon 的评论人指南。验证方法借鉴了 [beamer-skill](https://github.com/Noi1r/beamer-skill)（PDF 渲染目检）和 [Pedro Sant'Anna 的工作流](https://github.com/pedrohcgs/claude-code-my-workflow)（可执行的质量关卡）；TikZ 定位规则改编自 Scott Cunningham 的 MixtapeTools。实现为原创；公开指南仅作署名链接，未捆绑或复制。
+演讲方法规则综合了以下公开指南：[Jesse Shapiro](https://shapiro.scholars.harvard.edu/notes-and-lectures)（“How to Give an Applied Micro Talk”）、[Rachael Meager](https://sites.google.com/view/rachaelmeager)（公开演讲幻灯片）、[Paul Goldsmith-Pinkham](https://paulgp.com/beamer_tips.pdf)、[John Cochrane](https://faculty.wcas.northwestern.edu/mdo738/teaching/cochrane.pdf)（“Writing Tips for Ph.D. Students”第 4 节 Seminar presentations）、[Dick Startz](https://www.econ.ucsb.edu/~startz/Guide_Job_Market_Presentations.pdf)、[Marc Bellemare](https://marcfbellemare.com/wordpress/10053)、[Monika Piazzesi](https://web.stanford.edu/~niederle/piazzesi.pdf)、Alex Tabarrok、David Evans、Darren Lubotsky、Donald Davis、Keith Head，以及[达拉斯联储](https://www.dallasfed.org/~/media/documents/educate/events/esp/tipsdiscussant.pdf)和 [ASHEcon](https://ashecon.org/activities/news/how-to-be-a-good-discussant) 的评论人指南。验证方法借鉴了 [beamer-skill](https://github.com/Noi1r/beamer-skill)（PDF 渲染目检）和 [Pedro Sant'Anna 的工作流](https://github.com/pedrohcgs/claude-code-my-workflow)（可执行的质量关卡）；TikZ 定位规则改编自 Scott Cunningham 的 MixtapeTools。实现为原创；公开指南仅作署名链接，未捆绑或复制。
 
 ## 许可证
 

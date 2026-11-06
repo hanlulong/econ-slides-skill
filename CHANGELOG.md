@@ -127,6 +127,15 @@ that the v0.1.1 notes described.
 - The Acknowledgments link for Marc Bellemare pointed to another author's
   presentation guide. It now points to Bellemare's own conference and seminar
   presentation tips.
+- Guide attributions checked against the sources. The "slide lets a listener
+  catch back up" rule is Shapiro's, not Meager's; "people don't remember
+  equations from one slide to the next" is Cochrane's, beside Piazzesi's
+  "Explain every symbol"; Cochrane rejects any results preview, so the
+  one-sentence bottom line is credited to Shapiro and Startz; "JEP, not
+  Econometrica" is Tabarrok's, as quoted by Startz with his caveat; Shapiro's
+  "30 minute talk" line credits Matthew Rabin. The README no longer calls the
+  guides "unanimous" about literature reviews, and the Acknowledgments now
+  link the Startz, Piazzesi, Meager, Dallas Fed and ASHEcon guides.
 - `compile_deck.py` reports a missing themes folder clearly instead of
   failing inside TeX.
 - `check_deck.py` crashed with `AttributeError: 'Rect' object has no attribute

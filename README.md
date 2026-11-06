@@ -286,7 +286,7 @@ requirements.txt             PyMuPDF for the scripts
 
 ## What it does not do
 
-It will not write your paper's content, invent a number that is not in your materials, or promise results your paper does not contain. It also will not put a literature review on your slides — the craft corpus is unanimous on that.
+It will not write your paper's content, invent a number that is not in your materials, or promise results your paper does not contain. It also will not put a literature-review section in the main line of a talk: the guides agree on that ("You don't need any literature review or motivation in a seminar", Cochrane), and the skill states the marginal contribution against the closest papers instead (Piazzesi).
 
 ## Related projects
 
@@ -297,14 +297,16 @@ It will not write your paper's content, invent a number that is not in your mate
 ## Acknowledgments
 
 The craft rules synthesize public guides by
-[Jesse Shapiro](https://shapiro.scholars.harvard.edu/notes-and-lectures),
-Rachael Meager,
+[Jesse Shapiro](https://shapiro.scholars.harvard.edu/notes-and-lectures) ("How to Give an Applied Micro Talk"),
+[Rachael Meager](https://sites.google.com/view/rachaelmeager) (public-speaking slides),
 [Paul Goldsmith-Pinkham](https://paulgp.com/beamer_tips.pdf),
-[John Cochrane](https://faculty.wcas.northwestern.edu/mdo738/teaching/cochrane.pdf),
-Dick Startz,
-[Marc Bellemare](https://marcfbellemare.com/wordpress/10053), Monika
-Piazzesi, Alex Tabarrok, David Evans, Darren Lubotsky, Donald Davis, Keith
-Head, and the Dallas Fed and ASHEcon discussant guides. The verification
+[John Cochrane](https://faculty.wcas.northwestern.edu/mdo738/teaching/cochrane.pdf) ("Writing Tips for Ph.D. Students", §4 Seminar presentations),
+[Dick Startz](https://www.econ.ucsb.edu/~startz/Guide_Job_Market_Presentations.pdf),
+[Marc Bellemare](https://marcfbellemare.com/wordpress/10053),
+[Monika Piazzesi](https://web.stanford.edu/~niederle/piazzesi.pdf),
+Alex Tabarrok, David Evans, Darren Lubotsky, Donald Davis, Keith Head, and the
+[Dallas Fed](https://www.dallasfed.org/~/media/documents/educate/events/esp/tipsdiscussant.pdf) and
+[ASHEcon](https://ashecon.org/activities/news/how-to-be-a-good-discussant) discussant guides. The verification
 approach learns from [beamer-skill](https://github.com/Noi1r/beamer-skill)
 (PDF-render visual auditing) and
 [Pedro Sant'Anna's workflow](https://github.com/pedrohcgs/claude-code-my-workflow)
