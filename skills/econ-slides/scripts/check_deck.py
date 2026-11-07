@@ -34,9 +34,11 @@ Checks (geometry measured from the PDF itself, not guessed from source):
   arrow-bullet    a right arrow is used as a list marker
   question-label  an opening object is called "economic question"
   question-subtitle a concise question is hidden in a generic frame subtitle
-  roadmap-emphasis a Roadmap uses boldface instead of regular-weight orientation
+  roadmap-emphasis a roadmap (Roadmap, Outline, Agenda, Plan of the talk) uses
+                  boldface instead of regular-weight orientation
   exhibit-reading a static table or figure has no bottom interpretation line
-  conclusion-link a conclusion frame contains Beamer navigation
+  conclusion-link a conclusion frame (Conclusion(s), Concluding remarks)
+                  contains Beamer navigation
   conclusion-density a conclusion carries more than three bullet items
 
 Score starts at 100 and deducts only for objective or strongly actionable
@@ -194,6 +196,13 @@ def parse_allowed_markers(values: list[str]) -> set[str]:
                 "unresolved-key markers; use ??, (?), [?] or [?, ?]")
         allowed.update(normalize_marker(marker) for marker in markers)
     return allowed
+
+
+# Frame titles (lowercased, commands stripped) for the conclusion and roadmap
+# house rules.
+CONCLUSION_TITLE = re.compile(
+    r"^(?:conclusions?|concluding remarks|conclusion and next steps)[.:]?$")
+ROADMAP_TITLE = re.compile(r"^(?:roadmap|outline|agenda|plan of the talk)[.:]?$")
 
 
 MATH_FONT_RE = re.compile(r"CMMI|CMSY|CMEX|MSBM|MSAM|Math|rsfs", re.I)
@@ -761,10 +770,10 @@ def check_tex(tex_path: Path) -> list[dict]:
                                            "subtitle of 'Key question' — make the "
                                            "question the frame title when it fits"})
 
-        if title_plain == "roadmap" and re.search(
+        if ROADMAP_TITLE.match(title_plain) and re.search(
                 r"\\textbf\s*\{|\\bfseries\b", frame_src):
             findings.append({"check": "roadmap-emphasis", "page": None,
-                             "detail": "Roadmap uses boldface — keep orientation "
+                             "detail": "the roadmap uses boldface — keep orientation "
                                        "labels regular weight; use muted color only "
                                        "to mark inactive modules when needed"})
 
@@ -784,13 +793,15 @@ def check_tex(tex_path: Path) -> list[dict]:
                                        "interpretation or economic-significance line "
                                        "after the exhibit"})
 
-        if title_plain == "conclusion" and re.search(
+        is_conclusion = bool(CONCLUSION_TITLE.match(title_plain))
+        if is_conclusion and re.search(
                 r"\\(?:PlaceNav|hyperlink|beamergotobutton|beamerbutton|BackButton)\b",
                 frame_src):
             findings.append({"check": "conclusion-link", "page": None,
-                             "detail": "Conclusion contains Beamer navigation — "
-                                       "end on the takeaway, not a link hub"})
-        if title_plain == "conclusion":
+                             "detail": "the conclusion slide contains Beamer "
+                                       "navigation — end on the takeaway, not a "
+                                       "link hub"})
+        if is_conclusion:
             n_items = len(re.findall(
                 r"\\item(?![A-Za-z@])(?:\s*<[^>]*>)?(?:\s*\[[^]]*\])?",
                 frame_src))

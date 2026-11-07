@@ -147,6 +147,54 @@ class CheckerUnitTest(unittest.TestCase):
         self.assertEqual(result["pages"], 23)
 
 
+def source_checks(body: str) -> set[str]:
+    """Run check_tex on a one-off deck written to a temporary folder."""
+    import tempfile
+    from check_deck import check_tex
+    deck = ("\\documentclass{beamer}\n\\begin{document}\n" + body
+            + "\n\\end{document}\n")
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "deck.tex"
+        path.write_text(deck, encoding="utf-8")
+        return {f["check"] for f in check_tex(path)}
+
+
+class HouseRuleTitleTest(unittest.TestCase):
+    BUTTON = ("\\hyperlink{bk}{\\beamergotobutton{Backup}}\n\\end{frame}\n"
+              "\\begin{frame}{Backup}\\hypertarget{bk}{}Detail\\end{frame}")
+
+    def frame(self, title: str, inner: str) -> str:
+        return f"\\begin{{frame}}{{{title}}}\n{inner}"
+
+    def test_conclusion_variants_fire(self):
+        for title in ("Conclusion", "Conclusions", "Concluding remarks",
+                      "Conclusions.", "Conclusion and next steps"):
+            self.assertIn("conclusion-link",
+                          source_checks(self.frame(title, self.BUTTON)), title)
+        found = source_checks("\\begin{frame}{Concluding remarks}\n"
+                              "\\beamergotobutton{More}\n\\end{frame}")
+        self.assertIn("conclusion-link", found)
+
+    def test_other_titles_do_not_fire(self):
+        for title in ("Summary", "Conclusions and extensions"):
+            self.assertNotIn("conclusion-link",
+                             source_checks(self.frame(title, self.BUTTON)), title)
+
+    def test_roadmap_variants(self):
+        for title in ("Roadmap", "Outline", "Agenda", "Plan of the talk"):
+            found = source_checks(f"\\begin{{frame}}{{{title}}}\n"
+                                  "\\textbf{x}\n\\end{frame}")
+            self.assertIn("roadmap-emphasis", found, title)
+        self.assertNotIn("roadmap-emphasis", source_checks(
+            "\\begin{frame}{Outline of the model}\n\\textbf{x}\n\\end{frame}"))
+
+    def test_violations_fixture_still_fires(self):
+        from check_deck import check_tex
+        found = {f["check"] for f in check_tex(ROOT / "tests/violations-test.tex")}
+        self.assertIn("conclusion-link", found)
+        self.assertIn("roadmap-emphasis", found)
+
+
 class MissingGlyphTest(unittest.TestCase):
     # Four lines from a real XeTeX log of a house-theme deck with ≥ and β in
     # text, wrapped at 79 columns as TeX writes them.

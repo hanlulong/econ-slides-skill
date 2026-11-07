@@ -1265,6 +1265,29 @@ else
 fi
 rm -f tests/_glyph.tex tests/_nullfont.tex
 
+echo "== conclusion and roadmap title variants =="
+printf '%s\n' '\documentclass[aspectratio=169,11pt]{beamer}' \
+  '\usepackage{econ-slides-house}' '\begin{document}' \
+  '\begin{frame}{Conclusions}' '\begin{itemize}' \
+  '  \item Broadband raised small-firm productivity' \
+  '  \item The gain tracks communication intensity' '\end{itemize}' \
+  '\hyperlink{bk}{\beamergotobutton{Backup}}' '\end{frame}' '\appendix' \
+  '\begin{frame}{Backup}\hypertarget{bk}{}' 'Detail' '\end{frame}' \
+  '\end{document}' > tests/_conclusions.tex
+if compile_clean tests/_conclusions.tex --build-dir tests/build-suite; then
+  CONC_OUT=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/_conclusions.pdf \
+      --tex tests/_conclusions.tex --log tests/build-suite/_conclusions.log 2>&1)
+  CONC_STATUS=$?
+else
+  CONC_OUT=""; CONC_STATUS=compile
+fi
+if [ "$CONC_STATUS" = "1" ] && [[ "$CONC_OUT" == *"[conclusion-link]"* ]]; then
+  ok "a navigation button on a 'Conclusions' slide blocks delivery"
+else
+  bad "conclusion title variant [$CONC_STATUS]"
+fi
+rm -f tests/_conclusions.tex
+
 echo "== plugin packaging stays consistent =="
 if python3 - <<'PY'
 import json
