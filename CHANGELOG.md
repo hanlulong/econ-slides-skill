@@ -4,6 +4,30 @@ All notable changes to econ-slides. Versions follow semantic versioning.
 From 0.2.0, release tags use the OpenEcon.ai catalog form
 `econ-slides--vX.Y.Z`; the earlier `v0.1.0` and `v0.1.1` tags stay as they are.
 
+## 0.3.1 — 2026-11-07
+
+Documentation corrections only: three statements about TeX behavior, each
+rechecked with TeX Live 2025, and one line of the 0.3.0 entry. No script
+changed, and the theme change is a comment.
+
+### Fixed
+
+- `references/exhibit-surgery.md`: Beamer does not suppress overfull-box
+  warnings inside a `ResultBox` or block. TeX logs them, but for an ordinary
+  (not fragile) frame at the line of its `\end{frame}`, so the render is
+  still where to find the slide.
+- `references/style-guide.md`: the compile log does not always list a
+  missing `\hyperlink` target. pdfLaTeX and LuaLaTeX log it; XeLaTeX, the
+  default engine, logs nothing. The guide now points to
+  `check_deck.py --tex`, which reports it as `dead-link`.
+- `themes/econ-slides-house.sty` comment: the square `\textbullet` under
+  XeLaTeX and LuaLaTeX is Latin Modern Sans's own bullet, not a glyph
+  missing from mathpazo; it looks the same without mathpazo. The theme
+  still uses a math-mode bullet.
+- The 0.3.0 entry below said `crop_figure.py` usage errors exit 2 like "the
+  other scripts". `compile_deck.py` exits 1 on a missing input, so the entry
+  now names `check_deck.py` and `check_script.py`.
+
 ## 0.3.0 — 2026-11-07
 
 New checks in `check_deck.py` and fixes across the helpers. Two of them can
@@ -43,9 +67,9 @@ from the font now blocks, and the conclusion rule now also applies to
   text, to confirm that a `.tex` and a PDF are the same version, and to name
   pages that extract empty.
 - `crop_figure.py` usage errors (a missing `--bbox` or `--out`, a page out of
-  range, no PyMuPDF) now exit 2, like its other errors and the other
-  scripts; they exited 1 before. A crash exits 3. `--out` must end in `.png`,
-  `.jpg` or `.jpeg`.
+  range, no PyMuPDF) now exit 2, like its other errors and like
+  `check_deck.py` and `check_script.py`; they exited 1 before. A crash
+  exits 3. `--out` must end in `.png`, `.jpg` or `.jpeg`.
 
 ### Fixed
 

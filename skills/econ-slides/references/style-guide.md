@@ -127,7 +127,10 @@ make that style reusable across new decks.
   Two buttons on one frame share a single `\PlaceNav` node:
   `\PlaceNav{\hyperlink{app:a}{\beamergotobutton{Placebo}}\;\hyperlink{app:b}{\beamergotobutton{By cohort}}}`
   (stacked `\PlaceNav` calls overprint). Every button's target must exist —
-  cutting frames orphans links; the compile log lists undefined references.
+  cutting frames orphans links. pdfLaTeX and LuaLaTeX log a missing
+  `\hyperlink` target, but XeLaTeX (the default engine) logs nothing, so run
+  `check_deck.py --tex`: it reports a `\hyperlink` or `\BackButton` target
+  that the source never defines as `dead-link`.
   Existing decks keep their own appendix and target conventions.
 - Main-deck navigation is optional and subordinate. The **Conclusion never has
   navigation**: no `\PlaceNav`, `\hyperlink`, `\beamergotobutton`, or appendix
