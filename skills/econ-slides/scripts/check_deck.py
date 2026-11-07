@@ -15,6 +15,11 @@ Checks (geometry measured from the PDF itself, not guessed from source):
   overfull        Overfull \\hbox/\\vbox warnings parsed from the .log
   compile-error   a TeX error (a ``! ...`` line) in the .log: a halted or
                   ``nonstopmode`` build, a missing figure, an undefined macro
+  missing-glyph   a character the font lacks (``Missing character`` in the
+                  .log), such as a β or ≥ typed in text: it does not render
+  lost-char       a dropped character that is usually harmless: a stray
+                  character inside a TikZ picture (nullfont) or an invisible
+                  one (U+200B); a note, no deduction
   undefined-ref   an undefined citation or cross-reference: LaTeX/natbib/biblatex
                   warnings in the .log, or a [?], (?) or ?? marker in the PDF
                   text (biblatex prints a missing key itself and natbib's
@@ -35,9 +40,10 @@ Checks (geometry measured from the PDF itself, not guessed from source):
   conclusion-density a conclusion carries more than three bullet items
 
 Score starts at 100 and deducts only for objective or strongly actionable
-findings. TeX errors in the log, edge overflow, serious overfull boxes,
-navigation collisions, dead links, undefined citations or references, prohibited arrow markers, the
-disallowed question label, and conclusion links are hard blockers. Wrapped
+findings. TeX errors in the log, characters missing from the font, edge
+overflow, serious overfull boxes, navigation collisions, dead links,
+undefined citations or references, prohibited arrow markers, the disallowed
+question label, and conclusion links are hard blockers. Wrapped
 text, density, sparse layout, prose columns, emphasis, exhibit readings, and
 conclusion density are review prompts: judge
 them against the paper and target deck, and never trigger filler or a forced
@@ -62,9 +68,10 @@ log, the .tex itself) stops the check with exit 2 instead of passing as clean.
 
 Without --tex the source checks (dead links, arrow bullets, the question
 label, conclusion links, pause chains, exhibit readings, and the other source
-prompts) do not run; without --log the compile-error, overfull-box and
-log-based undefined-reference checks do not run. Such a run is partial: it lists the
-skipped checks, and its verdict is "incomplete" instead of "ship".
+prompts) do not run; without --log the compile-error, missing-glyph,
+overfull-box and log-based undefined-reference checks do not run. Such a run
+is partial: it lists the skipped checks, and its verdict is "incomplete"
+instead of "ship".
 
 Exit status: 0 = ship (full check, no blocker); 1 = the deck is not ready
 (must fix, fix recommended, or incomplete); 2 = the check could not run (bad
@@ -89,7 +96,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 try:
     from compile_deck import (  # noqa: E402  (no PyMuPDF)
-        undefined_references, unwrap_log)
+        missing_characters, undefined_references, unwrap_log)
 except ImportError as exc:  # pragma: no cover
     print(f"error: check_deck.py cannot import its sibling scripts ({exc}). "
           "Keep check_deck.py, compile_deck.py and check_script.py together "
@@ -131,10 +138,11 @@ DEDUCT = {"edge-overflow": 15, "wrapped-title": 0, "wrapped-bullet": 0,
           "roadmap-emphasis": 0,
           "exhibit-reading": 0, "conclusion-link": 10,
           "conclusion-density": 0, "undefined-ref": 10,
-          "compile-error": 15}
+          "compile-error": 15, "missing-glyph": 10, "lost-char": 0}
 HARD_BLOCKERS = {"edge-overflow", "overfull", "nav-footer-overlap",
                  "dead-link", "arrow-bullet", "question-label",
-                 "conclusion-link", "undefined-ref", "compile-error"}
+                 "conclusion-link", "undefined-ref", "compile-error",
+                 "missing-glyph"}
 # Blockers that a --baseline-json comparison never treats as inherited: an
 # unresolved [?] or ?? is visible to the audience whoever introduced it.
 NON_WAIVABLE_BLOCKERS = {"undefined-ref"}
@@ -143,7 +151,8 @@ TEX_ONLY_CHECKS = ("dead-link", "arrow-bullet", "question-label",
                    "question-subtitle", "roadmap-emphasis", "exhibit-reading",
                    "conclusion-link", "conclusion-density", "pause-chain",
                    "emphasis-overuse", "prose-columns")
-LOG_ONLY_CHECKS = ("compile-error", "overfull", "undefined-ref (log warnings)")
+LOG_ONLY_CHECKS = ("compile-error", "missing-glyph", "overfull",
+                   "undefined-ref (log warnings)")
 EXIT_SHIP, EXIT_NOT_READY, EXIT_CANNOT_RUN, EXIT_CRASH = 0, 1, 2, 3
 # What LaTeX, natbib, and the standard styles print for an unresolved key:
 # [?] or [?, ?] (\cite), (?) (natbib), and a bold ?? (\ref). ``What??`` in
@@ -552,8 +561,36 @@ def compile_errors(text: str) -> list[dict]:
     return findings
 
 
+def missing_character_findings(text: str) -> list[dict]:
+    """Report characters the font lacks; no page numbers, so a baseline matches."""
+    findings = []
+    for item in missing_characters(text):
+        shown = repr(item["char"])
+        code = f" ({item['code']})" if item["code"] else ""
+        if item["kind"] == "glyph":
+            findings.append({
+                "check": "missing-glyph", "page": None,
+                "detail": f"{shown}{code} is missing from font {item['font']} "
+                          "and does not render — use math mode or a font "
+                          "that has it"})
+        elif item["kind"] == "nullfont":
+            findings.append({
+                "check": "lost-char", "page": None,
+                "detail": f"a character ({shown}) typed inside a TikZ/PGF "
+                          "picture outside a node was dropped — check that "
+                          "picture for a stray character"})
+        else:
+            findings.append({
+                "check": "lost-char", "page": None,
+                "detail": f"invisible character {item['code']} is not in font "
+                          f"{item['font']} — usually harmless; remove it from "
+                          "the source"})
+    return findings
+
+
 def check_log(text: str) -> list[dict]:
     findings = compile_errors(text)
+    findings += missing_character_findings(text)
     for m in re.finditer(r"^Overfull \\([hv])box \(([\d.]+)pt too \w+\)", text, re.M):
         if float(m.group(2)) > 2.0:
             findings.append({"check": "overfull", "page": None,

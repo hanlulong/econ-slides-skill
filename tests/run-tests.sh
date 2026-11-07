@@ -1222,6 +1222,49 @@ else
   echo "  SKIP  non-UTF-8 locale compile (no zh_CN.GBK locale here)"
 fi
 
+echo "== characters missing from the font =="
+# A β or ≥ typed in text is dropped by the house theme's text font: a blocker.
+printf '%s\n' '\documentclass[aspectratio=169,11pt]{beamer}' \
+  '\usepackage{econ-slides-house}' '\begin{document}' \
+  '\begin{frame}{Effect of the reform on employment}' '\begin{itemize}' \
+  '  \item Effect ≥ 5 percent in rural counties' \
+  '  \item The elasticity is β = 0.4 for teens' '\end{itemize}' \
+  '\Takeaway{The decline is concentrated in rural counties.}' '\end{frame}' \
+  '\end{document}' > tests/_glyph.tex
+GLYPH_OUT=$(python3 skills/econ-slides/scripts/compile_deck.py tests/_glyph.tex \
+    --build-dir tests/build-suite 2>&1)
+GLYPH_CHECK=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/_glyph.pdf \
+    --tex tests/_glyph.tex --log tests/build-suite/_glyph.log 2>&1)
+GLYPH_STATUS=$?
+if [[ "$GLYPH_OUT" == *"warning: 2 characters are missing from the font"* ]] \
+    && [ "$GLYPH_STATUS" = "1" ] && [[ "$GLYPH_CHECK" == *"[missing-glyph]"* ]] \
+    && [[ "$GLYPH_CHECK" == *"'β' (U+03B2) is missing from font"* ]]; then
+  ok "a character missing from the font is reported and blocks delivery"
+else
+  bad "missing-glyph blocker [$GLYPH_STATUS]"
+fi
+# A stray character inside a TikZ picture lands in nullfont: a note only.
+printf '%s\n' '\documentclass[aspectratio=169,11pt]{beamer}' \
+  '\usepackage{econ-slides-house}' '\usepackage{tikz}' '\begin{document}' \
+  '\begin{frame}{A rule drawn with a stray semicolon}' '\centering' \
+  '\begin{tikzpicture}\draw (0,0) -- (3,0);;\end{tikzpicture}' \
+  '\Takeaway{The rule still draws; the extra semicolon is dropped.}' \
+  '\end{frame}' '\end{document}' > tests/_nullfont.tex
+if compile_clean tests/_nullfont.tex --build-dir tests/build-suite; then
+  NULL_CHECK=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/_nullfont.pdf \
+      --tex tests/_nullfont.tex --log tests/build-suite/_nullfont.log 2>&1)
+  NULL_STATUS=$?
+else
+  NULL_CHECK=""; NULL_STATUS=compile
+fi
+if [ "$NULL_STATUS" = "0" ] && [[ "$NULL_CHECK" == *"[lost-char]"* ]] \
+    && [[ "$NULL_CHECK" != *"[missing-glyph]"* ]]; then
+  ok "a stray TikZ character is a lost-char note and the deck still ships"
+else
+  bad "lost-char note [$NULL_STATUS]"
+fi
+rm -f tests/_glyph.tex tests/_nullfont.tex
+
 echo "== plugin packaging stays consistent =="
 if python3 - <<'PY'
 import json

@@ -147,6 +147,56 @@ class CheckerUnitTest(unittest.TestCase):
         self.assertEqual(result["pages"], 23)
 
 
+class MissingGlyphTest(unittest.TestCase):
+    # Four lines from a real XeTeX log of a house-theme deck with ≥ and β in
+    # text, wrapped at 79 columns as TeX writes them.
+    WRAPPED = (
+        "Missing character: There is no ≥ (U+2265) in font [lmsans10-regular]:mapping=te\n"
+        "x-text;!\n"
+        "Missing character: There is no β (U+03B2) in font [lmsans10-regular]:mapping=te\n"
+        "x-text;!\n")
+
+    def checks(self, log: str) -> list[str]:
+        from check_deck import check_log
+        return [f["check"] for f in check_log(log)]
+
+    def test_wrapped_xetex_lines_are_blockers(self):
+        from check_deck import check_log
+        findings = check_log(self.WRAPPED)
+        self.assertEqual([f["check"] for f in findings],
+                         ["missing-glyph", "missing-glyph"])
+        self.assertIn("'≥' (U+2265) is missing from font lmsans10-regular",
+                      findings[0]["detail"])
+        self.assertIn("'β' (U+03B2)", findings[1]["detail"])
+        self.assertTrue(all(f["page"] is None for f in findings))
+
+    def test_harmless_losses_are_notes(self):
+        self.assertEqual(self.checks(
+            'Missing character: There is no ; ("3B) in font nullfont!\n'),
+            ["lost-char"])
+        self.assertEqual(self.checks(
+            "Missing character: There is no \u200b (U+200B) in font "
+            "[lmroman10-regular]:mapping=tex-text;!\n"), ["lost-char"])
+
+    def test_pdftex_form_and_clean_log(self):
+        self.assertEqual(self.checks(
+            "Missing character: There is no ^^b2 in font cmr10!\n"),
+            ["missing-glyph"])
+        self.assertEqual(self.checks("Overfull \\hbox (0.5pt too wide)\n"), [])
+
+    def test_weights(self):
+        from check_deck import HARD_BLOCKERS, NON_WAIVABLE_BLOCKERS, score_findings
+        self.assertEqual(score_findings([{"check": "missing-glyph"}]), 90)
+        self.assertEqual(score_findings([{"check": "lost-char"}]), 100)
+        self.assertIn("missing-glyph", HARD_BLOCKERS)
+        self.assertNotIn("missing-glyph", NON_WAIVABLE_BLOCKERS)
+
+    def test_inherited_glyph_is_waived_by_a_baseline(self):
+        from check_deck import check_log, classify_blocker_regressions
+        findings = check_log(self.WRAPPED)
+        inherited, new, _ = classify_blocker_regressions(findings, findings)
+        self.assertEqual((len(inherited), new), (2, []))
+
 class CompileDeckTest(unittest.TestCase):
     def test_engine_directive(self):
         from compile_deck import engine_from_directive

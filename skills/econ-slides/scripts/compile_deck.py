@@ -35,6 +35,7 @@ import re
 import shutil
 import subprocess
 import sys
+import unicodedata
 from pathlib import Path
 
 # Sibling helpers are imported by path so the script runs from any directory.
@@ -272,6 +273,58 @@ def undefined_count(info: dict) -> int:
     return len(info["items"]) or int(unexplained or info["biber_rerun"])
 
 
+# "Missing character: There is no β (U+03B2) in font [lmsans10-regular]:..!"
+# (XeTeX, LuaTeX), '... no ; ("3B) in font nullfont!' (XeTeX with no font
+# selected), and "... no ^^b2 in font cmr10!" (pdfTeX). LaTeX logs these by default
+# (\tracinglostchars=2); the character simply does not render.
+MISSING_CHAR_RE = re.compile(
+    r'^Missing character: There is no (.+?) '
+    r'(?:\((U\+[0-9A-Fa-f]+|"[0-9A-Fa-f]+)\) )?in font (.+?)!', re.M)
+
+
+def _font_name(raw: str) -> str:
+    """``[lmsans10-regular]:mapping=tex-text;`` -> ``lmsans10-regular``."""
+    raw = raw.strip()
+    bracketed = re.match(r"\[([^\]]+)\]", raw)
+    if bracketed:
+        return bracketed.group(1)
+    raw = re.sub(r"^(?:name|file):", "", raw.strip('"'))
+    return raw.split(":", 1)[0].strip('"')
+
+
+def missing_characters(log_text: str) -> list[dict]:
+    """List the characters TeX dropped because the font lacks them.
+
+    Each item is ``{"char", "code", "font", "kind"}``, unique by character
+    and font. ``code`` is ``U+XXXX`` or None (pdfTeX's ``^^b2`` form).
+    ``kind`` is ``"nullfont"`` for a character typed where no font is
+    selected (a stray character inside a TikZ picture, outside a node),
+    ``"invisible"`` for a format or space character (U+200B, U+00A0 ...),
+    and ``"glyph"`` for a visible character the audience will not see.
+    """
+    items: list[dict] = []
+    seen: set[tuple[str, str]] = set()
+    for match in MISSING_CHAR_RE.finditer(unwrap_log(log_text)):
+        char, code, font = match.group(1), match.group(2), _font_name(match.group(3))
+        if code and code.startswith('"'):
+            code = f"U+{int(code[1:], 16):04X}"
+        elif code:
+            code = "U+" + code[2:].upper()
+        if (char, font) in seen:
+            continue
+        seen.add((char, font))
+        point = int(code[2:], 16) if code else None
+        if font == "nullfont":
+            kind = "nullfont"
+        elif (point is not None and point <= sys.maxunicode
+              and unicodedata.category(chr(point)) in ("Cf", "Zs")):
+            kind = "invisible"
+        else:
+            kind = "glyph"
+        items.append({"char": char, "code": code, "font": font, "kind": kind})
+    return items
+
+
 # A missing input leaves the tool's .bbl empty or useless: BibTeX's
 # "I couldn't open database/style file", "I found no database files" (or
 # \\bibdata/\\bibstyle), and Biber's "ERROR - Cannot find 'refs.bib'!".
@@ -484,6 +537,8 @@ def main() -> int:
         result["undefined_refs"] = undefined_count(undefined)
         result["undefined"] = undefined["items"]
         result["dead_hyperrefs"] = [item["key"] for item in undefined["hyper"]]
+        result["missing_glyphs"] = sum(item["kind"] == "glyph"
+                                       for item in missing_characters(log_text))
     elif timed_out:
         result["error"] = timed_out
         result["hint"] = ("The engine did not finish. Look for an infinite loop "
@@ -516,6 +571,9 @@ def main() -> int:
             print("warning: \\hyperref targets with no \\label (dead links): "
                   + ", ".join(result["dead_hyperrefs"][:8])
                   + " — check_deck.py blocks delivery until they are fixed")
+        if result["missing_glyphs"]:
+            print(f"warning: {result['missing_glyphs']} characters are missing "
+                  "from the font and do not render; check_deck lists them")
         if bib is not None and bib.get("warning"):
             print(f"warning: {bib['warning']}")
     else:
