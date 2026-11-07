@@ -1171,6 +1171,57 @@ else
   ok "nonpositive compile timeout is rejected"
 fi
 
+echo "== engine choice and non-UTF-8 locales =="
+# A % !TEX program line picks the engine when --engine is not given.
+printf '%s\n' '% !TEX program = pdflatex' '\documentclass{beamer}' \
+  '\input{glyphtounicode}' '\pdfgentounicode=1' '\begin{document}' \
+  '\begin{frame}{Engine directive}' 'Built with pdfLaTeX.' '\end{frame}' \
+  '\end{document}' > tests/_directive.tex
+DIRECTIVE_OUT=$(python3 skills/econ-slides/scripts/compile_deck.py tests/_directive.tex \
+    --build-dir tests/build-suite/directive 2>&1)
+DIRECTIVE_STATUS=$?
+if [ "$DIRECTIVE_STATUS" = "0" ] \
+    && [[ "$DIRECTIVE_OUT" == *"engine: pdflatex (from % !TEX program)"* ]]; then
+  ok "a % !TEX program = pdflatex line selects pdfLaTeX"
+else
+  bad "engine directive [$DIRECTIVE_STATUS]"
+fi
+# An explicit --engine still wins, and the hint names the pdfTeX primitive.
+FORCED_OUT=$(python3 skills/econ-slides/scripts/compile_deck.py tests/_directive.tex \
+    --engine xelatex --build-dir tests/build-suite/directive-xe --json 2>/dev/null)
+FORCED_STATUS=$?
+if [ "$FORCED_STATUS" = "1" ] && python3 -c '
+import json,sys
+r=json.load(sys.stdin)
+raise SystemExit(0 if not r["ok"] and r["engine"]=="xelatex"
+                 and r["engine_source"]=="flag"
+                 and "pdfTeX-only primitive" in r["hint"]
+                 and "--engine pdflatex" in r["hint"] else 1)' <<<"$FORCED_OUT"; then
+  ok "--engine overrides the directive and the hint names a pdfTeX-only primitive"
+else
+  bad "explicit engine or pdfTeX-primitive hint [$FORCED_STATUS]"
+fi
+rm -f tests/_directive.tex
+
+# TeX output is UTF-8 whatever the locale: a GBK locale and a CJK folder name
+# used to crash the helper (exit 3) while decoding the engine's output.
+GBK=$(locale -a 2>/dev/null | grep -i -m1 -E '^zh_CN\.gbk$')
+if [ -n "$GBK" ]; then
+  cjk="tests/build-suite/讲稿"
+  rm -rf "$cjk"; mkdir -p "$cjk"
+  printf '%s\n' '\documentclass{beamer}' '\begin{document}' \
+    '\begin{frame}{Locale}' 'A deck in a CJK folder.' '\end{frame}' \
+    '\end{document}' > "$cjk/deck.tex"
+  if env -u PYTHONUTF8 LC_ALL="$GBK" python3 skills/econ-slides/scripts/compile_deck.py \
+       "$cjk/deck.tex" >/dev/null 2>&1; then
+    ok "compiles under a $GBK locale in a CJK-named folder"
+  else
+    bad "non-UTF-8 locale compile"
+  fi
+else
+  echo "  SKIP  non-UTF-8 locale compile (no zh_CN.GBK locale here)"
+fi
+
 echo "== plugin packaging stays consistent =="
 if python3 - <<'PY'
 import json

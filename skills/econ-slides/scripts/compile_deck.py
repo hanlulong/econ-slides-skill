@@ -2,9 +2,13 @@
 """Compile a Beamer deck or article script and triage what went wrong.
 
 Usage:
-    python3 scripts/compile_deck.py talk.tex [--engine xelatex] [--build-dir build]
-                                             [--themes-dir PATH] [--passes 2]
-                                             [--timeout 600]
+    python3 <skill-dir>/scripts/compile_deck.py talk.tex
+        [--engine xelatex|pdflatex|lualatex] [--build-dir build]
+        [--themes-dir PATH] [--passes 2] [--timeout 600] [--json]
+
+--engine defaults to the deck's ``% !TEX program = ...`` line (pdflatex,
+xelatex or lualatex, within its first 20 lines), else xelatex. An explicit
+--engine always wins.
 
 Runs the engine non-interactively, parses the log, and prints a compact
 human/machine-readable verdict: OK with page count, or the first real error
@@ -79,6 +83,52 @@ TRIAGE = [
     (r"! Dimension too large",
      "A length overflowed — usually a resizebox/includegraphics with a bad value."),
 ]
+
+
+ENGINES = ("xelatex", "lualatex", "pdflatex")
+# TeXShop/TeXstudio/VS Code style magic comment: % !TEX program = pdflatex
+# (also % !TEX TS-program = ...). Read only near the top of the file.
+TEX_PROGRAM_RE = re.compile(
+    r"^\s*%\s*!\s*TEX\s+(?:TS-)?program\s*=\s*(\S+)", re.I)
+DIRECTIVE_LINES = 20
+
+
+def engine_from_directive(text: str) -> tuple[str | None, str | None]:
+    """Read a ``% !TEX program = ...`` line from the first 20 lines.
+
+    Returns ``(engine, None)`` for pdflatex, xelatex or lualatex,
+    ``(None, value)`` for any other program (latexmk, pdflatexmk ...), and
+    ``(None, None)`` when there is no such line.
+    """
+    for line in text.splitlines()[:DIRECTIVE_LINES]:
+        match = TEX_PROGRAM_RE.match(line)
+        if match:
+            value = match.group(1)
+            engine = value.lower()
+            return (engine, None) if engine in ENGINES else (None, value)
+    return None, None
+
+
+# The context line TeX prints under an error (``l.12 \pdfgentounicode``)
+# ends with the offending control sequence.
+CONTEXT_LINE_RE = re.compile(r"^l\.\d+ (.*)$", re.M)
+
+
+def pdftex_only_primitive(log_text: str) -> str | None:
+    """Name the ``\\pdf...`` command behind an undefined-control-sequence error.
+
+    XeTeX and LuaTeX lack most pdfTeX primitives (\\pdfgentounicode,
+    \\pdfglyphtounicode, \\pdfminorversion ...), so such a deck needs pdfLaTeX.
+    """
+    log_text = unwrap_log(log_text)
+    error = re.search(r"^! Undefined control sequence\.", log_text, re.M)
+    if not error:
+        return None
+    context = CONTEXT_LINE_RE.search(log_text, error.end())
+    command = re.search(r"(\\[A-Za-z@]+)\s*$", context.group(1)) if context else None
+    if command and command.group(1).startswith("\\pdf"):
+        return command.group(1)
+    return None
 
 
 def installed_engine(engine: str) -> Path | None:
@@ -266,7 +316,8 @@ def run_bibliography(tool: str, tex: Path, build: Path, env: dict,
             run_env["BIBINPUTS"] = f"{build}{os.pathsep}" + run_env.get("BIBINPUTS", "")
     try:
         proc = subprocess.run(cmd, cwd=tex.parent, env=run_env,
-                              capture_output=True, text=True, timeout=timeout)
+                              capture_output=True, text=True, encoding="utf-8",
+                              errors="replace", timeout=timeout)
     except subprocess.TimeoutExpired:
         bib["warning"] = f"{tool} timed out after {timeout:g}s"
         return bib
@@ -306,8 +357,8 @@ def bibliography_tool(tex: Path) -> str | None:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("texfile", type=Path)
-    ap.add_argument("--engine", default="xelatex",
-                    choices=["xelatex", "lualatex", "pdflatex"])
+    ap.add_argument("--engine", default=None, choices=list(ENGINES),
+                    help="default: the deck's %% !TEX program line, else xelatex")
     ap.add_argument("--build-dir", type=Path, default=None,
                     help="output directory (default: <texdir>/build)")
     ap.add_argument("--themes-dir", type=Path, default=None,
@@ -335,6 +386,26 @@ def main() -> int:
     if not tex.is_file():
         return fail_early(f"{tex} not found",
                           "pass the path of the deck's .tex file")
+    # An explicit --engine wins; then the deck's own % !TEX program line.
+    engine_note = None
+    if args.engine:
+        engine_source = "flag"
+    else:
+        directive, unsupported = engine_from_directive(
+            tex.read_text(encoding="utf-8", errors="replace"))
+        if directive:
+            args.engine, engine_source = directive, "directive"
+        else:
+            args.engine, engine_source = "xelatex", "default"
+            if unsupported:
+                engine_note = (f"% !TEX program = {unsupported} is not "
+                               "supported; using xelatex (pass --engine to "
+                               "choose)")
+    if not args.json:
+        if engine_source == "directive":
+            print(f"engine: {args.engine} (from % !TEX program)")
+        if engine_note:
+            print(f"note: {engine_note}")
     if shutil.which(args.engine) is None:
         found = installed_engine(args.engine)
         if found:
@@ -381,7 +452,8 @@ def main() -> int:
     for index in range(passes):
         try:
             proc = subprocess.run(cmd, cwd=tex.parent, env=env, capture_output=True,
-                                  text=True, timeout=args.timeout)
+                                  text=True, encoding="utf-8", errors="replace",
+                                  timeout=args.timeout)
         except subprocess.TimeoutExpired:
             ok = False
             timed_out = f"{args.engine} timed out after {args.timeout:g}s"
@@ -399,7 +471,10 @@ def main() -> int:
     pdf_path = build / (tex.stem + ".pdf")
 
     result: dict = {"ok": ok and pdf_path.exists(), "pdf": str(pdf_path),
-                    "log": str(log_path)}
+                    "log": str(log_path), "engine": args.engine,
+                    "engine_source": engine_source}
+    if engine_note:
+        result["engine_note"] = engine_note
     if bib is not None:
         result["bibliography"] = bib
     if result["ok"]:
@@ -417,6 +492,14 @@ def main() -> int:
     else:
         err = find_error(log_text)
         result["error"], result["hint"] = err if err else ("unknown", "inspect the log")
+        primitive = (pdftex_only_primitive(log_text)
+                     if args.engine in ("xelatex", "lualatex") and err
+                     and err[0].startswith("! Undefined control sequence")
+                     else None)
+        if primitive:
+            result["hint"] += (f" This looks like a pdfTeX-only primitive "
+                               f"({primitive}): try --engine pdflatex, or "
+                               "remove it for XeLaTeX/LuaLaTeX.")
 
     if args.json:
         print(json.dumps(result, indent=2))

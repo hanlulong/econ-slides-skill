@@ -147,5 +147,50 @@ class CheckerUnitTest(unittest.TestCase):
         self.assertEqual(result["pages"], 23)
 
 
+class CompileDeckTest(unittest.TestCase):
+    def test_engine_directive(self):
+        from compile_deck import engine_from_directive
+        cases = {
+            "% !TEX program = pdflatex\n\\documentclass{beamer}": ("pdflatex", None),
+            "% !TEX program = xelatex\n": ("xelatex", None),
+            "%!TEX program=lualatex\n": ("lualatex", None),
+            "% !TEX TS-program = xelatex\n": ("xelatex", None),
+            "% !TeX Program = LuaLaTeX\n": ("lualatex", None),
+            "% !TEX program = latexmk\n": (None, "latexmk"),
+            "\n" * 24 + "% !TEX program = pdflatex\n": (None, None),
+            "\\documentclass{beamer}\n% just a comment\n": (None, None),
+        }
+        for text, expected in cases.items():
+            self.assertEqual(engine_from_directive(text), expected, text)
+
+    def test_pdftex_only_primitive(self):
+        from compile_deck import pdftex_only_primitive
+        log = ("! Undefined control sequence.\n"
+               "l.7 \\pdfglyphtounicode\n"
+               "                       {A}{0041}\n")
+        self.assertEqual(pdftex_only_primitive(log), "\\pdfglyphtounicode")
+        self.assertIsNone(pdftex_only_primitive(
+            "! Undefined control sequence.\nl.19 \\undefinedmacro\n"))
+        self.assertIsNone(pdftex_only_primitive("! Missing $ inserted.\n"))
+
+    def test_text_mode_subprocesses_name_an_encoding(self):
+        # text=True alone decodes TeX output in the locale's code page, which
+        # crashed under GBK on a UTF-8 log.
+        import ast
+        for path in sorted(SCRIPTS.glob("*.py")):
+            for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+                if not (isinstance(node, ast.Call)
+                        and isinstance(node.func, ast.Attribute)
+                        and node.func.attr == "run"
+                        and isinstance(node.func.value, ast.Name)
+                        and node.func.value.id == "subprocess"):
+                    continue
+                keywords = {k.arg: k.value for k in node.keywords}
+                text = keywords.get("text")
+                if isinstance(text, ast.Constant) and text.value is True:
+                    self.assertIn("encoding", keywords,
+                                  f"{path.name}:{node.lineno}")
+
+
 if __name__ == "__main__":
     unittest.main()
