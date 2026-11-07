@@ -1,0 +1,9 @@
+% Fixture: a modular deck whose literal-marker allowance sits two \input
+% levels down. TeX resolves nested-sections/marker from this file's folder,
+% so the checker must read it from there too.
+\documentclass[11pt,aspectratio=169]{beamer}
+\usepackage{econ-slides-house}
+
+\begin{document}
+\input{nested-sections/all}
+\end{document}

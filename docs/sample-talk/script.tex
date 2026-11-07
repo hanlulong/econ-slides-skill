@@ -1,6 +1,6 @@
 % Rehearsal script synchronized to conference-30min.tex.
 % Check:
-% python3 ../../scripts/check_script.py script.tex \
+% python3 ../../skills/econ-slides/scripts/check_script.py script.tex \
 %   --deck conference-30min.tex --slot-minutes 30
 \documentclass[11pt]{article}
 \usepackage[margin=0.78in,headheight=14pt]{geometry}
@@ -105,11 +105,14 @@
   firms from 2008 through 2019. That gives us a long panel in which the same
   firm can be followed before and after service reaches its municipality.
 
-  The first result is easy to interpret. In the years after local service
-  arrives, \ResultHeadlineSpoken. This is a sizeable difference for a change
-  in one piece of local infrastructure: the firm is producing more value from
-  the same labor input. The estimate remains close to that value when we
-  add firm controls, regional trends, or municipality-level clustering.
+  The first result compares each early rollout cohort only with places that
+  were still waiting. The answer is the same in each of the five waves shown:
+  \ResultHeadlineSpoken.
+  Firms are producing more value
+  from the same labor input. A pooled two-way regression summarizes the whole
+  rollout as \ResBaseline\ log points, about 3.4 percent. Because arrival is
+  staggered and the differences grow over time, that pooled number sits, by
+  eye, at the low end of the cohort comparisons.
 
   We then build a simple task-sourcing model to ask which firms should benefit
   most. Broadband lowers the cost of coordinating with a specialist at a
@@ -117,14 +120,14 @@
   can use the specialist. The data line up with that prediction. A
   one-standard-deviation increase in pre-rollout communication intensity adds
   \ResCommSDGap\ log points to the post-arrival difference, about one-fifth of
-  the headline association.
+  the pooled association.
 
   The contribution is to connect a place-based infrastructure change to a
-  within-firm organizational margin. The average result tells us the scale of
-  the productivity pattern. The model and the cross-firm comparison tell us
+  within-firm organizational margin. The cohort comparisons tell us the sign and
+  breadth of the productivity pattern. The model and the cross-firm comparison tell us
   where that pattern is strongest and why. Together they suggest that
   \ResultImplicationSpoken.
-  \Cue{Data link; headline result; task-sourcing prediction; organizational contribution.}
+  \Cue{Data link; cohort result and pooled 3.4 percent; task-sourcing prediction; contribution.}
 }
 
 \scriptframe{Roadmap}{0.3 min}{%
@@ -222,11 +225,11 @@
   the same firm moves differently when its municipality reaches a different
   point on the rollout clock.
 
-  The firms that are waiting provide the intuitive benchmark for firms that
-  have just received service. Because all municipalities eventually connect,
-  that benchmark changes over time. Early in the program there are many
-  not-yet-served places; near the end there are few. The regression combines
-  those timing comparisons into one summary coefficient.
+  The pooled regression mixes two kinds of comparisons. Some set newly served
+  firms against places still waiting; others use places served earlier as the
+  benchmark. When the difference grows with time since arrival, those second
+  comparisons pull the pooled coefficient down. So our main evidence compares
+  each cohort only with municipalities connected at least three years later.
 
   The key economic assumption is about the path without broadband. Earlier-
   and later-served municipalities should otherwise have followed similar
@@ -238,48 +241,50 @@
   We examine that issue directly with event time. Rather than collapse all
   post-arrival years into one indicator, the event study shows how productivity
   evolves in each year before and after service. The pre-arrival coefficients
-  tell us whether the cohorts were already moving differently as arrival
-  approached. The post-arrival coefficients show whether the trajectory
+  check whether the cohorts were already moving differently as arrival
+  approached; a flat pre-period would not prove the assumption, but a slope
+  is a warning. The post-arrival coefficients show whether the trajectory
   changes or continues.
 
   Finally, service timing is assigned at the municipality level. Firms in the
   same municipality can share local shocks, so the most informative standard
-  errors allow their outcomes to move together. The results table reports that
-  municipality-level clustering. I will use the table for scale and the event
-  study for the shape of the timing pattern.
+  errors allow their outcomes to move together. The pooled table in the
+  appendix reports that municipality-level clustering. I will use the cohort
+  comparisons for scale and the event study for the shape of the timing
+  pattern.
   \Cue{Within-firm timing comparison; fixed effects; path without broadband; clustering.}
 }
 
-\scriptframe{Labor productivity is about 3.4\% higher after arrival}{2.2 min}{%
-  Start with the first row. Every column uses the full panel and includes firm
-  and year effects. The colored entry in the first column is \ResBaseline\ log
-  points. At this magnitude, that is naturally read as about 3.4 percent higher
-  real value added per worker in the post-arrival years.
+\scriptframe{Each \ResCohortYears\ cohort is more productive after arrival}{2.2 min}{%
+  This figure is the paper's cleanest timing comparison. Each bar is one
+  rollout cohort, from 2011 through 2015, compared only with municipalities
+  that were connected at least three years later. The paper does not state the
+  event window. These are clean comparisons only if that window ends before
+  the later places connect. On that reading, no place that already has
+  service serves as a control.
 
-  To make the comparison concrete, take the same firm before and after local
-  service arrives and use firms elsewhere in the rollout to net out the common
-  year. The post-arrival observations are associated with about 3.4 percent
-  more output per worker. That is the economic object behind the coefficient.
+  Read the bars from left to right. Each of the five cohorts shown is above
+  zero. The bars differ in height, but the sign is the same in each wave. Firms in newly
+  connected municipalities are more productive than firms in places still
+  waiting for service. The
+  later 2016 to 2018 cohorts do not appear because no municipality was
+  connected three years after them.
 
-  The next two columns ask how much that scale changes when we alter the
-  controls. Adding firm-level covariates moves the estimate only slightly, from
-  \ResBaseline\ to \ResControls. Allowing each region to have its own linear
-  trend lowers it to \ResTrends. The point is not the last decimal place. The
-  different ways of absorbing observed firm changes and smooth regional trends
-  all leave us with a difference of roughly three percent or a little more.
+  The intervals are wide for single cohorts, so I would not rank the waves.
+  What matters is that the sign does not depend on one early group, and that
+  is why I treat this comparison as the main evidence.
 
-  The final column changes the uncertainty calculation. It keeps the point
-  estimate at \ResMunicipalCluster\ but clusters firms by municipality, which is
-  where the service date varies. The standard error rises from
-  \ResBaselineSE\ to \ResMunicipalClusterSE. That is the comparison I would use
-  for inference because firms in the same place can share local shocks.
+  How does this relate to a standard regression? A pooled two-way estimate
+  with firm and year effects gives \ResBaseline\ log points, about 3.4
+  percent, which by eye sits at the low end of these bars. That is what a pooled
+  coefficient does when arrival is staggered and differences grow with time:
+  it mixes in comparisons against already-served places. The table is in the
+  appendix, together with the municipality-clustered standard errors.
 
-  So this table does two jobs. It tells us that the post-arrival productivity
-  difference is economically meaningful, and it shows that its scale is not
-  coming from one control set. What the table cannot show is whether the
-  difference begins only when broadband arrives. For that, we need to open up
-  the timing and look at the years on both sides of arrival.
-  \Cue{Read the first row; 3.4 percent in levels; controls preserve scale; municipal SE; event time next.}
+  What the cohort bars cannot show is whether the difference begins only when
+  broadband arrives. For that, we need to open up the timing and look at the
+  years on both sides of arrival.
+  \Cue{One bar per 2011--2015 cohort; later-connected controls; all positive; pooled 0.034 at the low end; event time next.}
 }
 
 \scriptframe{Productivity rises before and after broadband arrives}{2.4 min}{%
@@ -295,9 +300,11 @@
   productivity is already moving before the backbone becomes commercially
   available.
 
-  After zero, the coefficients continue to rise. That is why the average
-  post-arrival coefficient in the table is positive. But the post-period begins
-  on a trajectory that was already underway. The clean timing story would have
+  After zero, the coefficients continue to rise, and every post-arrival point
+  lies above the pooled \ResBaseline\ from the two-way table. But the
+  post-period begins on a trajectory that was already underway. In a staggered
+  two-way event study the leads can also pick up effects from other periods, so
+  I read the pre-period slope as a warning rather than a precise measure. The clean timing story would have
   shown the earlier and later cohorts moving together before arrival and then
   separating afterward. That is not the pattern here.
 
@@ -385,7 +392,7 @@
   standard deviation of communication intensity is \ResCommSD. Multiply that by
   \ResInteraction, and the post-arrival difference is \ResCommSDGap\ log points
   larger. In percentage terms, that is about 0.64 percentage points. Compared
-  with the main 3.4 percent difference, it is roughly one-fifth as large.
+  with the pooled 3.4 percent difference, it is roughly one-fifth as large.
 
   Think again about the two firms in the model. Moving one standard deviation
   toward the communication-intensive firm does not replace the average result;
@@ -404,11 +411,12 @@
 
 \begin{samepage}
 \scriptframe{Conclusion}{1.2 min}{%
-  Let me close with the paper's main message. Labor productivity is about 3.4
-  percent higher after broadband reaches a municipality. The difference is
-  larger for firms that entered the rollout with more communication-intensive
+  Let me close with the paper's main message. Each of the first five rollout
+  cohorts is more productive after broadband arrives than places connected
+  later; the pooled summary, about 3.4 percent, sits by eye at the low end. The difference
+  is larger for firms that entered the rollout with more communication-intensive
   work: one standard deviation adds \ResCommSDGap\ log points, about one-fifth
-  of the main difference.
+  of the pooled difference.
 
   The model explains why that cross-firm pattern is economically meaningful.
   Better connectivity can make a distant specialist practical and move tasks
@@ -416,12 +424,12 @@
   gain when that coordination cost falls.
 
   The broader contribution is to connect public infrastructure with the
-  organization of production, not only access. That is why \ResultImplicationSpoken. More generally, the value of a network
+  organization of production, not only access. In the data, \ResultImplicationSpoken. More generally, the value of a network
   depends on which production constraint it relaxes and which firms face that
   constraint most strongly. This broadens the policy question from coverage alone to
   the organizational frictions that determine whether firms can turn a
   connection into higher productivity.
-  \Cue{3.4 percent; larger for communication-intensive firms; organization; broader implication.}
+  \Cue{Each 2011--2015 cohort higher; larger for communication-intensive firms; organization; broader implication.}
 }
 \end{samepage}
 
@@ -437,7 +445,7 @@
   \item \textbf{Broadband reached every municipality in eight waves} --- The rollout gives us a simple piece of timing variation.
   \item \textbf{Data} --- We build the analysis from three administrative sources.
   \item \textbf{The design follows firms as local backbone service arrives} --- The design asks how a firm's productivity changes when local service arrives.
-  \item \textbf{Labor productivity is about 3.4\% higher after arrival} --- Start with the first row.
+  \item \textbf{Each \ResCohortYears\ cohort is more productive after arrival} --- This figure is the paper's cleanest timing comparison.
   \item \textbf{Productivity rises before and after broadband arrives} --- Now open up the timing.
   \item \textbf{The model predicts larger gains for communication-intensive firms} --- The model puts one organizational choice at the center of the paper.
   \item \textbf{The broadband association is larger for communication-intensive firms} --- This table takes the prediction directly to the data.
@@ -468,12 +476,19 @@
   productivity is stable before the resulting timing change.
 }
 
-\scriptframe{The placebo table and prose point in different directions}{if asked}{%
+\scriptframe{The pooled two-way estimate sits at the low end}{if asked}{%
+  Table 2 reports \ResBaseline\ log points, and \ResTrends\ to \ResControls\
+  with controls or regional trends. A pooled coefficient also compares against
+  places already served, which pulls it down when differences grow. So the
+  cohort comparisons carry the headline.
+}
+
+\scriptframe{Rounded placebo entries cannot confirm the prose}{if asked}{%
   Table 3 reports a placebo coefficient of \ResPlacebo\ with a standard error
-  of \ResPlaceboSE. Using the rounded entries, that is about two reported
-  standard errors below zero. The prose nevertheless calls it statistically
-  indistinguishable from zero, and the source supplies no exact p-value or
-  confidence interval. I therefore do not read the placebo as a clean
+  of \ResPlaceboSE. Using the rounded entries, that is about two standard
+  errors below zero, but rounding allows anything from about 1.4 to 3. The
+  prose calls it statistically indistinguishable from zero, and the source
+  supplies no exact p-value or confidence interval. I therefore do not read the placebo as a clean
   validation or rejection of the design.
 }
 

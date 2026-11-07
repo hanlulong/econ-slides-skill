@@ -1,0 +1,21 @@
+% biblatex with backend=bibtex: biblatex writes <stem>-blx.bib into the
+% build folder and BibTeX must find it there, while \addbibresource{../x.bib}
+% still resolves from this source folder.
+\documentclass[11pt,aspectratio=169]{beamer}
+\usepackage{econ-slides-house}
+\usepackage[backend=bibtex]{biblatex}
+\addbibresource{../bib-test.bib}
+
+\begin{document}
+
+\begin{frame}{Related work}
+  \begin{itemize}
+    \item Rollout timing follows \cite{fixtureRollout2021}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{References}
+  \printbibliography
+\end{frame}
+
+\end{document}

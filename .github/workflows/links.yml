@@ -1,0 +1,28 @@
+name: Link check
+
+on:
+  schedule:
+    - cron: "23 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lychee:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check links in Markdown files
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # Some university pages (Shapiro's Harvard page among them) answer
+          # automated clients with 403 or 429; check those by hand.
+          args: >-
+            --no-progress
+            --max-retries 2
+            --accept 200..=299,403,429
+            "./**/*.md"
+          fail: true
+          jobSummary: true

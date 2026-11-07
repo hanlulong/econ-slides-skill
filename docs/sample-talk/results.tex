@@ -32,16 +32,23 @@
 \newcommand{\ResCommSD}{0.20} % Table 1, paper p. 5.
 \newcommand{\ResCommSDGap}{0.0064} % Derived: 0.032 x 0.20; Tables 1 and 4, pp. 5 and 9.
 
-\newcommand{\ResPlacebo}{-0.004} % Table 3, paper p. 8; log points.
+\newcommand{\ResPlacebo}{\ensuremath{-0.004}} % Table 3, paper p. 8; log points.
 \newcommand{\ResPlaceboSE}{0.002} % Table 3, paper p. 8.
 \newcommand{\ResDropEarly}{0.037} % Table 5, col. (3), paper p. 9.
 \newcommand{\ResDropEarlySE}{0.002} % Table 5, col. (3), paper p. 9.
 \newcommand{\ResPolicyValue}{410 million euros} % Section 7, paper pp. 8--9.
 \newcommand{\ResPolicyCost}{2.3 billion euros} % Section 7, paper p. 9.
 
-\newcommand{\ResultHeadlineSlide}{Labor productivity is about 3.4\% higher after backbone availability.}
-\newcommand{\ResultHeadlineSpoken}{the same firm produces about 3.4 percent more real value added per worker}
-\newcommand{\ResultSupportSlide}{A one-SD increase in communication intensity adds \ResCommSDGap\ log points, about one-fifth of the main difference.}
-\newcommand{\ResultSupportSpoken}{a one-standard-deviation increase in communication intensity adds about 0.0064 log points, or one-fifth of the main difference}
-\newcommand{\ResultImplicationSlide}{digital infrastructure may matter most where communication frictions bind.}
-\newcommand{\ResultImplicationSpoken}{digital infrastructure may matter most where communication frictions bind}
+% Headline: the cohort comparisons in Figure 3, p. 8, each against municipalities
+% connected at least three years later (2011--2015 cohorts only; signs read from
+% the figure, no bar values read from pixels). The paper states no event
+% window, so the controls are clean only if it ends before they connect. The pooled two-way 0.034 is the
+% regression-weighted summary (Table 2, col. 1).
+\newcommand{\ResCohortYears}{2011--2015} % Figure 3 cohorts, paper p. 8.
+\newcommand{\ResultHeadlineSlide}{Each \ResCohortYears\ rollout cohort is more productive after backbone arrival.}
+\newcommand{\ResultHeadlineSpoken}{each of the first five rollout cohorts is more productive after the backbone arrives than municipalities connected at least three years later}
+% Implication tied to what is measured (2008 communication intensity), with the
+% model as the interpretation. The ledger status of the evidence is
+% "descriptive only", so no causal verb and no effect noun.
+\newcommand{\ResultImplicationSlide}{the differences track communication intensity, as the model predicts.}
+\newcommand{\ResultImplicationSpoken}{the differences track communication intensity, as the model predicts}

@@ -11,9 +11,9 @@
 
 *中英文如有出入，以[英文版](./README.md)为准。*
 
-| 核心结论页 | 主结果表格页 |
+| 核心结论页 | 主结果页 |
 |---|---|
-| ![AI 生成 Beamer 演讲中的核心结论页：主结果、一个支撑性的异质性模式和由此得出的含义](docs/images/sample-punchline.png) | ![主结果页：Table 2 中四个精确估计值、一个高亮单元格和一句简洁的经济学解读](docs/images/sample-mainresult.png) |
+| ![AI 生成 Beamer 演讲中的核心结论页：主结果、一个支撑性的异质性模式和由此得出的含义](docs/images/sample-punchline.png) | ![主结果页：交错推行下论文的逐批次（cohort）比较，每一批都与之后才接通的城市比较，并附一句解读：结论的符号不取决于任何单独一批](docs/images/sample-mainresult.png) |
 
 *这两页由本技能对一篇演示论文冷启动生成——完整的[示例幻灯片（PDF）](docs/sample-talk/conference-30min.pdf)与[演讲讲稿（PDF）](docs/sample-talk/script.pdf)。*
 
@@ -24,7 +24,7 @@
 ## 它能做什么
 
 - **论文 → 演讲。** 给它一份稿件和一个 15 到 90 分钟的总时长，它会构建一条带领听众走完全程的最短路径：问题、答案、必要的实证或理论铺垫、证据或命题、解读、含义。顺序和每页的结构始终取决于论文本身。
-- **演讲讲稿。** 生成可打印的排练讲稿：逐页对应幻灯片标题、从开场到正文全程计时、与真实的视觉分步展示同步，并附有备用的问答应对模块。默认为提问保留总时长的 20–25%，绝不为凑时长注水。
+- **演讲讲稿。** 生成可打印的排练讲稿：逐页对应幻灯片标题、从开场到正文全程计时、与真实的视觉分步展示同步，并附有备用的问答应对模块。提问时间按体裁预留（会议报告为总时长的 20–25%，研讨会和求职报告为 30–40%），只有超时才判为不通过，绝不为凑时长注水。
 - **评论人（discussant）幻灯片。** 作为一等公民对待、而非附带功能：一份面向听众校准的论文摘要，加上最有分量的几条点评（每条自带标题），每条都落在具体建议上——遵循达拉斯联储与 ASHEcon 的评论人规范。
 - **修改现有幻灯片。** 增加主题页、附录、讨论内容或整体打磨，同时把已编译的目标幻灯片当作设计契约：工作流会逆向识别并保留其 Beamer 风格，而不是套用本技能自带的主题。
 - **改编演讲场合。** 同一篇论文的 15 分钟版和 90 分钟版是两场不同的演讲，不是同一套幻灯片讲快讲慢。本技能以完整的论证单元为单位进行保留、压缩、移动、删减或深化，而不是把每页等比缩放。
@@ -35,11 +35,11 @@
 2. **论断与数值可溯源。** 起草大纲之前，技能会将行文与处理分配规则、图表、表注、单位和代数逐一核对。每个待用的标题论断被归类为"有支撑、描述性、有冲突、排除"之一；每个量级都追溯到其所在表格和页码。讲稿不可能把"相关"说成"提高"。
 3. **渲染行数纪律。** 只要表意允许，标题和要点会改写到渲染后单行以内。确实无法压缩且可读的换行以 PDF 实际效果为准判断，而不是机械否决；整页缩字号永远不是第一选择。
 4. **图表优先用原件。** 优先复用或裁剪清晰的原文图表；其次使用幻灯片原生表格、公式或简洁文字。只有必要时才基于可追溯的输入重建或新建图形，并逐一目检。回归表会精简到演讲真正需要的行和列。
-5. **真实的验证闭环。** `compile_deck.py` 负责编译并分诊错误；`check_deck.py` 拦截客观缺陷——超出页边、严重溢出、失效链接、导航元素碰撞——同时把换行、密度、分栏、强调和留白列为人工复核项。对局部修改，其基线模式能区分"继承的旧问题"与"新引入的客观退化"，且不豁免视觉比对。`check_script.py` 审核标题顺序、总时长、问答分离、口语风格和真实的点击同步。两份 PDF 都要经过逐页目检。
+5. **真实的验证闭环。** `compile_deck.py` 负责编译（幻灯片含参考文献时自动运行 BibTeX 或 Biber）并分诊错误；`check_deck.py` 拦截客观缺陷——超出页边、严重溢出、失效链接、未定义的引用或交叉引用（`[?]`、`??`）、导航元素碰撞——同时把换行、密度、分栏、强调和留白列为人工复核项。对局部修改，其基线模式能区分"继承的旧问题"与"新引入的客观退化"，且不豁免视觉比对。`check_script.py` 审核标题顺序、总时长、问答分离、口语风格和真实的点击同步。两份 PDF 都要经过逐页目检。
 
 ## 效果展示
 
-页面顶部的两页幻灯片来自交错推行（staggered-rollout）[示例演讲](docs/sample-talk/)，按 30 分钟总时长构建；其配套讲稿约 22.5 分钟，为提问留出约四分之一的时间。
+页面顶部的两页幻灯片来自交错推行（staggered-rollout）[示例演讲](docs/sample-talk/)，按 30 分钟总时长构建；其配套讲稿约 23 分钟，为提问留出约四分之一的时间。
 
 **[浏览完整的示例基准 →](docs/sample-talk/)**：包含幻灯片与讲稿的 PDF 和 LaTeX 源文件，以及一份结构规划。它使用来自 [econ-paper-review-skill](https://github.com/hanlulong/econ-paper-review-skill) 的虚构演示论文；来源说明见示例的 [README](docs/sample-talk/README.md)。
 
@@ -47,48 +47,130 @@
 
 ## 安装
 
-需要 Python 3.10+、带 XeLaTeX 的 TeX 发行版（TeX Live / MacTeX / MiKTeX），以及 PyMuPDF（`python3 -m pip install --user pymupdf`；若你的 Python 受系统管理限制，请装入虚拟环境）。
+需要装有 PyMuPDF 的 Python 3.10+，以及带 XeLaTeX 的 TeX 发行版（TeX Live / MacTeX / MiKTeX）。如果 `python3 -c "import pymupdf"` 已能运行，Python 一侧无需再装任何东西；否则请把 PyMuPDF 装进一个专用虚拟环境（当 Python 受系统管理限制时，PEP 668 同样会拦截 `pip install --user`），并用该环境的 `python` 运行技能脚本；也可以用 `uv run --with pymupdf python ...`。全新安装的 PyMuPDF 2.x 还会附带 onnxruntime 和 numpy（约 265 MB）；如需更小的虚拟环境，脚本同样支持 `pymupdf>=1.26,<2`。
 
 将以下内容粘贴到 Claude Code 或 Codex（安装指令面向智能体，请保持英文原文）：
 
 ```text
 Help me install the econ-slides skill from
-https://github.com/hanlulong/econ-slides-skill: clone it, then link the
-folder as an Agent Skill — into ~/.claude/skills/econ-slides for Claude Code
-and ~/.agents/skills/econ-slides for Codex (whichever of the two I use).
-Verify python3 and xelatex are available and pymupdf is installed (use
---user or a venv if pip is externally managed), then confirm the skill
-loads.
+https://github.com/hanlulong/econ-slides-skill: clone it to a stable location,
+then link its skills/econ-slides folder as an Agent Skill — into
+~/.claude/skills/econ-slides for Claude Code and ~/.agents/skills/econ-slides
+for Codex (whichever of the two I use).
+Verify that xelatex is available, that `python3 --version` is 3.10 or newer,
+and that python3 can import pymupdf (PyMuPDF). If xelatex is missing, tell me
+which TeX distribution to install (MacTeX, TeX Live or MiKTeX). If the Python
+version or the PyMuPDF check fails, create ~/.venvs/econ-slides with a Python
+3.10+ and install the repo's requirements.txt there (for example
+`uv venv -p 3.12 ~/.venvs/econ-slides && uv pip install -p ~/.venvs/econ-slides -r requirements.txt`),
+and tell me to run the skill's scripts with that venv's python. Then confirm
+the skill loads.
 ```
+
+也可以从 [OpenEcon.ai 插件市场](https://github.com/OpenEconAI/plugins)以插件形式安装。
+
+Claude Code：
+
+```text
+/plugin marketplace add OpenEconAI/plugins
+/plugin install econ-slides@openeconai
+```
+
+Claude Code 2.1.275 及以上版本可用 `/plugin install econ-slides --marketplace OpenEconAI/plugins` 一步完成。
+
+Codex：
+
+```bash
+codex plugin marketplace add OpenEconAI/plugins
+codex plugin add econ-slides@openeconai
+```
+
+每个客户端只用一种安装方式：安装插件前请先删除手动创建的链接。插件中的技能带命名空间，因此在 Claude Code 中以 `/econ-slides:econ-slides` 调用；普通请求同样会触发它。
+
+<details>
+<summary>从 0.1.x 升级</summary>
+
+0.2.0 起，技能从仓库根目录移到了 `skills/econ-slides/`。指向克隆根目录的旧链接在 `git pull` 之后仍然可用，但 Claude Code 现在会把它作为插件式文件夹加载（`econ-slides@skills-dir`，以 `/econ-slides:econ-slides` 调用）。如需保留不带前缀的 `/econ-slides`，请把 `~/.claude/skills/econ-slides` 重新链接到 `<clone>/skills/econ-slides`。在 Codex 中，无论链接指向哪个文件夹，手动链接都会显示为 `econ-slides:econ-slides`，因为克隆目录带有插件清单。v0.1.x 曾让 Codex 用户链接 `~/.codex/skills/econ-slides`，Codex 至今仍会加载该目录：安装插件前请删除这个链接（或把它移到 `~/.agents/skills`），否则 Codex 会把技能列出两次。
+
+</details>
+
+<details>
+<summary>更新或卸载</summary>
+
+完成以下任一步骤后，请开启新的智能体会话。
+
+插件安装：
+
+```bash
+# Claude Code（或在会话中使用 /plugin）
+claude plugin marketplace update openeconai
+claude plugin update econ-slides@openeconai
+claude plugin uninstall econ-slides@openeconai
+
+# Codex
+codex plugin marketplace upgrade openeconai
+codex plugin remove econ-slides@openeconai
+```
+
+手动安装或粘贴提示安装（链接指向你的克隆目录，所以请勿移动克隆目录）：
+
+```bash
+git -C /path/to/econ-slides-skill pull                      # 更新
+rm -f ~/.claude/skills/econ-slides ~/.agents/skills/econ-slides ~/.codex/skills/econ-slides # 卸载：只删除链接
+rm -rf /path/to/econ-slides-skill ~/.venvs/econ-slides       # 可选：删除克隆目录和虚拟环境
+```
+
+在 Windows 上，`cmd /c rmdir "$env:USERPROFILE\.claude\skills\econ-slides"`（`.agents\skills\econ-slides` 以及 v0.1.x 的 `.codex\skills\econ-slides` 同理）只删除目录联接，不会动到克隆目录；不要对目录联接使用 `Remove-Item -Recurse`。
+
+</details>
 
 <details>
 <summary>手动安装</summary>
+
+请克隆到一个固定位置：下面的链接指向这个克隆目录，移动或删除它会使安装失效。
 
 macOS / Linux：
 
 ```bash
 git clone https://github.com/hanlulong/econ-slides-skill.git
-python3 -m pip install --user pymupdf   # 若 pip 受系统管理限制，请装入虚拟环境
+
+# 仅当 `python3 -c "import pymupdf"` 失败时才需要：把 PyMuPDF 装进专用虚拟环境
+python3 -m venv ~/.venvs/econ-slides
+~/.venvs/econ-slides/bin/python -m pip install -r econ-slides-skill/requirements.txt
 
 # Claude Code（全局技能目录）
-ln -s "$(pwd)/econ-slides-skill" ~/.claude/skills/econ-slides
+mkdir -p ~/.claude/skills
+ln -s "$(pwd)/econ-slides-skill/skills/econ-slides" ~/.claude/skills/econ-slides
 
 # Codex（共享的 agent-skills 目录）
 mkdir -p ~/.agents/skills
-ln -s "$(pwd)/econ-slides-skill" ~/.agents/skills/econ-slides
+ln -s "$(pwd)/econ-slides-skill/skills/econ-slides" ~/.agents/skills/econ-slides
 ```
 
 Windows（PowerShell——使用 `python` 而非 `python3`）：
 
 ```powershell
 git clone https://github.com/hanlulong/econ-slides-skill.git
-python -m pip install --user pymupdf
-New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\econ-slides" -Target "$PWD\econ-slides-skill"
+# 仅当 `python -c "import pymupdf"` 失败时才需要：把 PyMuPDF 装进专用虚拟环境
+python -m venv "$env:USERPROFILE\.venvs\econ-slides"
+& "$env:USERPROFILE\.venvs\econ-slides\Scripts\python.exe" -m pip install -r econ-slides-skill\requirements.txt
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\skills" | Out-Null
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\econ-slides" -Target "$PWD\econ-slides-skill\skills\econ-slides"
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.agents\skills" | Out-Null
-New-Item -ItemType Junction -Path "$env:USERPROFILE\.agents\skills\econ-slides" -Target "$PWD\econ-slides-skill"
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.agents\skills\econ-slides" -Target "$PWD\econ-slides-skill\skills\econ-slides"
 ```
 
-两个客户端读取同一份 `SKILL.md`；任何能读取它的智能体都能使用本技能。脚本为纯 Python（全程 pathlib，TeX 路径使用 `os.pathsep`），可在 macOS、Windows 和 Linux 上运行；`tests/run-tests.sh` 需要 bash（Windows 上可用 Git Bash 或 WSL）。
+使用虚拟环境时，请以 `~/.venvs/econ-slides/bin/python <skill-dir>/scripts/...` 运行脚本（Windows：`...\Scripts\python.exe`），或告诉智能体哪个解释器装有 PyMuPDF。
+
+如果使用精简版 TeX（BasicTeX、TinyTeX 或其他 `scheme-basic` 安装），请补装内置主题、模板和示例用到的宏包（若 TeX 目录归系统所有，请加 `sudo`）：
+
+```bash
+tlmgr install xetex beamer translator pgf xcolor appendixnumberbeamer booktabs \
+  multirow threeparttable tcolorbox environ trimspaces needspace setspace \
+  microtype mathpazo palatino fontname sansmathaccent koma-script
+```
+
+两个客户端读取同一份 `skills/econ-slides/SKILL.md`；任何能读取它的智能体都能使用本技能。脚本为纯 Python（全程 pathlib，TeX 路径使用 `os.pathsep`），可在 macOS、Windows 和 Linux 上运行；`tests/run-tests.sh` 需要 bash（Windows 上可用 Git Bash 或 WSL）。
 
 </details>
 
@@ -103,7 +185,8 @@ Use the econ-slides skill to prepare exactly 20 minutes of speaking; the
 organizer schedules questions separately.
 Use the econ-slides skill to make a 60-minute pure-theory seminar talk.
 Use the econ-slides skill to make the talk and a printable speaker script.
-Use the econ-slides skill to build my discussion of the attached paper for a 15-minute total session.
+Use the econ-slides skill to build my discussion of the attached paper for a
+7-minute discussant slot.
 Use the econ-slides skill to turn my 90-minute seminar deck into a 30-minute
 total-session version for SED while preserving its Beamer style.
 Use the econ-slides skill to add slides on the mechanism and a linked appendix
@@ -123,37 +206,44 @@ to my existing deck without restyling it.
 | `econ-slides-boxed` | 深蓝标题栏、结构化区块 | 论文评论、政策场合 |
 | `econ-slides-compat` | **你喜欢的任何 Beamer 标准主题** | Madrid、metropolis、CambridgeUS、机构主题 |
 
-想用标准主题新建幻灯片？先 `\usetheme{Madrid}` 再 `\usepackage{econ-slides-compat}`，即可保留原有外观并获得语义接口。修改机构或个人的现有幻灯片？保留其原有导言区、编译引擎、宏、间距和视觉语言。详见 [themes/README.md](themes/README.md)。
+想用标准主题新建幻灯片？先 `\usetheme{Madrid}` 再 `\usepackage{econ-slides-compat}`，即可保留原有外观并获得语义接口。修改机构或个人的现有幻灯片？保留其原有导言区、编译引擎、宏、间距和视觉语言。详见 [skills/econ-slides/themes/README.md](skills/econ-slides/themes/README.md)。
 
 ## 仓库结构
 
 ```
-SKILL.md                 工作流：接收 → 精读 → 规划 → 起草 → 验证 → 交付
-references/
-  talk-structures.md     可调整的听众路径与 15–90 分钟时间预算
-  discussant.md          论文评论体裁：骨架、时间预算、语气规则
-  slide-rules.md         渲染版面规范：标题、间距、数学、颜色
-  beamer-layout-mechanics.md
-                         源码修改如何改变编译后的版面
-  existing-deck-workflow.md
-                         在不改变风格的前提下增补、打磨、评论或改编
-  exhibit-surgery.md     回归表 → 幻灯片表格；图形；数值溯源
-  source-integrity.md    论断↔证据台账；识别策略、模型与政策核查
-  speaker-script.md      计时、口语表达、点击同步、问答与可打印质检
-  style-guide.md         主题、文件工程、构建与交付规范
-themes/                  三套内置外观 + 标准主题兼容适配器
-templates/               可选的实证、理论、评论与讲稿起点模板
-scripts/
-  compile_deck.py        XeLaTeX 编译循环与错误分诊
-  check_deck.py          渲染版面审核：硬性拦截项 + 评分
-  check_script.py        幻灯片/讲稿同步、计时、口语风格与点击审核
-  crop_figure.py         无独立图形文件时裁剪原文图形
-tests/                   跨主题渲染 + 缺陷幻灯片/讲稿反例
+.claude-plugin/plugin.json   Claude Code 插件清单
+.codex-plugin/plugin.json    Codex 插件清单
+skills/econ-slides/          技能本体（手动安装时链接这个文件夹）
+  SKILL.md                   工作流：接收 → 精读 → 规划 → 起草 → 验证 → 交付
+  references/
+    talk-structures.md       可调整的听众路径与按体裁区分的 15–90 分钟时间预算
+    discussant.md            论文评论体裁：骨架、常见发言时长、语气规则
+    slide-rules.md           渲染版面规范：标题、间距、数学、颜色
+    beamer-layout-mechanics.md
+                             源码修改如何改变编译后的版面
+    existing-deck-workflow.md
+                             在不改变风格的前提下增补、打磨、评论或改编
+    exhibit-surgery.md       回归表 → 幻灯片表格；图形；数值溯源
+    source-integrity.md      论断↔证据台账；识别策略、模型与政策核查
+    design-checks.md         DiD、RD、IV、shift-share、合成控制与 RCT 幻灯片必须呈现的内容
+    speaker-script.md        计时、口语表达、点击同步、问答与可打印质检
+    style-guide.md           主题、文件工程、构建与交付规范
+  themes/                    三套内置外观 + 标准主题兼容适配器
+  templates/                 可选的实证、理论、评论与讲稿起点模板
+  scripts/
+    compile_deck.py          XeLaTeX 编译循环：BibTeX/Biber 与错误分诊
+    check_deck.py            渲染版面审核：硬性拦截项 + 评分
+    check_script.py          幻灯片/讲稿同步、计时、口语风格与点击审核
+    crop_figure.py           无独立图形文件时裁剪原文图形
+tests/                       跨主题渲染 + 缺陷幻灯片/讲稿反例
+evals/                       claude plugin eval 的触发测试用例
+docs/sample-talk/            交错推行示例：幻灯片与讲稿
+requirements.txt             脚本所需的 PyMuPDF
 ```
 
 ## 它不做什么
 
-它不会代写论文内容，不会编造材料中不存在的数值，不会承诺论文没有的结果。它也不会把文献综述放上幻灯片——所有演讲方法论文献在这一点上意见一致。
+它不会代写论文内容，不会编造材料中不存在的数值，不会承诺论文没有的结果。它也不会在演讲主线中安排文献综述部分：各指南在这一点上一致（Cochrane：“You don't need any literature review or motivation in a seminar”），本技能改为说明相对最接近文献的边际贡献（Piazzesi）。
 
 ## 相关项目
 
@@ -163,7 +253,7 @@ tests/                   跨主题渲染 + 缺陷幻灯片/讲稿反例
 
 ## 致谢
 
-演讲方法规则综合了以下公开指南：[Jesse Shapiro](https://shapiro.scholars.harvard.edu/notes-and-lectures)、Rachael Meager、[Paul Goldsmith-Pinkham](https://paulgp.com/beamer_tips.pdf)、[John Cochrane](https://faculty.wcas.northwestern.edu/mdo738/teaching/cochrane.pdf)、Dick Startz、[Marc Bellemare](https://profiles.shsu.edu/dpg006/present.htm)、Monika Piazzesi、Alex Tabarrok、David Evans、Darren Lubotsky、Donald Davis、Keith Head，以及达拉斯联储和 ASHEcon 的评论人指南。验证方法借鉴了 [beamer-skill](https://github.com/Noi1r/beamer-skill)（PDF 渲染目检）和 [Pedro Sant'Anna 的工作流](https://github.com/pedrohcgs/claude-code-my-workflow)（可执行的质量关卡）；TikZ 定位规则改编自 Scott Cunningham 的 MixtapeTools。实现为原创；公开指南仅作署名链接，未捆绑或复制。
+演讲方法规则综合了以下公开指南：[Jesse Shapiro](https://shapiro.scholars.harvard.edu/notes-and-lectures)（“How to Give an Applied Micro Talk”）、[Rachael Meager](https://sites.google.com/view/rachaelmeager)（公开演讲幻灯片）、[Paul Goldsmith-Pinkham](https://paulgp.com/beamer_tips.pdf)、[John Cochrane](https://faculty.wcas.northwestern.edu/mdo738/teaching/cochrane.pdf)（“Writing Tips for Ph.D. Students”第 4 节 Seminar presentations）、[Dick Startz](https://www.econ.ucsb.edu/~startz/Guide_Job_Market_Presentations.pdf)、[Marc Bellemare](https://marcfbellemare.com/wordpress/10053)、[Monika Piazzesi](https://web.stanford.edu/~niederle/piazzesi.pdf)、[Alex Tabarrok](https://mason.gmu.edu/~atabarro/HowToGiveAGreatSeminar.pptx)（“How to Give a Great Seminar”）、David Evans、Darren Lubotsky、[Donald Davis](https://www.columbia.edu/~drd28/SuccessfulPaperSeminar.pdf)（“What Makes for a Successful Paper and Seminar?”）、Keith Head，以及[达拉斯联储](https://www.dallasfed.org/~/media/documents/educate/events/esp/tipsdiscussant.pdf)（为其本科生学术会议 Economic Scholars Program 撰写）和 [ASHEcon](https://ashecon.org/activities/news/how-to-be-a-good-discussant) 的评论人指南。验证方法借鉴了 [beamer-skill](https://github.com/Noi1r/beamer-skill)（PDF 渲染目检）和 [Pedro Sant'Anna 的工作流](https://github.com/pedrohcgs/claude-code-my-workflow)（可执行的质量关卡）；TikZ 定位规则改编自 Scott Cunningham 的 MixtapeTools。实现为原创；公开指南仅作署名链接，未捆绑或复制。
 
 ## 许可证
 

@@ -1,0 +1,20 @@
+% Relative bibliography fixture: \bibliography{../bib-test} names a database
+% one folder up, as a slides/ folder inside a paper repository does.
+% compile_deck.py must resolve it from this folder, so no [?] remains.
+\documentclass[11pt,aspectratio=169]{beamer}
+\usepackage{econ-slides-house}
+
+\begin{document}
+
+\begin{frame}{Related work}
+  \begin{itemize}
+    \item Rollout timing follows \cite{fixtureRollout2021}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{References}
+  \bibliographystyle{plain}
+  \bibliography{../bib-test}
+\end{frame}
+
+\end{document}

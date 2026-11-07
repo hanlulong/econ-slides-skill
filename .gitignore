@@ -32,3 +32,9 @@ internal-tests/
 demo-runs/
 HANDOFF.md
 USER-REQUIREMENTS.md
+
+# Generated test sources (the test runners remove them, even on interrupt)
+**/_swap-*.tex
+
+# claude plugin eval output
+evals/results/

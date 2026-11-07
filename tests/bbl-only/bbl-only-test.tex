@@ -1,0 +1,20 @@
+% Prebuilt-.bbl fixture: the database is absent (as in an arXiv or Overleaf
+% export) and only bbl-only-test.bbl sits beside this file. BibTeX fails, and
+% compile_deck.py must still use that .bbl, so no [?] remains.
+\documentclass[11pt,aspectratio=169]{beamer}
+\usepackage{econ-slides-house}
+
+\begin{document}
+
+\begin{frame}{Related work}
+  \begin{itemize}
+    \item Rollout timing follows \cite{fixtureRollout2021}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{References}
+  \bibliographystyle{plain}
+  \bibliography{bbl-only-absent}
+\end{frame}
+
+\end{document}

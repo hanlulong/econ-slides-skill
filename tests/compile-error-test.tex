@@ -1,0 +1,21 @@
+% Negative fixture: frame 2 uses an undefined macro. A halted build stops
+% after frame 1; a nonstopmode build still writes both pages. Either way the
+% log records a TeX error, and check_deck.py must not ship the PDF.
+\documentclass[11pt,aspectratio=169]{beamer}
+\usepackage{econ-slides-house}
+
+\begin{document}
+
+\begin{frame}{The first frame compiles}
+  \begin{itemize}
+    \item This page is fine
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The second frame does not}
+  \begin{itemize}
+    \item \undefinedfixturemacro{} breaks the build
+  \end{itemize}
+\end{frame}
+
+\end{document}

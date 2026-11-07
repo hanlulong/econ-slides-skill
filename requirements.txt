@@ -1,0 +1,5 @@
+# PyMuPDF 2.x also installs onnxruntime, numpy and other packages (about 265 MB
+# in a fresh venv). For a smaller install, `pip install "pymupdf>=1.26,<2"`
+# works too. 1.24.3 is the first release with the `pymupdf` module name; the
+# scripts fall back to `fitz` on older ones, but the test runners do not.
+pymupdf>=1.24.3
