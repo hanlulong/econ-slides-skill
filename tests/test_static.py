@@ -70,6 +70,12 @@ class ScriptTimingTest(unittest.TestCase):
         self.assertEqual(status, 0, result["findings"])
         self.assertEqual(result["genre"], "conference")
 
+    def test_sample_readme_quotes_the_checker(self):
+        _, result = self.timing("--slot-minutes", "30")
+        readme = (SAMPLE / "README.md").read_text(encoding="utf-8")
+        self.assertIn(f"{result['planned_words']:,} prepared words", readme)
+        self.assertIn(f"about {result['talking_minutes']} minutes", readme)
+
     def test_only_an_overrun_fails(self):
         under, _ = self.timing("--slot-minutes", "34")
         over, _ = self.timing("--slot-minutes", "28")

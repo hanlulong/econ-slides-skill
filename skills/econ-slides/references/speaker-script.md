@@ -256,7 +256,7 @@ word-substitution rules.
   or reversed markers fail the checker.
 - **Title-set check**: every script block title must exactly match a frame
   title in the deck, and every content frame must have a block —
-  `scripts/check_script.py` diffs the two and fails on drift.
+  `<skill-dir>/scripts/check_script.py` diffs the two and fails on drift.
 - Emphasis: mark the 1–2 stress words per block (`\emph`) and deliberate
   pauses (`[pause]`) sparingly — a script that marks everything marks
   nothing.

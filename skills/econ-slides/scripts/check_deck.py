@@ -2,10 +2,9 @@
 """Audit a compiled Beamer deck against econ-slides geometry gates and review prompts.
 
 Usage:
-    python3 scripts/check_deck.py build/talk.pdf [--tex talk.tex] [--log build/talk.log]
-                                                 [--render-dir pages]
-                                                 [--baseline-json baseline.json]
-                                                 [--json]
+    python3 <skill-dir>/scripts/check_deck.py build/talk.pdf
+        [--tex talk.tex] [--log build/talk.log] [--render-dir pages]
+        [--baseline-json baseline.json] [--json]
 
 Checks (geometry measured from the PDF itself, not guessed from source):
   edge-overflow   any text placed outside the safe page margins

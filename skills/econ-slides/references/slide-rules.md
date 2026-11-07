@@ -2,9 +2,9 @@
 
 Use these procedures for new decks. For an existing deck, its rendered PDF
 and repeated source idioms define the visual language; this file supplies
-diagnostics rather than permission to restyle it. `scripts/check_deck.py`
-reports a measurable subset, while the rendered pages and the argument decide
-the detailed treatment.
+diagnostics rather than permission to restyle it.
+`<skill-dir>/scripts/check_deck.py` reports a measurable subset, while the
+rendered pages and the argument decide the detailed treatment.
 
 ## Contents
 

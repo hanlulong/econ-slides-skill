@@ -2,7 +2,7 @@
 """Check a speaker script against its deck, clock, and oral standard.
 
 Usage:
-    python3 scripts/check_script.py script.tex --deck talk.tex
+    python3 <skill-dir>/scripts/check_script.py script.tex --deck talk.tex
         (--slot-minutes TOTAL | --speaking-minutes ALLOCATION)
         [--genre conference|seminar|job-talk|discussant] [--wpm 135] [--json]
 

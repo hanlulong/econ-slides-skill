@@ -346,6 +346,9 @@ python3 <skill-dir>/scripts/check_deck.py build/talk.pdf \
     --tex talk.tex --log build/talk.log --render-dir build/pages
 ```
 
+Run these scripts as tools; use --help for options, and open their source only
+to debug or change them.
+
 Always pass both `--tex` and `--log`: without them the checker skips the
 source and log checks, says so, and reports "incomplete" rather than "ship".
 `--log` must come from the build that made the PDF; a TeX error recorded in

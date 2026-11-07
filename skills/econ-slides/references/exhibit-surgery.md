@@ -185,7 +185,7 @@ For every new figure, record beside the slide plan:
   consistent with the slide's concept map. Keep rebuilt and new assets in a
   `figures-slides/` directory separate from the paper's figures.
 - When the paper PDF is the only available source artifact, crop tightly with
-  `scripts/crop_figure.py` (`--list` finds candidate regions, `--bbox`
+  `<skill-dir>/scripts/crop_figure.py` (`--list` finds candidate regions, `--bbox`
   crops at 300 DPI) and include at `width=0.9\textwidth, keepaspectratio`;
   if its internal text is illegible at that size, it does not go on the
   slide.
