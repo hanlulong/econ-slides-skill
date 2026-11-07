@@ -4,7 +4,7 @@ All notable changes to econ-slides. Versions follow semantic versioning.
 From 0.2.0, release tags use the OpenEcon.ai catalog form
 `econ-slides--vX.Y.Z`; the earlier `v0.1.0` and `v0.1.1` tags stay as they are.
 
-## 0.2.0 — 2026-11-06
+## 0.2.0 — 2026-11-07
 
 The first release packaged as a plugin, and the first since v0.1.1. It also
 collects the unreleased work on `main` since then, which changes several rules
