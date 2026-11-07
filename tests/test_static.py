@@ -315,6 +315,40 @@ class MissingGlyphTest(unittest.TestCase):
         inherited, new, _ = classify_blocker_regressions(findings, findings)
         self.assertEqual((len(inherited), new), (2, []))
 
+class CropFigureTest(unittest.TestCase):
+    PDF = str(SAMPLE / "conference-30min.pdf")
+
+    def test_list_and_crop(self):
+        import tempfile
+        self.assertEqual(run("crop_figure.py", self.PDF, "--page", "8",
+                             "--list").returncode, 0)
+        with tempfile.TemporaryDirectory() as tmp:
+            for name in ("a.png", "b.JPG"):
+                out = Path(tmp) / "c" / name
+                proc = run("crop_figure.py", self.PDF, "--page", "8",
+                           "--bbox", "50,60,400,200", "--out", str(out))
+                self.assertEqual(proc.returncode, 0, proc.stderr)
+                self.assertGreater(out.stat().st_size, 0)
+
+    def test_usage_errors_exit_2_without_a_traceback(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "d"
+            cases = (
+                ("--page", "8", "--bbox", "50,60,400,200",
+                 "--out", str(folder / "a.pdf")),
+                ("--page", "99", "--list"),
+                ("--page", "8"),
+            )
+            for args in cases:
+                proc = run("crop_figure.py", self.PDF, *args)
+                self.assertEqual(proc.returncode, 2, args)
+                self.assertNotIn("Traceback", proc.stderr)
+            self.assertFalse(folder.exists())
+            self.assertIn(".png, .jpg or .jpeg",
+                          run("crop_figure.py", self.PDF, *cases[0]).stderr)
+
+
 class CompileDeckTest(unittest.TestCase):
     def test_engine_directive(self):
         from compile_deck import engine_from_directive
