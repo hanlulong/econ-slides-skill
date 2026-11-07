@@ -145,6 +145,8 @@ class CheckerUnitTest(unittest.TestCase):
         self.assertEqual(result["verdict"], "incomplete")
         self.assertEqual(result["blockers"], [])
         self.assertEqual(result["pages"], 23)
+        self.assertNotIn("todo-placeholder",
+                         {f["check"] for f in result["findings"]})
 
 
 def source_checks(body: str) -> set[str]:
@@ -187,6 +189,29 @@ class HouseRuleTitleTest(unittest.TestCase):
             self.assertIn("roadmap-emphasis", found, title)
         self.assertNotIn("roadmap-emphasis", source_checks(
             "\\begin{frame}{Outline of the model}\n\\textbf{x}\n\\end{frame}"))
+
+    def test_todo_placeholder_is_listed_without_a_deduction(self):
+        import tempfile
+        from check_deck import check_tex, score_findings
+        deck = ("\\documentclass{beamer}\n"
+                "\\newcommand{\\TODO}[1]{\\textbf{TODO: #1}}\n"
+                "\\begin{document}\n\\begin{frame}{Main result}\n"
+                "Effect: 0.12 (s.e.\\ \\TODO{need SE for col 3})\n"
+                "\\end{frame}\n\\end{document}\n")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "deck.tex"
+            path.write_text(deck, encoding="utf-8")
+            findings = check_tex(path)
+            todo = [f for f in findings if f["check"] == "todo-placeholder"]
+            self.assertEqual(len(todo), 1)
+            self.assertIn("\\TODO{need SE for col 3}", todo[0]["detail"])
+            self.assertEqual(score_findings(findings),
+                             score_findings([f for f in findings if f not in todo]))
+            # The definition alone is not a placeholder.
+            path.write_text(deck.replace("\\TODO{need SE for col 3}", "0.03"),
+                            encoding="utf-8")
+            self.assertNotIn("todo-placeholder",
+                             {f["check"] for f in check_tex(path)})
 
     def test_violations_fixture_still_fires(self):
         from check_deck import check_tex

@@ -40,6 +40,9 @@ Checks (geometry measured from the PDF itself, not guessed from source):
   conclusion-link a conclusion frame (Conclusion(s), Concluding remarks)
                   contains Beamer navigation
   conclusion-density a conclusion carries more than three bullet items
+  todo-placeholder a \\TODO{...} in the source (without --tex, a "TODO:" on a
+                  page): a number still needed from the user; list it in the
+                  hand-over and never fill it in (no deduction)
 
 Score starts at 100 and deducts only for objective or strongly actionable
 findings. TeX errors in the log, characters missing from the font, edge
@@ -140,7 +143,8 @@ DEDUCT = {"edge-overflow": 15, "wrapped-title": 0, "wrapped-bullet": 0,
           "roadmap-emphasis": 0,
           "exhibit-reading": 0, "conclusion-link": 10,
           "conclusion-density": 0, "undefined-ref": 10,
-          "compile-error": 15, "missing-glyph": 10, "lost-char": 0}
+          "compile-error": 15, "missing-glyph": 10, "lost-char": 0,
+          "todo-placeholder": 0}
 HARD_BLOCKERS = {"edge-overflow", "overfull", "nav-footer-overlap",
                  "dead-link", "arrow-bullet", "question-label",
                  "conclusion-link", "undefined-ref", "compile-error",
@@ -503,6 +507,18 @@ def check_unresolved_markers(page: fitz.Page, pno: int,
     return findings
 
 
+TODO_ADVICE = ("needs the user's number; do not fill it in; list it in the "
+               "hand-over")
+
+
+def check_todo_text(page: fitz.Page, pno: int) -> list[dict]:
+    """Without --tex, a visible ``TODO:`` marks a placeholder on the page."""
+    if not re.search(r"\bTODO:", page.get_text()):
+        return []
+    return [{"check": "todo-placeholder", "page": pno,
+             "detail": f"the page shows a TODO: placeholder — {TODO_ADVICE}"}]
+
+
 def read_log(log_path: Path, pdf_path: Path, pdf_pages: int) -> tuple[str, list[str]]:
     """Return the text of a log that belongs to this PDF, plus notes.
 
@@ -659,6 +675,25 @@ def tex_tree(tex_path: Path, seen: set[Path] | None = None,
     return re.sub(r"\\(?:input|include)\s*\{([^{}]+)\}", expand, src)
 
 
+def braced_argument(src: str, pos: int) -> str:
+    """Return the balanced ``{...}`` group opening at ``src[pos]``.
+
+    An unbalanced group returns the rest of the source.
+    """
+    depth = 0
+    for index in range(pos, len(src)):
+        char = src[index]
+        if index > 0 and src[index - 1] == "\\":
+            continue
+        if char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return src[pos + 1:index]
+    return src[pos + 1:]
+
+
 def command_argument(src: str, command: str) -> str | None:
     """Return a command's first mandatory argument, preserving nested braces.
 
@@ -812,6 +847,14 @@ def check_tex(tex_path: Path) -> list[dict]:
                                            "implication; recall a boundary only in "
                                            "the rare case that omitting it would "
                                            "materially misstate the result"})
+
+    # \TODO{...} marks a number the materials do not supply (SKILL.md gate 3).
+    # The definition, \newcommand{\TODO}[1]{...}, does not match.
+    for todo in re.finditer(r"\\TODO\s*(?=\{)", src):
+        argument = re.sub(r"\s+", " ", braced_argument(src, todo.end())).strip()
+        findings.append({"check": "todo-placeholder", "page": None,
+                         "detail": f"\\TODO{{{argument[:40]}}} placeholder — "
+                                   f"{TODO_ADVICE}"})
 
     targets = set(re.findall(r"\\hypertarget(?:<[^>]+>)?\s*\{([^{}]+)\}", src))
     targets.update(re.findall(r"\\label\{([^{}]+)\}", src))
@@ -1050,6 +1093,8 @@ def main() -> int:
             findings += check_nav_overlap(doc.load_page(pno), pno + 1)
             findings += check_unresolved_markers(doc.load_page(pno), pno + 1,
                                                  allowed_markers)
+            if not args.tex:  # with --tex, check_tex reports each \TODO once
+                findings += check_todo_text(doc.load_page(pno), pno + 1)
     if log_text is not None:
         findings += check_log(log_text)
     # A declared literal marker is waived only when the log shows that no

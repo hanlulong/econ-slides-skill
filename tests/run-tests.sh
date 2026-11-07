@@ -1288,6 +1288,40 @@ else
 fi
 rm -f tests/_conclusions.tex
 
+echo "== TODO placeholders are listed, never scored =="
+printf '%s\n' '\documentclass[aspectratio=169,11pt]{beamer}' \
+  '\usepackage{econ-slides-house}' \
+  '\newcommand{\TODO}[1]{\textcolor{cAccentB}{\textbf{TODO: #1}}}' \
+  '\begin{document}' '\begin{frame}{Productivity rose after broadband arrived}' \
+  '\begin{itemize}' '  \item Revenue per worker: +3.4 percent' \
+  '  \item Standard error: \TODO{need SE for col 3}' '\end{itemize}' \
+  '\Takeaway{The gain is concentrated in communication-intensive firms.}' \
+  '\end{frame}' '\end{document}' > tests/_todo.tex
+if compile_clean tests/_todo.tex --build-dir tests/build-suite; then
+  TODO_JSON=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/_todo.pdf \
+      --tex tests/_todo.tex --log tests/build-suite/_todo.log --json 2>/dev/null)
+  TODO_STATUS=$?
+  TODO_PDF=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/_todo.pdf \
+      --log tests/build-suite/_todo.log --json 2>/dev/null)
+else
+  TODO_JSON="{}"; TODO_PDF="{}"; TODO_STATUS=compile
+fi
+if [ "$TODO_STATUS" = "0" ] && python3 - "$TODO_JSON" "$TODO_PDF" <<'PY'
+import json, sys
+full, pdf_only = (json.loads(arg) for arg in sys.argv[1:])
+todo = [f for f in full["findings"] if f["check"] == "todo-placeholder"]
+assert full["verdict"] == "ship" and full["score"] == 100 and len(todo) == 1
+assert "need SE for col 3" in todo[0]["detail"]
+pdf_todo = [f for f in pdf_only["findings"] if f["check"] == "todo-placeholder"]
+assert [f["page"] for f in pdf_todo] == [1]
+PY
+then
+  ok "a \\TODO placeholder is listed (source and PDF) and costs no points"
+else
+  bad "todo-placeholder prompt [$TODO_STATUS]"
+fi
+rm -f tests/_todo.tex
+
 echo "== plugin packaging stays consistent =="
 if python3 - <<'PY'
 import json
