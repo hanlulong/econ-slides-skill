@@ -302,8 +302,10 @@ QA. Inspect the asset itself and every slide that contains it:
 ## The visual pass (why the renders exist)
 
 `check_deck.py --render-dir` writes every page as PNG. Inspect each for the
-failures no static check sees: content overflowing a `ResultBox` or block
-(Beamer suppresses those warnings), `\toprule`-under-title-bar merges, TikZ
-label overlap, figure text too small, a slide that is simply ugly. This
-deck-wide sweep supplements rather than replaces the individual figure QA
-above. One sweep, page by page, before delivery — non-negotiable.
+failures no static check sees (`\toprule`-under-title-bar merges, TikZ label
+overlap, figure text too small, a slide that is simply ugly) and to see what
+overflows a `ResultBox` or block: TeX logs the overfull box and
+`check_deck.py --log` blocks on it when it is over 2pt, but for an ordinary
+frame the log gives only the line of `\end{frame}`. This deck-wide sweep
+supplements rather than replaces the individual figure QA above. One sweep,
+page by page, before delivery — non-negotiable.

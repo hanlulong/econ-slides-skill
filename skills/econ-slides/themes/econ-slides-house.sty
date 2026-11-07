@@ -38,8 +38,9 @@
 \setbeamertemplate{navigation symbols}{}
 \setbeamertemplate{frametitle}[default][center]
 \setbeamersize{text margin left=2em, text margin right=2em}
-% Math-mode bullet, NOT \textbullet: mathpazo has no \textbullet glyph under
-% xelatex/lualatex, so \textbullet silently renders as a tofu square there.
+% Math-mode bullet, NOT \textbullet: under xelatex/lualatex the sans font
+% (Latin Modern Sans) draws \textbullet as a small square, with or without
+% mathpazo.
 \setbeamertemplate{itemize item}{\raise0.9pt\hbox{\small$\bullet$}}
 \setbeamertemplate{itemize subitem}{\tiny$\blacksquare$}
 \setbeamertemplate{itemize subsubitem}{$\star$}
