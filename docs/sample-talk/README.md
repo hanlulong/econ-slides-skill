@@ -59,12 +59,12 @@ cannot support.
 - Deck: 23 physical PDF pages; 11 numbered main frames; checker score **100**;
   no blockers and no overfull boxes. Its one whitespace prompt is reviewed and
   intentional on the concise conclusion.
-- Script: 9 letter-size pages; 3,093 prepared words; 9 selected Q&A blocks;
+- Script: 9 letter-size pages; 3,123 prepared words; 9 selected Q&A blocks;
   synchronized title order, no checker findings or warnings, and no overfull
   boxes.
 - Visual QA: every deck page, every script page, and all three source crops
   were inspected at rendered size.
 
-The prepared script is about 22.9 minutes at the 135-word-per-minute audit
+The prepared script is about 23.1 minutes at the 135-word-per-minute audit
 pace, leaving about 7 minutes for questions. A slower rehearsal should lead
 to trimming—not borrowing from the question period.

@@ -167,8 +167,9 @@ python3 <skill-dir>/scripts/check_deck.py talk/build/sed-2026.pdf \
   redistribute existing spacing, enlarge the source exhibit, deepen the same
   supported point, or merge the frame. Roadmaps and dividers may be sparse,
   but their whitespace should be balanced rather than bottom-heavy.
-- Engines: XeLaTeX default; pdfLaTeX and LuaLaTeX also work with the
-  bundled themes (`--engine`).
+- Engines: XeLaTeX by default; `compile_deck.py` follows a
+  `% !TEX program =` line when no `--engine` is given; pdfLaTeX and LuaLaTeX
+  also work with the bundled themes (`--engine`).
 
 ## Delivery conventions
 

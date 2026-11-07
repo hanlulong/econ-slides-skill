@@ -70,11 +70,47 @@ class ScriptTimingTest(unittest.TestCase):
         self.assertEqual(status, 0, result["findings"])
         self.assertEqual(result["genre"], "conference")
 
+    def test_sample_readme_quotes_the_checker(self):
+        _, result = self.timing("--slot-minutes", "30")
+        readme = (SAMPLE / "README.md").read_text(encoding="utf-8")
+        self.assertIn(f"{result['planned_words']:,} prepared words", readme)
+        self.assertIn(f"about {result['talking_minutes']} minutes", readme)
+
     def test_only_an_overrun_fails(self):
         under, _ = self.timing("--slot-minutes", "34")
         over, _ = self.timing("--slot-minutes", "28")
         seminar, _ = self.timing("--slot-minutes", "34", "--genre", "seminar")
         self.assertEqual((under, over, seminar), (0, 1, 0))
+
+
+class BannedPhraseTest(unittest.TestCase):
+    def test_documented_list_matches_the_checker(self):
+        from check_script import BANNED
+        text = (SKILL / "references/speaker-script.md").read_text(encoding="utf-8")
+        # The parenthetical list ends at its ';' (or at the next bullet).
+        rule = text.split("blocklist still applies fully", 1)[1]
+        rule = re.split(r";|\n- ", rule, maxsplit=1)[0]
+        documented = set()
+        for phrase in re.findall(r'"([^"]+)"', rule):
+            if phrase.endswith("(ly)"):
+                documented.update({phrase[:-4], phrase[:-4] + "ly"})
+            else:
+                documented.add(phrase)
+        self.assertEqual(documented, set(BANNED))
+
+    def test_technical_pivotal_is_not_filler(self):
+        from check_script import banned_phrases
+        for text in ("In the median-voter benchmark the pivotal voter sets "
+                     "the tax rate.", "a pivotal-voter model",
+                     "the pivotal voter's ideal point",
+                     "a pivotal mechanism", "Pivotal players decide."):
+            self.assertEqual(banned_phrases(text), [], text)
+        self.assertEqual(banned_phrases("This was a pivotal moment."),
+                         ["pivotal"])
+        self.assertEqual(banned_phrases("a groundbreaking result"),
+                         ["groundbreaking"])
+        self.assertEqual(banned_phrases("Crucially, we delve."),
+                         ["delve", "crucially"])
 
 
 class CheckerUnitTest(unittest.TestCase):
@@ -145,6 +181,253 @@ class CheckerUnitTest(unittest.TestCase):
         self.assertEqual(result["verdict"], "incomplete")
         self.assertEqual(result["blockers"], [])
         self.assertEqual(result["pages"], 23)
+        self.assertNotIn("todo-placeholder",
+                         {f["check"] for f in result["findings"]})
+
+
+def source_checks(body: str) -> set[str]:
+    """Run check_tex on a one-off deck written to a temporary folder."""
+    import tempfile
+    from check_deck import check_tex
+    deck = ("\\documentclass{beamer}\n\\begin{document}\n" + body
+            + "\n\\end{document}\n")
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "deck.tex"
+        path.write_text(deck, encoding="utf-8")
+        return {f["check"] for f in check_tex(path)}
+
+
+class HouseRuleTitleTest(unittest.TestCase):
+    BUTTON = ("\\hyperlink{bk}{\\beamergotobutton{Backup}}\n\\end{frame}\n"
+              "\\begin{frame}{Backup}\\hypertarget{bk}{}Detail\\end{frame}")
+
+    def frame(self, title: str, inner: str) -> str:
+        return f"\\begin{{frame}}{{{title}}}\n{inner}"
+
+    def test_conclusion_variants_fire(self):
+        for title in ("Conclusion", "Conclusions", "Concluding remarks",
+                      "Conclusions.", "Conclusion and next steps"):
+            self.assertIn("conclusion-link",
+                          source_checks(self.frame(title, self.BUTTON)), title)
+        found = source_checks("\\begin{frame}{Concluding remarks}\n"
+                              "\\beamergotobutton{More}\n\\end{frame}")
+        self.assertIn("conclusion-link", found)
+
+    def test_other_titles_do_not_fire(self):
+        for title in ("Summary", "Conclusions and extensions"):
+            self.assertNotIn("conclusion-link",
+                             source_checks(self.frame(title, self.BUTTON)), title)
+
+    def test_roadmap_variants(self):
+        for title in ("Roadmap", "Outline", "Agenda", "Plan of the talk"):
+            found = source_checks(f"\\begin{{frame}}{{{title}}}\n"
+                                  "\\textbf{x}\n\\end{frame}")
+            self.assertIn("roadmap-emphasis", found, title)
+        self.assertNotIn("roadmap-emphasis", source_checks(
+            "\\begin{frame}{Outline of the model}\n\\textbf{x}\n\\end{frame}"))
+
+    def test_todo_placeholder_is_listed_without_a_deduction(self):
+        import tempfile
+        from check_deck import check_tex, score_findings
+        deck = ("\\documentclass{beamer}\n"
+                "\\newcommand{\\TODO}[1]{\\textbf{TODO: #1}}\n"
+                "\\begin{document}\n\\begin{frame}{Main result}\n"
+                "Effect: 0.12 (s.e.\\ \\TODO{need SE for col 3})\n"
+                "\\end{frame}\n\\end{document}\n")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "deck.tex"
+            path.write_text(deck, encoding="utf-8")
+            findings = check_tex(path)
+            todo = [f for f in findings if f["check"] == "todo-placeholder"]
+            self.assertEqual(len(todo), 1)
+            self.assertIn("\\TODO{need SE for col 3}", todo[0]["detail"])
+            self.assertEqual(score_findings(findings),
+                             score_findings([f for f in findings if f not in todo]))
+            # The definition alone is not a placeholder.
+            path.write_text(deck.replace("\\TODO{need SE for col 3}", "0.03"),
+                            encoding="utf-8")
+            self.assertNotIn("todo-placeholder",
+                             {f["check"] for f in check_tex(path)})
+
+    def test_violations_fixture_still_fires(self):
+        from check_deck import check_tex
+        found = {f["check"] for f in check_tex(ROOT / "tests/violations-test.tex")}
+        self.assertIn("conclusion-link", found)
+        self.assertIn("roadmap-emphasis", found)
+
+
+class OverlayBuildTest(unittest.TestCase):
+    def test_nav_build_pages(self):
+        from check_deck import nav_build_pages
+        nav = "".join(
+            f"\\headcommand {{\\beamer@framepages {{{a}}}{{{b}}}}}\n"
+            for a, b in ((1, 3), (4, 4), (4, 5), (4, 6), (4, 7), (8, 9)))
+        self.assertEqual(nav_build_pages(nav, 9), {1, 2, 8})
+        self.assertIsNone(nav_build_pages(nav, 10))  # stale .nav
+        self.assertIsNone(nav_build_pages("", 9))
+
+
+class LayoutBalanceTest(unittest.TestCase):
+    W, H = 364.0, 273.0
+
+    def page(self, draw):
+        from check_deck import fitz
+        doc = fitz.open()
+        page = doc.new_page(width=self.W, height=self.H)
+        page.insert_text((20, 30), "A frame title", fontsize=14)
+        page.insert_text((20, 70), "One line of text above the figure.",
+                         fontsize=11)
+        page.insert_text((20, 85), "A second line of text.", fontsize=11)
+        draw(page, fitz)
+        return doc, page
+
+    def layout(self, draw) -> bool:
+        from check_deck import check_page
+        doc, page = self.page(draw)
+        found = {f["check"] for f in check_page(page, 2)}
+        doc.close()
+        return "layout-balance" in found
+
+    def test_a_diagram_running_off_the_slide_is_not_sparse(self):
+        def draw(page, fitz):
+            page.draw_rect(fitz.Rect(20, 0.30 * self.H, 200, 1.02 * self.H),
+                           color=(0, 0, 0))
+        self.assertFalse(self.layout(draw))
+
+    def test_a_footer_logo_does_not_fill_a_sparse_slide(self):
+        def draw(page, fitz):
+            page.draw_rect(fitz.Rect(300, 0.90 * self.H, 325, 0.90 * self.H + 25),
+                           color=(0, 0, 0))
+        self.assertTrue(self.layout(draw))
+
+
+class MissingGlyphTest(unittest.TestCase):
+    # Four lines from a real XeTeX log of a house-theme deck with ≥ and β in
+    # text, wrapped at 79 columns as TeX writes them.
+    WRAPPED = (
+        "Missing character: There is no ≥ (U+2265) in font [lmsans10-regular]:mapping=te\n"
+        "x-text;!\n"
+        "Missing character: There is no β (U+03B2) in font [lmsans10-regular]:mapping=te\n"
+        "x-text;!\n")
+
+    def checks(self, log: str) -> list[str]:
+        from check_deck import check_log
+        return [f["check"] for f in check_log(log)]
+
+    def test_wrapped_xetex_lines_are_blockers(self):
+        from check_deck import check_log
+        findings = check_log(self.WRAPPED)
+        self.assertEqual([f["check"] for f in findings],
+                         ["missing-glyph", "missing-glyph"])
+        self.assertIn("'≥' (U+2265) is missing from font lmsans10-regular",
+                      findings[0]["detail"])
+        self.assertIn("'β' (U+03B2)", findings[1]["detail"])
+        self.assertTrue(all(f["page"] is None for f in findings))
+
+    def test_harmless_losses_are_notes(self):
+        self.assertEqual(self.checks(
+            'Missing character: There is no ; ("3B) in font nullfont!\n'),
+            ["lost-char"])
+        self.assertEqual(self.checks(
+            "Missing character: There is no \u200b (U+200B) in font "
+            "[lmroman10-regular]:mapping=tex-text;!\n"), ["lost-char"])
+
+    def test_pdftex_form_and_clean_log(self):
+        self.assertEqual(self.checks(
+            "Missing character: There is no ^^b2 in font cmr10!\n"),
+            ["missing-glyph"])
+        self.assertEqual(self.checks("Overfull \\hbox (0.5pt too wide)\n"), [])
+
+    def test_weights(self):
+        from check_deck import HARD_BLOCKERS, NON_WAIVABLE_BLOCKERS, score_findings
+        self.assertEqual(score_findings([{"check": "missing-glyph"}]), 90)
+        self.assertEqual(score_findings([{"check": "lost-char"}]), 100)
+        self.assertIn("missing-glyph", HARD_BLOCKERS)
+        self.assertNotIn("missing-glyph", NON_WAIVABLE_BLOCKERS)
+
+    def test_inherited_glyph_is_waived_by_a_baseline(self):
+        from check_deck import check_log, classify_blocker_regressions
+        findings = check_log(self.WRAPPED)
+        inherited, new, _ = classify_blocker_regressions(findings, findings)
+        self.assertEqual((len(inherited), new), (2, []))
+
+class CropFigureTest(unittest.TestCase):
+    PDF = str(SAMPLE / "conference-30min.pdf")
+
+    def test_list_and_crop(self):
+        import tempfile
+        self.assertEqual(run("crop_figure.py", self.PDF, "--page", "8",
+                             "--list").returncode, 0)
+        with tempfile.TemporaryDirectory() as tmp:
+            for name in ("a.png", "b.JPG"):
+                out = Path(tmp) / "c" / name
+                proc = run("crop_figure.py", self.PDF, "--page", "8",
+                           "--bbox", "50,60,400,200", "--out", str(out))
+                self.assertEqual(proc.returncode, 0, proc.stderr)
+                self.assertGreater(out.stat().st_size, 0)
+
+    def test_usage_errors_exit_2_without_a_traceback(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "d"
+            cases = (
+                ("--page", "8", "--bbox", "50,60,400,200",
+                 "--out", str(folder / "a.pdf")),
+                ("--page", "99", "--list"),
+                ("--page", "8"),
+            )
+            for args in cases:
+                proc = run("crop_figure.py", self.PDF, *args)
+                self.assertEqual(proc.returncode, 2, args)
+                self.assertNotIn("Traceback", proc.stderr)
+            self.assertFalse(folder.exists())
+            self.assertIn(".png, .jpg or .jpeg",
+                          run("crop_figure.py", self.PDF, *cases[0]).stderr)
+
+
+class CompileDeckTest(unittest.TestCase):
+    def test_engine_directive(self):
+        from compile_deck import engine_from_directive
+        cases = {
+            "% !TEX program = pdflatex\n\\documentclass{beamer}": ("pdflatex", None),
+            "% !TEX program = xelatex\n": ("xelatex", None),
+            "%!TEX program=lualatex\n": ("lualatex", None),
+            "% !TEX TS-program = xelatex\n": ("xelatex", None),
+            "% !TeX Program = LuaLaTeX\n": ("lualatex", None),
+            "% !TEX program = latexmk\n": (None, "latexmk"),
+            "\n" * 24 + "% !TEX program = pdflatex\n": (None, None),
+            "\\documentclass{beamer}\n% just a comment\n": (None, None),
+        }
+        for text, expected in cases.items():
+            self.assertEqual(engine_from_directive(text), expected, text)
+
+    def test_pdftex_only_primitive(self):
+        from compile_deck import pdftex_only_primitive
+        log = ("! Undefined control sequence.\n"
+               "l.7 \\pdfglyphtounicode\n"
+               "                       {A}{0041}\n")
+        self.assertEqual(pdftex_only_primitive(log), "\\pdfglyphtounicode")
+        self.assertIsNone(pdftex_only_primitive(
+            "! Undefined control sequence.\nl.19 \\undefinedmacro\n"))
+        self.assertIsNone(pdftex_only_primitive("! Missing $ inserted.\n"))
+
+    def test_text_mode_subprocesses_name_an_encoding(self):
+        # text=True alone decodes TeX output in the locale's code page, which
+        # crashed under GBK on a UTF-8 log.
+        import ast
+        for path in sorted(SCRIPTS.glob("*.py")):
+            for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+                if not (isinstance(node, ast.Call)
+                        and isinstance(node.func, ast.Attribute)
+                        and node.func.attr == "run"
+                        and isinstance(node.func.value, ast.Name)
+                        and node.func.value.id == "subprocess"):
+                    continue
+                keywords = {k.arg: k.value for k in node.keywords}
+                text = keywords.get("text")
+                if isinstance(text, ast.Constant) and text.value is True:
+                    self.assertIn("encoding", keywords,
+                                  f"{path.name}:{node.lineno}")
 
 
 if __name__ == "__main__":

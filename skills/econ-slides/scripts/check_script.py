@@ -2,7 +2,7 @@
 """Check a speaker script against its deck, clock, and oral standard.
 
 Usage:
-    python3 scripts/check_script.py script.tex --deck talk.tex
+    python3 <skill-dir>/scripts/check_script.py script.tex --deck talk.tex
         (--slot-minutes TOTAL | --speaking-minutes ALLOCATION)
         [--genre conference|seminar|job-talk|discussant] [--wpm 135] [--json]
 
@@ -43,6 +43,11 @@ BANNED = [
     "novel insights", "shed light on", "it is worth noting", "groundbreaking",
     "pivotal",
 ]
+# Technical uses that are not filler: the pivotal voter, a pivotal mechanism.
+TECHNICAL_EXEMPT = {
+    "pivotal": r"(?![\s-]+(?:voters?|mechanisms?|players?|agents?|members?"
+               r"|legislators?|states?)\b)",
+}
 # Main-frame explanations are paper dependent: a theorem, design, or central
 # exhibit may deserve materially more time than a transition slide.  Fixed word
 # ceilings turn into accidental content rules and can encourage padding short
@@ -69,6 +74,14 @@ SPEECH_SHARE = {
     "job-talk": (0.60, 0.70),
     "discussant": (0.0, 0.80),
 }
+
+
+def banned_phrases(text: str) -> list[str]:
+    """Return the BANNED phrases in ``text``, skipping technical uses."""
+    low = text.lower()
+    return [phrase for phrase in BANNED
+            if re.search(rf"(?<!\w){re.escape(phrase)}(?!\w)"
+                         + TECHNICAL_EXEMPT.get(phrase, ""), low)]
 
 
 def strip_comments(src: str) -> str:
@@ -547,10 +560,8 @@ def main() -> int:
             f"[word-budget] opening: {opening['words']} words; preferred "
             f"{OPENING_PREFERRED_LO}--{OPENING_PREFERRED_HI}")
     if opening:
-        low = opening["body"].lower()
-        for phrase in BANNED:
-            if re.search(rf"(?<!\w){re.escape(phrase)}(?!\w)", low):
-                warnings.append(f"[oral-tells] opening: banned phrase {phrase!r}")
+        for phrase in banned_phrases(opening["body"]):
+            warnings.append(f"[oral-tells] opening: banned phrase {phrase!r}")
         for sentence in re.split(r"[.!?]", opening["body"]):
             count = word_count(sentence)
             if count > 35:
@@ -611,10 +622,8 @@ def main() -> int:
                     f"[word-budget] Q&A {block['title']!r}: {words} words; "
                     f"preferred {QA_PREFERRED_LO}--{QA_PREFERRED_HI}")
 
-        low = block["body"].lower()
-        for phrase in BANNED:
-            if re.search(rf"(?<!\w){re.escape(phrase)}(?!\w)", low):
-                warnings.append(f"[oral-tells] {block['title']!r}: banned phrase {phrase!r}")
+        for phrase in banned_phrases(block["body"]):
+            warnings.append(f"[oral-tells] {block['title']!r}: banned phrase {phrase!r}")
         for sentence in re.split(r"[.!?]", block["body"]):
             count = word_count(sentence)
             if count > 35:

@@ -1171,6 +1171,203 @@ else
   ok "nonpositive compile timeout is rejected"
 fi
 
+echo "== engine choice and non-UTF-8 locales =="
+# A % !TEX program line picks the engine when --engine is not given.
+printf '%s\n' '% !TEX program = pdflatex' '\documentclass{beamer}' \
+  '\input{glyphtounicode}' '\pdfgentounicode=1' '\begin{document}' \
+  '\begin{frame}{Engine directive}' 'Built with pdfLaTeX.' '\end{frame}' \
+  '\end{document}' > tests/_directive.tex
+DIRECTIVE_OUT=$(python3 skills/econ-slides/scripts/compile_deck.py tests/_directive.tex \
+    --build-dir tests/build-suite/directive 2>&1)
+DIRECTIVE_STATUS=$?
+if [ "$DIRECTIVE_STATUS" = "0" ] \
+    && [[ "$DIRECTIVE_OUT" == *"engine: pdflatex (from % !TEX program)"* ]]; then
+  ok "a % !TEX program = pdflatex line selects pdfLaTeX"
+else
+  bad "engine directive [$DIRECTIVE_STATUS]"
+fi
+# An explicit --engine still wins, and the hint names the pdfTeX primitive.
+FORCED_OUT=$(python3 skills/econ-slides/scripts/compile_deck.py tests/_directive.tex \
+    --engine xelatex --build-dir tests/build-suite/directive-xe --json 2>/dev/null)
+FORCED_STATUS=$?
+if [ "$FORCED_STATUS" = "1" ] && python3 -c '
+import json,sys
+r=json.load(sys.stdin)
+raise SystemExit(0 if not r["ok"] and r["engine"]=="xelatex"
+                 and r["engine_source"]=="flag"
+                 and "pdfTeX-only primitive" in r["hint"]
+                 and "--engine pdflatex" in r["hint"] else 1)' <<<"$FORCED_OUT"; then
+  ok "--engine overrides the directive and the hint names a pdfTeX-only primitive"
+else
+  bad "explicit engine or pdfTeX-primitive hint [$FORCED_STATUS]"
+fi
+rm -f tests/_directive.tex
+
+# TeX output is UTF-8 whatever the locale: a GBK locale and a CJK folder name
+# used to crash the helper (exit 3) while decoding the engine's output.
+GBK=$(locale -a 2>/dev/null | grep -i -m1 -E '^zh_CN\.gbk$')
+if [ -n "$GBK" ]; then
+  cjk="tests/build-suite/讲稿"
+  rm -rf "$cjk"; mkdir -p "$cjk"
+  printf '%s\n' '\documentclass{beamer}' '\begin{document}' \
+    '\begin{frame}{Locale}' 'A deck in a CJK folder.' '\end{frame}' \
+    '\end{document}' > "$cjk/deck.tex"
+  if env -u PYTHONUTF8 LC_ALL="$GBK" python3 skills/econ-slides/scripts/compile_deck.py \
+       "$cjk/deck.tex" >/dev/null 2>&1; then
+    ok "compiles under a $GBK locale in a CJK-named folder"
+  else
+    bad "non-UTF-8 locale compile"
+  fi
+else
+  echo "  SKIP  non-UTF-8 locale compile (no zh_CN.GBK locale here)"
+fi
+
+echo "== characters missing from the font =="
+# A β or ≥ typed in text is dropped by the house theme's text font: a blocker.
+printf '%s\n' '\documentclass[aspectratio=169,11pt]{beamer}' \
+  '\usepackage{econ-slides-house}' '\begin{document}' \
+  '\begin{frame}{Effect of the reform on employment}' '\begin{itemize}' \
+  '  \item Effect ≥ 5 percent in rural counties' \
+  '  \item The elasticity is β = 0.4 for teens' '\end{itemize}' \
+  '\Takeaway{The decline is concentrated in rural counties.}' '\end{frame}' \
+  '\end{document}' > tests/_glyph.tex
+GLYPH_OUT=$(python3 skills/econ-slides/scripts/compile_deck.py tests/_glyph.tex \
+    --build-dir tests/build-suite 2>&1)
+GLYPH_CHECK=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/_glyph.pdf \
+    --tex tests/_glyph.tex --log tests/build-suite/_glyph.log 2>&1)
+GLYPH_STATUS=$?
+if [[ "$GLYPH_OUT" == *"warning: 2 characters are missing from the font"* ]] \
+    && [ "$GLYPH_STATUS" = "1" ] && [[ "$GLYPH_CHECK" == *"[missing-glyph]"* ]] \
+    && [[ "$GLYPH_CHECK" == *"'β' (U+03B2) is missing from font"* ]]; then
+  ok "a character missing from the font is reported and blocks delivery"
+else
+  bad "missing-glyph blocker [$GLYPH_STATUS]"
+fi
+# A stray character inside a TikZ picture lands in nullfont: a note only.
+printf '%s\n' '\documentclass[aspectratio=169,11pt]{beamer}' \
+  '\usepackage{econ-slides-house}' '\usepackage{tikz}' '\begin{document}' \
+  '\begin{frame}{A rule drawn with a stray semicolon}' '\centering' \
+  '\begin{tikzpicture}\draw (0,0) -- (3,0);;\end{tikzpicture}' \
+  '\Takeaway{The rule still draws; the extra semicolon is dropped.}' \
+  '\end{frame}' '\end{document}' > tests/_nullfont.tex
+if compile_clean tests/_nullfont.tex --build-dir tests/build-suite; then
+  NULL_CHECK=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/_nullfont.pdf \
+      --tex tests/_nullfont.tex --log tests/build-suite/_nullfont.log 2>&1)
+  NULL_STATUS=$?
+else
+  NULL_CHECK=""; NULL_STATUS=compile
+fi
+if [ "$NULL_STATUS" = "0" ] && [[ "$NULL_CHECK" == *"[lost-char]"* ]] \
+    && [[ "$NULL_CHECK" != *"[missing-glyph]"* ]]; then
+  ok "a stray TikZ character is a lost-char note and the deck still ships"
+else
+  bad "lost-char note [$NULL_STATUS]"
+fi
+rm -f tests/_glyph.tex tests/_nullfont.tex
+
+echo "== conclusion and roadmap title variants =="
+printf '%s\n' '\documentclass[aspectratio=169,11pt]{beamer}' \
+  '\usepackage{econ-slides-house}' '\begin{document}' \
+  '\begin{frame}{Conclusions}' '\begin{itemize}' \
+  '  \item Broadband raised small-firm productivity' \
+  '  \item The gain tracks communication intensity' '\end{itemize}' \
+  '\hyperlink{bk}{\beamergotobutton{Backup}}' '\end{frame}' '\appendix' \
+  '\begin{frame}{Backup}\hypertarget{bk}{}' 'Detail' '\end{frame}' \
+  '\end{document}' > tests/_conclusions.tex
+if compile_clean tests/_conclusions.tex --build-dir tests/build-suite; then
+  CONC_OUT=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/_conclusions.pdf \
+      --tex tests/_conclusions.tex --log tests/build-suite/_conclusions.log 2>&1)
+  CONC_STATUS=$?
+else
+  CONC_OUT=""; CONC_STATUS=compile
+fi
+if [ "$CONC_STATUS" = "1" ] && [[ "$CONC_OUT" == *"[conclusion-link]"* ]]; then
+  ok "a navigation button on a 'Conclusions' slide blocks delivery"
+else
+  bad "conclusion title variant [$CONC_STATUS]"
+fi
+rm -f tests/_conclusions.tex
+
+echo "== TODO placeholders are listed, never scored =="
+printf '%s\n' '\documentclass[aspectratio=169,11pt]{beamer}' \
+  '\usepackage{econ-slides-house}' \
+  '\newcommand{\TODO}[1]{\textcolor{cAccentB}{\textbf{TODO: #1}}}' \
+  '\begin{document}' '\begin{frame}{Productivity rose after broadband arrived}' \
+  '\begin{itemize}' '  \item Revenue per worker: +3.4 percent' \
+  '  \item Standard error: \TODO{need SE for col 3}' '\end{itemize}' \
+  '\Takeaway{The gain is concentrated in communication-intensive firms.}' \
+  '\end{frame}' '\end{document}' > tests/_todo.tex
+if compile_clean tests/_todo.tex --build-dir tests/build-suite; then
+  TODO_JSON=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/_todo.pdf \
+      --tex tests/_todo.tex --log tests/build-suite/_todo.log --json 2>/dev/null)
+  TODO_STATUS=$?
+  TODO_PDF=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/_todo.pdf \
+      --log tests/build-suite/_todo.log --json 2>/dev/null)
+else
+  TODO_JSON="{}"; TODO_PDF="{}"; TODO_STATUS=compile
+fi
+if [ "$TODO_STATUS" = "0" ] && python3 - "$TODO_JSON" "$TODO_PDF" <<'PY'
+import json, sys
+full, pdf_only = (json.loads(arg) for arg in sys.argv[1:])
+todo = [f for f in full["findings"] if f["check"] == "todo-placeholder"]
+assert full["verdict"] == "ship" and full["score"] == 100 and len(todo) == 1
+assert "need SE for col 3" in todo[0]["detail"]
+pdf_todo = [f for f in pdf_only["findings"] if f["check"] == "todo-placeholder"]
+assert [f["page"] for f in pdf_todo] == [1]
+PY
+then
+  ok "a \\TODO placeholder is listed (source and PDF) and costs no points"
+else
+  bad "todo-placeholder prompt [$TODO_STATUS]"
+fi
+rm -f tests/_todo.tex
+
+echo "== overlay builds without a frame counter (.nav) =="
+if python3 skills/econ-slides/scripts/compile_deck.py tests/nav-builds-test.tex \
+     --build-dir tests/build-suite --json >/dev/null 2>&1; then
+  NAVB_JSON=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/nav-builds-test.pdf \
+      --tex tests/nav-builds-test.tex --log tests/build-suite/nav-builds-test.log --json 2>/dev/null)
+  NAVB_STATUS=$?
+  # The same build without its .nav: every page is audited as final.
+  rm -rf tests/build-suite/no-nav; mkdir -p tests/build-suite/no-nav
+  cp tests/build-suite/nav-builds-test.pdf tests/build-suite/nav-builds-test.log \
+     tests/build-suite/no-nav/
+  NONAV_JSON=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/no-nav/nav-builds-test.pdf \
+      --tex tests/nav-builds-test.tex --log tests/build-suite/no-nav/nav-builds-test.log --json 2>/dev/null)
+else
+  NAVB_JSON="{}"; NONAV_JSON="{}"; NAVB_STATUS=compile
+fi
+if [ "$NAVB_STATUS" = "1" ] && python3 - "$NAVB_JSON" "$NONAV_JSON" <<'PY'
+import json, sys
+import pymupdf
+from scripts.check_deck import frame_title_key
+nav, no_nav = (json.loads(arg) for arg in sys.argv[1:])
+doc = pymupdf.open("tests/build-suite/nav-builds-test.pdf")
+titles = [frame_title_key(page) for page in doc]
+assert len(titles) == 12, titles
+def pages(result, check):
+    return {f["page"] for f in result["findings"] if f["check"] == check}
+layout = pages(nav, "layout-balance")
+# Builds 1-2 of the frame and of its \againframe: no layout prompt; the
+# final build of the frame is still reviewed.
+assert not layout & {2, 3, 10}, layout
+assert 4 in layout, layout
+assert {2, 3} <= pages(no_nav, "layout-balance")
+# Frame-break pages are separate slides: the ?? on the third one blocks.
+marker = [f["page"] for f in nav["findings"]
+          if f["check"] == "undefined-ref" and f["page"]]
+assert marker and titles[marker[0] - 1] == "long list iii", (marker, titles)
+assert "undefined-ref" in nav["blockers"]
+# A diagram that runs off the slide: overfull, and no "content stops at".
+assert "overfull" in nav["blockers"]
+assert 9 not in layout and titles[8].startswith("a diagram"), titles
+PY
+then
+  ok "the .nav marks overlay builds; frame breaks and overflowing diagrams are still judged"
+else
+  bad "nav-based build detection [$NAVB_STATUS]"
+fi
+
 echo "== plugin packaging stays consistent =="
 if python3 - <<'PY'
 import json

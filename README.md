@@ -153,9 +153,18 @@ In 0.2.0 the skill moved from the repository root into `skills/econ-slides/`.
 An existing link to the clone root keeps working after `git pull`, but Claude
 Code now loads it as a plugin-style folder (`econ-slides@skills-dir`, invoked as
 `/econ-slides:econ-slides`). To keep the bare `/econ-slides`, re-link
-`~/.claude/skills/econ-slides` to `<clone>/skills/econ-slides`. Codex lists a
-manual link to this clone as `econ-slides:econ-slides` either way, because the
-clone carries plugin manifests. v0.1.x told Codex users to link
+`~/.claude/skills/econ-slides` to `<clone>/skills/econ-slides`:
+
+```bash
+ln -sfn "<clone>/skills/econ-slides" ~/.claude/skills/econ-slides
+```
+
+Use `-sfn`: a plain `ln -s` over the old link follows it and creates a stray
+`<clone>/econ-slides` link inside the clone instead; delete that link if
+`git status` shows it.
+
+Codex lists a manual link to this clone as `econ-slides:econ-slides` either
+way, because the clone carries plugin manifests. v0.1.x told Codex users to link
 `~/.codex/skills/econ-slides`, which Codex still loads: remove that link (or
 move it to `~/.agents/skills`) before installing the plugin, or Codex lists
 the skill twice.

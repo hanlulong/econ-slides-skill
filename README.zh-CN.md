@@ -90,7 +90,15 @@ codex plugin add econ-slides@openeconai
 <details>
 <summary>从 0.1.x 升级</summary>
 
-0.2.0 起，技能从仓库根目录移到了 `skills/econ-slides/`。指向克隆根目录的旧链接在 `git pull` 之后仍然可用，但 Claude Code 现在会把它作为插件式文件夹加载（`econ-slides@skills-dir`，以 `/econ-slides:econ-slides` 调用）。如需保留不带前缀的 `/econ-slides`，请把 `~/.claude/skills/econ-slides` 重新链接到 `<clone>/skills/econ-slides`。在 Codex 中，无论链接指向哪个文件夹，手动链接都会显示为 `econ-slides:econ-slides`，因为克隆目录带有插件清单。v0.1.x 曾让 Codex 用户链接 `~/.codex/skills/econ-slides`，Codex 至今仍会加载该目录：安装插件前请删除这个链接（或把它移到 `~/.agents/skills`），否则 Codex 会把技能列出两次。
+0.2.0 起，技能从仓库根目录移到了 `skills/econ-slides/`。指向克隆根目录的旧链接在 `git pull` 之后仍然可用，但 Claude Code 现在会把它作为插件式文件夹加载（`econ-slides@skills-dir`，以 `/econ-slides:econ-slides` 调用）。如需保留不带前缀的 `/econ-slides`，请把 `~/.claude/skills/econ-slides` 重新链接到 `<clone>/skills/econ-slides`：
+
+```bash
+ln -sfn "<clone>/skills/econ-slides" ~/.claude/skills/econ-slides
+```
+
+请使用 `-sfn`：直接用 `ln -s` 覆盖旧链接时，它会顺着旧链接进入克隆目录，在其中另建一个多余的 `<clone>/econ-slides` 链接，而旧链接保持不变；如果 `git status` 显示了这个链接，请将其删除。
+
+在 Codex 中，无论链接指向哪个文件夹，手动链接都会显示为 `econ-slides:econ-slides`，因为克隆目录带有插件清单。v0.1.x 曾让 Codex 用户链接 `~/.codex/skills/econ-slides`，Codex 至今仍会加载该目录：安装插件前请删除这个链接（或把它移到 `~/.agents/skills`），否则 Codex 会把技能列出两次。
 
 </details>
 

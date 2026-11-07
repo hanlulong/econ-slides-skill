@@ -2,10 +2,9 @@
 """Audit a compiled Beamer deck against econ-slides geometry gates and review prompts.
 
 Usage:
-    python3 scripts/check_deck.py build/talk.pdf [--tex talk.tex] [--log build/talk.log]
-                                                 [--render-dir pages]
-                                                 [--baseline-json baseline.json]
-                                                 [--json]
+    python3 <skill-dir>/scripts/check_deck.py build/talk.pdf
+        [--tex talk.tex] [--log build/talk.log] [--render-dir pages]
+        [--baseline-json baseline.json] [--json]
 
 Checks (geometry measured from the PDF itself, not guessed from source):
   edge-overflow   any text placed outside the safe page margins
@@ -15,6 +14,11 @@ Checks (geometry measured from the PDF itself, not guessed from source):
   overfull        Overfull \\hbox/\\vbox warnings parsed from the .log
   compile-error   a TeX error (a ``! ...`` line) in the .log: a halted or
                   ``nonstopmode`` build, a missing figure, an undefined macro
+  missing-glyph   a character the font lacks (``Missing character`` in the
+                  .log), such as a β or ≥ typed in text: it does not render
+  lost-char       a dropped character that is usually harmless: a stray
+                  character inside a TikZ picture (nullfont) or an invisible
+                  one (U+200B); a note, no deduction
   undefined-ref   an undefined citation or cross-reference: LaTeX/natbib/biblatex
                   warnings in the .log, or a [?], (?) or ?? marker in the PDF
                   text (biblatex prints a missing key itself and natbib's
@@ -29,15 +33,21 @@ Checks (geometry measured from the PDF itself, not guessed from source):
   arrow-bullet    a right arrow is used as a list marker
   question-label  an opening object is called "economic question"
   question-subtitle a concise question is hidden in a generic frame subtitle
-  roadmap-emphasis a Roadmap uses boldface instead of regular-weight orientation
+  roadmap-emphasis a roadmap (Roadmap, Outline, Agenda, Plan of the talk) uses
+                  boldface instead of regular-weight orientation
   exhibit-reading a static table or figure has no bottom interpretation line
-  conclusion-link a conclusion frame contains Beamer navigation
+  conclusion-link a conclusion frame (Conclusion(s), Concluding remarks)
+                  contains Beamer navigation
   conclusion-density a conclusion carries more than three bullet items
+  todo-placeholder a \\TODO{...} in the source (without --tex, a "TODO:" on a
+                  page): a number still needed from the user; list it in the
+                  hand-over and never fill it in (no deduction)
 
 Score starts at 100 and deducts only for objective or strongly actionable
-findings. TeX errors in the log, edge overflow, serious overfull boxes,
-navigation collisions, dead links, undefined citations or references, prohibited arrow markers, the
-disallowed question label, and conclusion links are hard blockers. Wrapped
+findings. TeX errors in the log, characters missing from the font, edge
+overflow, serious overfull boxes, navigation collisions, dead links,
+undefined citations or references, prohibited arrow markers, the disallowed
+question label, and conclusion links are hard blockers. Wrapped
 text, density, sparse layout, prose columns, emphasis, exhibit readings, and
 conclusion density are review prompts: judge
 them against the paper and target deck, and never trigger filler or a forced
@@ -60,11 +70,18 @@ engine banner, and its ``Output written on`` line names a file with the PDF's
 stem and the PDF's page count. Any other file (an empty log, another deck's
 log, the .tex itself) stops the check with exit 2 instead of passing as clean.
 
+Overlay builds: a page that shares the next page's frame counter and title is
+an intermediate build and gets only the edge-overflow check. In themes
+without a frame counter (default, metropolis), the build's .nav file next to
+--log marks the builds instead; those pages keep every weighted check and
+lose only the zero-point review prompts.
+
 Without --tex the source checks (dead links, arrow bullets, the question
 label, conclusion links, pause chains, exhibit readings, and the other source
-prompts) do not run; without --log the compile-error, overfull-box and
-log-based undefined-reference checks do not run. Such a run is partial: it lists the
-skipped checks, and its verdict is "incomplete" instead of "ship".
+prompts) do not run; without --log the compile-error, missing-glyph,
+overfull-box and log-based undefined-reference checks do not run. Such a run
+is partial: it lists the skipped checks, and its verdict is "incomplete"
+instead of "ship".
 
 Exit status: 0 = ship (full check, no blocker); 1 = the deck is not ready
 (must fix, fix recommended, or incomplete); 2 = the check could not run (bad
@@ -78,7 +95,7 @@ or ``uv run --with pymupdf python ...`` rather than ``pip install --user``.
 from __future__ import annotations
 
 import argparse
-from collections import defaultdict, deque
+from collections import Counter, defaultdict, deque
 import json
 import os
 import re
@@ -89,7 +106,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 try:
     from compile_deck import (  # noqa: E402  (no PyMuPDF)
-        undefined_references, unwrap_log)
+        missing_characters, undefined_references, unwrap_log)
 except ImportError as exc:  # pragma: no cover
     print(f"error: check_deck.py cannot import its sibling scripts ({exc}). "
           "Keep check_deck.py, compile_deck.py and check_script.py together "
@@ -131,10 +148,12 @@ DEDUCT = {"edge-overflow": 15, "wrapped-title": 0, "wrapped-bullet": 0,
           "roadmap-emphasis": 0,
           "exhibit-reading": 0, "conclusion-link": 10,
           "conclusion-density": 0, "undefined-ref": 10,
-          "compile-error": 15}
+          "compile-error": 15, "missing-glyph": 10, "lost-char": 0,
+          "todo-placeholder": 0}
 HARD_BLOCKERS = {"edge-overflow", "overfull", "nav-footer-overlap",
                  "dead-link", "arrow-bullet", "question-label",
-                 "conclusion-link", "undefined-ref", "compile-error"}
+                 "conclusion-link", "undefined-ref", "compile-error",
+                 "missing-glyph"}
 # Blockers that a --baseline-json comparison never treats as inherited: an
 # unresolved [?] or ?? is visible to the audience whoever introduced it.
 NON_WAIVABLE_BLOCKERS = {"undefined-ref"}
@@ -143,7 +162,8 @@ TEX_ONLY_CHECKS = ("dead-link", "arrow-bullet", "question-label",
                    "question-subtitle", "roadmap-emphasis", "exhibit-reading",
                    "conclusion-link", "conclusion-density", "pause-chain",
                    "emphasis-overuse", "prose-columns")
-LOG_ONLY_CHECKS = ("compile-error", "overfull", "undefined-ref (log warnings)")
+LOG_ONLY_CHECKS = ("compile-error", "missing-glyph", "overfull",
+                   "undefined-ref (log warnings)")
 EXIT_SHIP, EXIT_NOT_READY, EXIT_CANNOT_RUN, EXIT_CRASH = 0, 1, 2, 3
 # What LaTeX, natbib, and the standard styles print for an unresolved key:
 # [?] or [?, ?] (\cite), (?) (natbib), and a bold ?? (\ref). ``What??`` in
@@ -185,6 +205,13 @@ def parse_allowed_markers(values: list[str]) -> set[str]:
                 "unresolved-key markers; use ??, (?), [?] or [?, ?]")
         allowed.update(normalize_marker(marker) for marker in markers)
     return allowed
+
+
+# Frame titles (lowercased, commands stripped) for the conclusion and roadmap
+# house rules.
+CONCLUSION_TITLE = re.compile(
+    r"^(?:conclusions?|concluding remarks|conclusion and next steps)[.:]?$")
+ROADMAP_TITLE = re.compile(r"^(?:roadmap|outline|agenda|plan of the talk)[.:]?$")
 
 
 MATH_FONT_RE = re.compile(r"CMMI|CMSY|CMEX|MSBM|MSAM|Math|rsfs", re.I)
@@ -270,6 +297,30 @@ def has_frame_counter(footer: str) -> bool:
     those as builds would skip checks on every page but the last.
     """
     return bool(re.search(r"\bA\s*\d+\b|\b\d+\s*/\s*\d+\b", footer))
+
+
+FRAMEPAGES_RE = re.compile(r"\\beamer@framepages\s*\{(\d+)\}\{(\d+)\}")
+
+
+def nav_build_pages(nav_text: str, page_count: int) -> set[int] | None:
+    """Return the 1-based pages that Beamer's .nav marks as non-final builds.
+
+    Each frame writes ``\\beamer@framepages{first}{last}``; every page before
+    ``last`` is an intermediate overlay build. An allowframebreaks frame
+    writes one entry per continuation page, all with the same first page
+    ({4}{4}, {4}{5} ...); those pages are separate slides, so entries whose
+    first page repeats contribute nothing. Returns None when the file has no
+    entries or ends on another page count than the PDF (a stale .nav).
+    """
+    entries = [(int(a), int(b)) for a, b in FRAMEPAGES_RE.findall(nav_text)]
+    if not entries or max(b for _, b in entries) != page_count:
+        return None
+    starts = Counter(a for a, _ in entries)
+    builds: set[int] = set()
+    for first, last in entries:
+        if starts[first] == 1 and last > first:
+            builds.update(range(first, last))
+    return builds
 
 
 def frame_title_key(page: fitz.Page) -> str:
@@ -412,6 +463,13 @@ def check_page(page: fitz.Page, pno: int, footer_zone: float = 0.93,
                 bottom = max(bottom, rect.y1)
             # PDF rectangles and TikZ axes often extract as separate
             # zero-thickness strokes rather than one drawing bbox.
+            # A diagram that starts in the content zone and runs past the
+            # footer line overflows; it does not end early. Footer bars and
+            # logos start lower, full-page backgrounds start in the title zone.
+            elif (rect.width > 20 and rect.height > 20
+                  and H * TITLE_ZONE < rect.y0 < H * 0.85
+                  and rect.y1 >= H * 0.88):
+                bottom = max(bottom, H * 0.88)
             elif (rect.width > W * 0.20 and rect.height < 2
                   and H * TITLE_ZONE < rect.y1 < H * 0.88):
                 bottom = max(bottom, rect.y1)
@@ -485,6 +543,18 @@ def check_unresolved_markers(page: fitz.Page, pno: int,
     return findings
 
 
+TODO_ADVICE = ("needs the user's number; do not fill it in; list it in the "
+               "hand-over")
+
+
+def check_todo_text(page: fitz.Page, pno: int) -> list[dict]:
+    """Without --tex, a visible ``TODO:`` marks a placeholder on the page."""
+    if not re.search(r"\bTODO:", page.get_text()):
+        return []
+    return [{"check": "todo-placeholder", "page": pno,
+             "detail": f"the page shows a TODO: placeholder — {TODO_ADVICE}"}]
+
+
 def read_log(log_path: Path, pdf_path: Path, pdf_pages: int) -> tuple[str, list[str]]:
     """Return the text of a log that belongs to this PDF, plus notes.
 
@@ -552,8 +622,36 @@ def compile_errors(text: str) -> list[dict]:
     return findings
 
 
+def missing_character_findings(text: str) -> list[dict]:
+    """Report characters the font lacks; no page numbers, so a baseline matches."""
+    findings = []
+    for item in missing_characters(text):
+        shown = repr(item["char"])
+        code = f" ({item['code']})" if item["code"] else ""
+        if item["kind"] == "glyph":
+            findings.append({
+                "check": "missing-glyph", "page": None,
+                "detail": f"{shown}{code} is missing from font {item['font']} "
+                          "and does not render — use math mode or a font "
+                          "that has it"})
+        elif item["kind"] == "nullfont":
+            findings.append({
+                "check": "lost-char", "page": None,
+                "detail": f"a character ({shown}) typed inside a TikZ/PGF "
+                          "picture outside a node was dropped — check that "
+                          "picture for a stray character"})
+        else:
+            findings.append({
+                "check": "lost-char", "page": None,
+                "detail": f"invisible character {item['code']} is not in font "
+                          f"{item['font']} — usually harmless; remove it from "
+                          "the source"})
+    return findings
+
+
 def check_log(text: str) -> list[dict]:
     findings = compile_errors(text)
+    findings += missing_character_findings(text)
     for m in re.finditer(r"^Overfull \\([hv])box \(([\d.]+)pt too \w+\)", text, re.M):
         if float(m.group(2)) > 2.0:
             findings.append({"check": "overfull", "page": None,
@@ -611,6 +709,25 @@ def tex_tree(tex_path: Path, seen: set[Path] | None = None,
         return tex_tree(child, seen, strip_comments, root)
 
     return re.sub(r"\\(?:input|include)\s*\{([^{}]+)\}", expand, src)
+
+
+def braced_argument(src: str, pos: int) -> str:
+    """Return the balanced ``{...}`` group opening at ``src[pos]``.
+
+    An unbalanced group returns the rest of the source.
+    """
+    depth = 0
+    for index in range(pos, len(src)):
+        char = src[index]
+        if index > 0 and src[index - 1] == "\\":
+            continue
+        if char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return src[pos + 1:index]
+    return src[pos + 1:]
 
 
 def command_argument(src: str, command: str) -> str | None:
@@ -724,10 +841,10 @@ def check_tex(tex_path: Path) -> list[dict]:
                                            "subtitle of 'Key question' — make the "
                                            "question the frame title when it fits"})
 
-        if title_plain == "roadmap" and re.search(
+        if ROADMAP_TITLE.match(title_plain) and re.search(
                 r"\\textbf\s*\{|\\bfseries\b", frame_src):
             findings.append({"check": "roadmap-emphasis", "page": None,
-                             "detail": "Roadmap uses boldface — keep orientation "
+                             "detail": "the roadmap uses boldface — keep orientation "
                                        "labels regular weight; use muted color only "
                                        "to mark inactive modules when needed"})
 
@@ -747,13 +864,15 @@ def check_tex(tex_path: Path) -> list[dict]:
                                        "interpretation or economic-significance line "
                                        "after the exhibit"})
 
-        if title_plain == "conclusion" and re.search(
+        is_conclusion = bool(CONCLUSION_TITLE.match(title_plain))
+        if is_conclusion and re.search(
                 r"\\(?:PlaceNav|hyperlink|beamergotobutton|beamerbutton|BackButton)\b",
                 frame_src):
             findings.append({"check": "conclusion-link", "page": None,
-                             "detail": "Conclusion contains Beamer navigation — "
-                                       "end on the takeaway, not a link hub"})
-        if title_plain == "conclusion":
+                             "detail": "the conclusion slide contains Beamer "
+                                       "navigation — end on the takeaway, not a "
+                                       "link hub"})
+        if is_conclusion:
             n_items = len(re.findall(
                 r"\\item(?![A-Za-z@])(?:\s*<[^>]*>)?(?:\s*\[[^]]*\])?",
                 frame_src))
@@ -764,6 +883,14 @@ def check_tex(tex_path: Path) -> list[dict]:
                                            "implication; recall a boundary only in "
                                            "the rare case that omitting it would "
                                            "materially misstate the result"})
+
+    # \TODO{...} marks a number the materials do not supply (SKILL.md gate 3).
+    # The definition, \newcommand{\TODO}[1]{...}, does not match.
+    for todo in re.finditer(r"\\TODO\s*(?=\{)", src):
+        argument = re.sub(r"\s+", " ", braced_argument(src, todo.end())).strip()
+        findings.append({"check": "todo-placeholder", "page": None,
+                         "detail": f"\\TODO{{{argument[:40]}}} placeholder — "
+                                   f"{TODO_ADVICE}"})
 
     targets = set(re.findall(r"\\hypertarget(?:<[^>]+>)?\s*\{([^{}]+)\}", src))
     targets.update(re.findall(r"\\label\{([^{}]+)\}", src))
@@ -990,18 +1117,41 @@ def main() -> int:
     findings: list[dict] = []
     keys = [footer_key(doc.load_page(p)) for p in range(doc.page_count)]
     titles = [frame_title_key(doc.load_page(p)) for p in range(doc.page_count)]
+    # Themes without a frame counter in the footer (default, metropolis) hide
+    # overlay builds from the footer test; the build's .nav still lists them.
+    nav_builds = None
+    nav_path = args.log.with_suffix(".nav") if args.log is not None else None
+    if nav_path is not None and nav_path.is_file():
+        try:
+            nav_builds = nav_build_pages(
+                nav_path.read_text(encoding="utf-8", errors="replace"),
+                doc.page_count)
+        except OSError:
+            nav_builds = None
     for pno in range(doc.page_count):
         same_overlay = (pno < doc.page_count - 1 and keys[pno]
                         and keys[pno] == keys[pno + 1]
                         and has_frame_counter(keys[pno])
                         and titles[pno]
                         and titles[pno] == titles[pno + 1])
+        nav_build = bool(not same_overlay and nav_builds
+                         and (pno + 1) in nav_builds
+                         and pno < doc.page_count - 1 and titles[pno]
+                         and titles[pno] == titles[pno + 1])
         final = not same_overlay
-        findings += check_page(doc.load_page(pno), pno + 1, final=final)
+        page_findings = check_page(doc.load_page(pno), pno + 1, final=final)
         if final:
-            findings += check_nav_overlap(doc.load_page(pno), pno + 1)
-            findings += check_unresolved_markers(doc.load_page(pno), pno + 1,
-                                                 allowed_markers)
+            page_findings += check_nav_overlap(doc.load_page(pno), pno + 1)
+            page_findings += check_unresolved_markers(doc.load_page(pno), pno + 1,
+                                                      allowed_markers)
+            if not args.tex:  # with --tex, check_tex reports each \TODO once
+                page_findings += check_todo_text(doc.load_page(pno), pno + 1)
+        if nav_build:
+            # An intermediate build keeps every weighted check (a blocker on
+            # it is real) but not the layout and density review prompts.
+            page_findings = [f for f in page_findings
+                             if DEDUCT.get(f["check"], 2) != 0]
+        findings += page_findings
     if log_text is not None:
         findings += check_log(log_text)
     # A declared literal marker is waived only when the log shows that no

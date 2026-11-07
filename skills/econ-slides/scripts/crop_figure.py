@@ -3,13 +3,18 @@
 
 Usage:
     # 1. Find candidate figure regions on a page:
-    python3 scripts/crop_figure.py paper.pdf --page 6 --list
+    python3 <skill-dir>/scripts/crop_figure.py paper.pdf --page 6 --list
 
-    # 2. Crop one (coordinates in PDF points, from --list or a PDF viewer):
-    python3 scripts/crop_figure.py paper.pdf --page 6 \
+    # 2. Crop one; coordinates are PDF points with the origin at the top-left
+    #    of the page and y increasing downward; take them from --list
+    #    (viewers differ in which origin they display):
+    python3 <skill-dir>/scripts/crop_figure.py paper.pdf --page 6 \
         --bbox 72,150,540,420 --out figures-slides/fig2_event_study.png
 
 Renders at 300 DPI so the crop stays legible when scaled to slide width.
+--out must end in .png, .jpg or .jpeg: a raster crop for \\includegraphics.
+Exit status: 0 done; 2 could not run (bad arguments, a missing or unreadable
+PDF, a page out of range, or no PyMuPDF); 3 the tool itself crashed.
 Requires PyMuPDF (requirements.txt). If this Python lacks it, use a venv
 or ``uv run --with pymupdf python ...`` rather than ``pip install --user``.
 """
@@ -35,7 +40,10 @@ except ImportError:  # pragma: no cover
               "    ~/.venvs/econ-slides/bin/python <this script> ...\n"
               "  or: uv run --with pymupdf python <this script> ...",
               file=sys.stderr)
-        sys.exit(1)
+        sys.exit(2)
+
+
+RASTER_SUFFIXES = {".png", ".jpg", ".jpeg"}
 
 
 def candidate_regions(page: fitz.Page) -> list[fitz.Rect]:
@@ -66,8 +74,9 @@ def main() -> int:
     ap.add_argument("--list", action="store_true",
                     help="print candidate figure bboxes and exit")
     ap.add_argument("--bbox", type=str, default=None,
-                    help="x0,y0,x1,y1 in PDF points")
-    ap.add_argument("--out", type=Path, default=None)
+                    help="x0,y0,x1,y1 in PDF points, origin top-left, y down")
+    ap.add_argument("--out", type=Path, default=None,
+                    help="output image: .png, .jpg or .jpeg")
     ap.add_argument("--dpi", type=int, default=300)
     ap.add_argument("--pad", type=float, default=4.0,
                     help="padding in points around the bbox")
@@ -87,14 +96,15 @@ def main() -> int:
     if not 1 <= args.page <= doc.page_count:
         print(f"error: page {args.page} out of range 1..{doc.page_count}",
               file=sys.stderr)
-        return 1
+        return 2
     page = doc.load_page(args.page - 1)
 
     if args.list:
         regions = candidate_regions(page)
         if not regions:
-            print("no figure-sized regions detected; use a PDF viewer to "
-                  "read coordinates and pass --bbox")
+            print("no figure-sized regions detected; pass --bbox x0,y0,x1,y1 "
+                  "in PDF points (origin top-left, y down) and check the "
+                  "crop, since viewers differ in which origin they display")
         for i, r in enumerate(regions, 1):
             print(f"  candidate {i}: --bbox "
                   f"{r.x0:.0f},{r.y0:.0f},{r.x1:.0f},{r.y1:.0f}"
@@ -104,7 +114,12 @@ def main() -> int:
     if not args.bbox or not args.out:
         print("error: --bbox and --out required (or use --list first)",
               file=sys.stderr)
-        return 1
+        return 2
+    if args.out.suffix.lower() not in RASTER_SUFFIXES:
+        print("error: --out must end in .png, .jpg or .jpeg (a raster crop "
+              f"for \\includegraphics); got '{args.out.suffix}'",
+              file=sys.stderr)
+        return 2
     try:
         values = [float(v.strip()) for v in args.bbox.split(",")]
     except ValueError:
@@ -136,5 +151,28 @@ def main() -> int:
     return 0
 
 
+def safe_output() -> None:
+    """Never crash on a console code page that lacks a character (Windows)."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(errors="backslashreplace")
+        except (AttributeError, ValueError):
+            pass
+
+
+def run() -> int:
+    """Run main(), keeping a crash (exit 3) apart from a bad request (exit 2)."""
+    safe_output()
+    try:
+        return main()
+    except Exception as exc:  # noqa: BLE001  (report, never pass as a result)
+        import traceback
+        traceback.print_exc()
+        print(f"error: crop_figure.py crashed ({type(exc).__name__}: {exc}); "
+              "exit 3 means the tool failed, not the crop request",
+              file=sys.stderr)
+        return 3
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(run())
