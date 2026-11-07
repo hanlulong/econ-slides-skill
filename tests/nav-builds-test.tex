@@ -1,0 +1,51 @@
+% Regression: a theme without a frame counter (default) hides overlay builds
+% from the footer test. With the build's .nav beside --log, intermediate
+% builds lose the zero-point layout prompts but keep every blocker; frame
+% breaks are separate slides; and a diagram that runs off the slide is an
+% overflow, not a slide that "stops" early.
+\documentclass{beamer}
+\usetheme{default}
+\usepackage{tikz}
+\title{Overlay builds without a frame counter}
+\begin{document}
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}<1-3>[label=builds]{Three builds}
+  \begin{itemize}
+    \item<1-> First point
+    \item<2-> Second point
+    \item<3-> Third point
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Long list}
+  \begin{itemize}
+    \item a \item b \item c \item d \item e \item f \item g \item h \item i
+    \item j \item k \item l \item m \item n \item o \item p \item q \item r
+    \item s \item t \item u \item v \item w \item x \item y \item z \item aa
+    \item bb \item cc \item dd \item ee \item ff \item gg \item hh \item ii
+    \item jj \item kk \ref{missing} \item ll \item mm \item nn \item oo
+    \item pp \item qq \item rr \item ss \item tt \item uu \item vv \item ww
+    \item xx
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[t]{A diagram that runs off the slide}
+  One line of text above the figure.
+
+  A second line of text above the figure.
+
+  \begin{tikzpicture}
+    \draw (0,0) rectangle (6,8);
+  \end{tikzpicture}
+\end{frame}
+
+\againframe<2-3>{builds}
+
+\appendix
+\begin{frame}{Backup}
+  Backup detail
+\end{frame}
+\end{document}

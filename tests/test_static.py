@@ -220,6 +220,51 @@ class HouseRuleTitleTest(unittest.TestCase):
         self.assertIn("roadmap-emphasis", found)
 
 
+class OverlayBuildTest(unittest.TestCase):
+    def test_nav_build_pages(self):
+        from check_deck import nav_build_pages
+        nav = "".join(
+            f"\\headcommand {{\\beamer@framepages {{{a}}}{{{b}}}}}\n"
+            for a, b in ((1, 3), (4, 4), (4, 5), (4, 6), (4, 7), (8, 9)))
+        self.assertEqual(nav_build_pages(nav, 9), {1, 2, 8})
+        self.assertIsNone(nav_build_pages(nav, 10))  # stale .nav
+        self.assertIsNone(nav_build_pages("", 9))
+
+
+class LayoutBalanceTest(unittest.TestCase):
+    W, H = 364.0, 273.0
+
+    def page(self, draw):
+        from check_deck import fitz
+        doc = fitz.open()
+        page = doc.new_page(width=self.W, height=self.H)
+        page.insert_text((20, 30), "A frame title", fontsize=14)
+        page.insert_text((20, 70), "One line of text above the figure.",
+                         fontsize=11)
+        page.insert_text((20, 85), "A second line of text.", fontsize=11)
+        draw(page, fitz)
+        return doc, page
+
+    def layout(self, draw) -> bool:
+        from check_deck import check_page
+        doc, page = self.page(draw)
+        found = {f["check"] for f in check_page(page, 2)}
+        doc.close()
+        return "layout-balance" in found
+
+    def test_a_diagram_running_off_the_slide_is_not_sparse(self):
+        def draw(page, fitz):
+            page.draw_rect(fitz.Rect(20, 0.30 * self.H, 200, 1.02 * self.H),
+                           color=(0, 0, 0))
+        self.assertFalse(self.layout(draw))
+
+    def test_a_footer_logo_does_not_fill_a_sparse_slide(self):
+        def draw(page, fitz):
+            page.draw_rect(fitz.Rect(300, 0.90 * self.H, 325, 0.90 * self.H + 25),
+                           color=(0, 0, 0))
+        self.assertTrue(self.layout(draw))
+
+
 class MissingGlyphTest(unittest.TestCase):
     # Four lines from a real XeTeX log of a house-theme deck with ≥ and β in
     # text, wrapped at 79 columns as TeX writes them.

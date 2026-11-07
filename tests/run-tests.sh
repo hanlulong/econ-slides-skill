@@ -1322,6 +1322,52 @@ else
 fi
 rm -f tests/_todo.tex
 
+echo "== overlay builds without a frame counter (.nav) =="
+if python3 skills/econ-slides/scripts/compile_deck.py tests/nav-builds-test.tex \
+     --build-dir tests/build-suite --json >/dev/null 2>&1; then
+  NAVB_JSON=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/nav-builds-test.pdf \
+      --tex tests/nav-builds-test.tex --log tests/build-suite/nav-builds-test.log --json 2>/dev/null)
+  NAVB_STATUS=$?
+  # The same build without its .nav: every page is audited as final.
+  rm -rf tests/build-suite/no-nav; mkdir -p tests/build-suite/no-nav
+  cp tests/build-suite/nav-builds-test.pdf tests/build-suite/nav-builds-test.log \
+     tests/build-suite/no-nav/
+  NONAV_JSON=$(python3 skills/econ-slides/scripts/check_deck.py tests/build-suite/no-nav/nav-builds-test.pdf \
+      --tex tests/nav-builds-test.tex --log tests/build-suite/no-nav/nav-builds-test.log --json 2>/dev/null)
+else
+  NAVB_JSON="{}"; NONAV_JSON="{}"; NAVB_STATUS=compile
+fi
+if [ "$NAVB_STATUS" = "1" ] && python3 - "$NAVB_JSON" "$NONAV_JSON" <<'PY'
+import json, sys
+import pymupdf
+from scripts.check_deck import frame_title_key
+nav, no_nav = (json.loads(arg) for arg in sys.argv[1:])
+doc = pymupdf.open("tests/build-suite/nav-builds-test.pdf")
+titles = [frame_title_key(page) for page in doc]
+assert len(titles) == 12, titles
+def pages(result, check):
+    return {f["page"] for f in result["findings"] if f["check"] == check}
+layout = pages(nav, "layout-balance")
+# Builds 1-2 of the frame and of its \againframe: no layout prompt; the
+# final build of the frame is still reviewed.
+assert not layout & {2, 3, 10}, layout
+assert 4 in layout, layout
+assert {2, 3} <= pages(no_nav, "layout-balance")
+# Frame-break pages are separate slides: the ?? on the third one blocks.
+marker = [f["page"] for f in nav["findings"]
+          if f["check"] == "undefined-ref" and f["page"]]
+assert marker and titles[marker[0] - 1] == "long list iii", (marker, titles)
+assert "undefined-ref" in nav["blockers"]
+# A diagram that runs off the slide: overfull, and no "content stops at".
+assert "overfull" in nav["blockers"]
+assert 9 not in layout and titles[8].startswith("a diagram"), titles
+PY
+then
+  ok "the .nav marks overlay builds; frame breaks and overflowing diagrams are still judged"
+else
+  bad "nav-based build detection [$NAVB_STATUS]"
+fi
+
 echo "== plugin packaging stays consistent =="
 if python3 - <<'PY'
 import json

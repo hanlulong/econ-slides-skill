@@ -71,6 +71,12 @@ engine banner, and its ``Output written on`` line names a file with the PDF's
 stem and the PDF's page count. Any other file (an empty log, another deck's
 log, the .tex itself) stops the check with exit 2 instead of passing as clean.
 
+Overlay builds: a page that shares the next page's frame counter and title is
+an intermediate build and gets only the edge-overflow check. In themes
+without a frame counter (default, metropolis), the build's .nav file next to
+--log marks the builds instead; those pages keep every weighted check and
+lose only the zero-point review prompts.
+
 Without --tex the source checks (dead links, arrow bullets, the question
 label, conclusion links, pause chains, exhibit readings, and the other source
 prompts) do not run; without --log the compile-error, missing-glyph,
@@ -90,7 +96,7 @@ or ``uv run --with pymupdf python ...`` rather than ``pip install --user``.
 from __future__ import annotations
 
 import argparse
-from collections import defaultdict, deque
+from collections import Counter, defaultdict, deque
 import json
 import os
 import re
@@ -294,6 +300,30 @@ def has_frame_counter(footer: str) -> bool:
     return bool(re.search(r"\bA\s*\d+\b|\b\d+\s*/\s*\d+\b", footer))
 
 
+FRAMEPAGES_RE = re.compile(r"\\beamer@framepages\s*\{(\d+)\}\{(\d+)\}")
+
+
+def nav_build_pages(nav_text: str, page_count: int) -> set[int] | None:
+    """Return the 1-based pages that Beamer's .nav marks as non-final builds.
+
+    Each frame writes ``\\beamer@framepages{first}{last}``; every page before
+    ``last`` is an intermediate overlay build. An allowframebreaks frame
+    writes one entry per continuation page, all with the same first page
+    ({4}{4}, {4}{5} ...); those pages are separate slides, so entries whose
+    first page repeats contribute nothing. Returns None when the file has no
+    entries or ends on another page count than the PDF (a stale .nav).
+    """
+    entries = [(int(a), int(b)) for a, b in FRAMEPAGES_RE.findall(nav_text)]
+    if not entries or max(b for _, b in entries) != page_count:
+        return None
+    starts = Counter(a for a, _ in entries)
+    builds: set[int] = set()
+    for first, last in entries:
+        if starts[first] == 1 and last > first:
+            builds.update(range(first, last))
+    return builds
+
+
 def frame_title_key(page: fitz.Page) -> str:
     """Return the largest top-zone text, used to distinguish real frames.
 
@@ -434,6 +464,13 @@ def check_page(page: fitz.Page, pno: int, footer_zone: float = 0.93,
                 bottom = max(bottom, rect.y1)
             # PDF rectangles and TikZ axes often extract as separate
             # zero-thickness strokes rather than one drawing bbox.
+            # A diagram that starts in the content zone and runs past the
+            # footer line overflows; it does not end early. Footer bars and
+            # logos start lower, full-page backgrounds start in the title zone.
+            elif (rect.width > 20 and rect.height > 20
+                  and H * TITLE_ZONE < rect.y0 < H * 0.85
+                  and rect.y1 >= H * 0.88):
+                bottom = max(bottom, H * 0.88)
             elif (rect.width > W * 0.20 and rect.height < 2
                   and H * TITLE_ZONE < rect.y1 < H * 0.88):
                 bottom = max(bottom, rect.y1)
@@ -1081,20 +1118,41 @@ def main() -> int:
     findings: list[dict] = []
     keys = [footer_key(doc.load_page(p)) for p in range(doc.page_count)]
     titles = [frame_title_key(doc.load_page(p)) for p in range(doc.page_count)]
+    # Themes without a frame counter in the footer (default, metropolis) hide
+    # overlay builds from the footer test; the build's .nav still lists them.
+    nav_builds = None
+    nav_path = args.log.with_suffix(".nav") if args.log is not None else None
+    if nav_path is not None and nav_path.is_file():
+        try:
+            nav_builds = nav_build_pages(
+                nav_path.read_text(encoding="utf-8", errors="replace"),
+                doc.page_count)
+        except OSError:
+            nav_builds = None
     for pno in range(doc.page_count):
         same_overlay = (pno < doc.page_count - 1 and keys[pno]
                         and keys[pno] == keys[pno + 1]
                         and has_frame_counter(keys[pno])
                         and titles[pno]
                         and titles[pno] == titles[pno + 1])
+        nav_build = bool(not same_overlay and nav_builds
+                         and (pno + 1) in nav_builds
+                         and pno < doc.page_count - 1 and titles[pno]
+                         and titles[pno] == titles[pno + 1])
         final = not same_overlay
-        findings += check_page(doc.load_page(pno), pno + 1, final=final)
+        page_findings = check_page(doc.load_page(pno), pno + 1, final=final)
         if final:
-            findings += check_nav_overlap(doc.load_page(pno), pno + 1)
-            findings += check_unresolved_markers(doc.load_page(pno), pno + 1,
-                                                 allowed_markers)
+            page_findings += check_nav_overlap(doc.load_page(pno), pno + 1)
+            page_findings += check_unresolved_markers(doc.load_page(pno), pno + 1,
+                                                      allowed_markers)
             if not args.tex:  # with --tex, check_tex reports each \TODO once
-                findings += check_todo_text(doc.load_page(pno), pno + 1)
+                page_findings += check_todo_text(doc.load_page(pno), pno + 1)
+        if nav_build:
+            # An intermediate build keeps every weighted check (a blocker on
+            # it is real) but not the layout and density review prompts.
+            page_findings = [f for f in page_findings
+                             if DEDUCT.get(f["check"], 2) != 0]
+        findings += page_findings
     if log_text is not None:
         findings += check_log(log_text)
     # A declared literal marker is waived only when the log shows that no
