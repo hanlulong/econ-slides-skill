@@ -195,7 +195,10 @@ Block skeleton:
   as routine scaffolding.
 - Contractions, "So/Now" beats, and the occasional rhetorical question
   are correct oral style. The anti-AI-tell blocklist still applies fully
-  (no "delve", "crucial", "notably", "landscape").
+  (no "delve", "crucial(ly)", "notably", "landscape", "multifaceted",
+  "novel insights", "shed light on", "it is worth noting", "groundbreaking",
+  or "pivotal"; technical terms such as the pivotal voter or a pivotal
+  mechanism are fine).
 - Enthusiasm without spin: sell the question's importance with energy,
   but teach the results like an honest teacher — script the excitement,
   never overclaim beyond what the deck's numbers support.

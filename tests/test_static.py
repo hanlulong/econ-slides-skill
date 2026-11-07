@@ -77,6 +77,36 @@ class ScriptTimingTest(unittest.TestCase):
         self.assertEqual((under, over, seminar), (0, 1, 0))
 
 
+class BannedPhraseTest(unittest.TestCase):
+    def test_documented_list_matches_the_checker(self):
+        from check_script import BANNED
+        text = (SKILL / "references/speaker-script.md").read_text(encoding="utf-8")
+        # The parenthetical list ends at its ';' (or at the next bullet).
+        rule = text.split("blocklist still applies fully", 1)[1]
+        rule = re.split(r";|\n- ", rule, maxsplit=1)[0]
+        documented = set()
+        for phrase in re.findall(r'"([^"]+)"', rule):
+            if phrase.endswith("(ly)"):
+                documented.update({phrase[:-4], phrase[:-4] + "ly"})
+            else:
+                documented.add(phrase)
+        self.assertEqual(documented, set(BANNED))
+
+    def test_technical_pivotal_is_not_filler(self):
+        from check_script import banned_phrases
+        for text in ("In the median-voter benchmark the pivotal voter sets "
+                     "the tax rate.", "a pivotal-voter model",
+                     "the pivotal voter's ideal point",
+                     "a pivotal mechanism", "Pivotal players decide."):
+            self.assertEqual(banned_phrases(text), [], text)
+        self.assertEqual(banned_phrases("This was a pivotal moment."),
+                         ["pivotal"])
+        self.assertEqual(banned_phrases("a groundbreaking result"),
+                         ["groundbreaking"])
+        self.assertEqual(banned_phrases("Crucially, we delve."),
+                         ["delve", "crucially"])
+
+
 class CheckerUnitTest(unittest.TestCase):
     def test_source_checks_fire_without_a_pdf(self):
         from check_deck import check_tex
