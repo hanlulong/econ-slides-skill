@@ -7,15 +7,17 @@ From 0.2.0, release tags use the OpenEcon.ai catalog form
 ## 0.3.1 — 2026-11-07
 
 Documentation corrections only: three statements about TeX behavior, each
-rechecked with TeX Live 2025, and one line of the 0.3.0 entry. No script
+rechecked with TeX Live 2025, and one item of the 0.3.0 entry. No script
 changed, and the theme change is a comment.
 
 ### Fixed
 
 - `references/exhibit-surgery.md`: Beamer does not suppress overfull-box
-  warnings inside a `ResultBox` or block. TeX logs them, but for an ordinary
-  (not fragile) frame at the line of its `\end{frame}`, so the render is
-  still where to find the slide.
+  warnings inside a `ResultBox` or block. TeX logs them and
+  `check_deck.py --log` blocks on those over 2pt, so the guide no longer
+  lists this overflow among the failures no static check sees. It still
+  sends you to the render to see what overflows: for an ordinary (not
+  fragile) frame, the log gives only the line of its `\end{frame}`.
 - `references/style-guide.md`: the compile log does not always list a
   missing `\hyperlink` target. pdfLaTeX and LuaLaTeX log it; XeLaTeX, the
   default engine, logs nothing. The guide now points to
